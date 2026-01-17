@@ -1,0 +1,62 @@
+.home-container {
+    text-align: center;
+    padding-top: 4rem;
+}
+
+.hero-section {
+    margin-bottom: 5rem;
+    animation: fadeIn 1s ease-out;
+}
+
+.hero-title {
+    font-size: 5rem;
+    margin-bottom: 1rem;
+    letter-spacing: 5px;
+    font-weight: 900;
+}
+
+.hero-subtitle {
+    font-size: 1.5rem;
+    color: #ccc;
+    margin-bottom: 2.5rem;
+}
+
+.hero-actions {
+    display: flex;
+    gap: 1.5rem;
+    justify-content: center;
+}
+
+.features-section {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 2rem;
+}
+
+.feature-card {
+    padding: 2rem;
+    text-align: left;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.feature-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 5px 15px rgba(0, 255, 255, 0.1);
+}
+
+.feature-card h2 {
+    margin-bottom: 1rem;
+    font-size: 1.5rem;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}

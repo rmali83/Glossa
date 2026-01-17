@@ -1,0 +1,67 @@
+.navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 2rem;
+    margin-bottom: 2rem;
+    position: sticky;
+    top: 1rem;
+    z-index: 100;
+    margin-left: 1rem;
+    margin-right: 1rem;
+}
+
+.navbar-logo {
+    font-size: 1.8rem;
+    font-weight: 800;
+    letter-spacing: 2px;
+}
+
+.navbar-links {
+    display: flex;
+    gap: 2rem;
+    align-items: center;
+}
+
+.navbar-links a {
+    font-weight: 500;
+    position: relative;
+    color: #aaa;
+}
+
+.navbar-links a:hover,
+.navbar-links a.active {
+    color: var(--neon-cyan);
+    text-shadow: 0 0 8px var(--neon-cyan);
+}
+
+.navbar-links a.active::after {
+    content: '';
+    position: absolute;
+    bottom: -5px;
+    left: 0;
+    width: 100%;
+    height: 2px;
+    background: var(--neon-cyan);
+    box-shadow: 0 0 5px var(--neon-cyan);
+}
+
+.navbar-links .btn-nav {
+    margin-left: 1rem;
+    padding: 0.5rem 1rem;
+    border: 1px solid var(--neon-pink);
+    border-radius: 4px;
+    color: var(--neon-pink) !important;
+    transition: all 0.3s ease;
+}
+
+.navbar-links .btn-nav:hover,
+.navbar-links .btn-nav.active {
+    background: var(--neon-pink);
+    color: white !important;
+    box-shadow: 0 0 15px var(--neon-pink);
+}
+
+.navbar-links .btn-nav.active::after {
+    display: none;
+}

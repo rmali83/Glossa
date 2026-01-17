@@ -1,0 +1,73 @@
+.contact-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 60vh;
+}
+
+.title {
+    font-size: 4rem;
+    margin-bottom: 3rem;
+    color: white;
+    text-shadow:
+        0 0 5px #fff,
+        0 0 10px #fff,
+        0 0 20px var(--neon-cyan),
+        0 0 30px var(--neon-cyan),
+        0 0 40px var(--neon-cyan);
+}
+
+.contact-info {
+    display: flex;
+    justify-content: space-around;
+    width: 100%;
+    padding: 3rem;
+    flex-wrap: wrap;
+    gap: 2rem;
+}
+
+.info-item {
+    text-align: center;
+}
+
+.info-item h2 {
+    margin-bottom: 1rem;
+    font-size: 1.8rem;
+}
+
+.info-item p {
+    font-size: 1.2rem;
+    color: #ddd;
+}
+
+@keyframes flicker {
+
+    0%,
+    19%,
+    21%,
+    23%,
+    25%,
+    54%,
+    56%,
+    100% {
+        opacity: 1;
+        text-shadow:
+            0 0 5px #fff,
+            0 0 10px #fff,
+            0 0 20px var(--neon-cyan),
+            0 0 30px var(--neon-cyan),
+            0 0 40px var(--neon-cyan);
+    }
+
+    20%,
+    24%,
+    55% {
+        opacity: 0.5;
+        text-shadow: none;
+    }
+}
+
+.neon-text-flicker {
+    animation: flicker 3s infinite alternate;
+}
