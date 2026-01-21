@@ -6,6 +6,8 @@ import Translation from './pages/Translation';
 import ContentWriting from './pages/ContentWriting';
 import Contact from './pages/Contact';
 import TranslatorOnboarding from './pages/TranslatorOnboarding';
+import WebDevelopment from './pages/WebDevelopment';
+import WebDevelopmentService from './pages/WebDevelopmentService';
 import './App.css';
 
 function App() {
@@ -17,6 +19,8 @@ function App() {
           <Route path="/" element={<Home />} />
           <Route path="/translation" element={<Translation />} />
           <Route path="/content-writing" element={<ContentWriting />} />
+          <Route path="/web-development" element={<WebDevelopment />} />
+          <Route path="/web-development/:serviceId" element={<WebDevelopmentService />} />
           <Route path="/join-us" element={<TranslatorOnboarding />} />
           <Route path="/contact" element={<Contact />} />
         </Routes>

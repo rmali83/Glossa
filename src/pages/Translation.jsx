@@ -8,7 +8,7 @@ const regionsData = [
     },
     {
         name: 'Asia',
-        languages: ['Mandarin', 'Hindi', 'Japanese', 'Korean', 'Arabic', 'Bengali', 'Vietnamese', 'Thai', 'Farsi']
+        languages: ['Mandarin', 'Japanese', 'Korean', 'Hindi', 'Arabic', 'Urdu', 'Punjabi', 'Dari', 'Pashto', 'Tamil', 'Bengali', 'Vietnamese', 'Thai', 'Indonesian', 'Malay', 'Turkish', 'Farsi', 'Russian']
     },
     {
         name: 'Americas',

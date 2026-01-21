@@ -17,6 +17,9 @@ const Home = () => {
                     <Link to="/content-writing" className="btn btn-secondary">
                         Content Writing
                     </Link>
+                    <Link to="/web-development" className="btn btn-primary">
+                        Web & App Dev
+                    </Link>
                 </div>
             </section>
 
@@ -36,7 +39,14 @@ const Home = () => {
                     </p>
                 </div>
                 <div className="feature-card glass-panel">
-                    <h2 className="text-neon-green">Freelance Hub</h2>
+                    <h2 className="text-neon-green">Digital Solutions</h2>
+                    <p>
+                        Modern web and mobile applications tailored to your business.
+                        Full-stack development and UI/UX design.
+                    </p>
+                </div>
+                <div className="feature-card glass-panel">
+                    <h2 className="text-neon-purple">Freelance Hub</h2>
                     <p>
                         Join our growing community of language experts.
                         Competitive rates and flexible opportunities.

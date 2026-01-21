@@ -1,5 +1,6 @@
 :root {
-  --bg-color: #0d0d2b; /* Deep blue/purple, NOT black */
+  --bg-color: #0d0d2b;
+  /* Deep blue/purple, NOT black */
   --text-color: #e0e0e0;
   --neon-cyan: #00ffff;
   --neon-pink: #ff00ff;
@@ -44,6 +45,16 @@ ul {
 .text-neon-pink {
   color: var(--neon-pink);
   text-shadow: 0 0 5px var(--neon-pink), 0 0 10px var(--neon-pink);
+}
+
+.text-neon-green {
+  color: var(--neon-green);
+  text-shadow: 0 0 5px var(--neon-green), 0 0 10px var(--neon-green);
+}
+
+.text-neon-purple {
+  color: var(--neon-purple);
+  text-shadow: 0 0 5px var(--neon-purple), 0 0 10px var(--neon-purple);
 }
 
 .neon-border {

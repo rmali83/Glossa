@@ -23,6 +23,9 @@ const Navbar = () => {
                     <Link to="/content-writing" className={isActive('/content-writing')}>Content Writing</Link>
                 </li>
                 <li>
+                    <Link to="/web-development" className={isActive('/web-development')}>Web & App Dev</Link>
+                </li>
+                <li>
                     <Link to="/join-us" className={`btn-nav ${isActive('/join-us')}`}>Join as Translator</Link>
                 </li>
                 <li>
