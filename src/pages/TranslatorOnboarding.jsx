@@ -28,7 +28,13 @@ const TranslatorOnboarding = () => {
         phone: '',
         country: '',
         city: '',
-        timeZone: '',
+        timeZone: (() => {
+            try {
+                return Intl.DateTimeFormat().resolvedOptions().timeZone || "";
+            } catch (e) {
+                return "";
+            }
+        })(),
         sourceLanguages: [],
         targetLanguages: [],
         direction: 'Into native only',
@@ -101,13 +107,14 @@ const TranslatorOnboarding = () => {
     });
 
     useEffect(() => {
-        try {
-            const detectedTZ = Intl.DateTimeFormat().resolvedOptions().timeZone;
-            if (detectedTZ) {
-                setFormData(prev => ({ ...prev, timeZone: detectedTZ }));
-            }
-        } catch (e) {
-            console.warn("Timezone detection failed", e);
+        // Fallback or re-verify if initial state failed or for persistence
+        if (!formData.timeZone) {
+            try {
+                const detectedTZ = Intl.DateTimeFormat().resolvedOptions().timeZone;
+                if (detectedTZ) {
+                    setFormData(prev => ({ ...prev, timeZone: detectedTZ }));
+                }
+            } catch (e) { }
         }
     }, [userType]); // Reset/Re-detect if userType changes or on mount
 
