@@ -3,6 +3,7 @@ import { Routes, Route } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import Home from './pages/Home';
 import Translation from './pages/Translation';
+import LanguageDetail from './pages/LanguageDetail';
 import ContentWriting from './pages/ContentWriting';
 import Contact from './pages/Contact';
 import TranslatorOnboarding from './pages/TranslatorOnboarding';
@@ -18,6 +19,7 @@ function App() {
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/translation" element={<Translation />} />
+          <Route path="/translation/language/:languageName" element={<LanguageDetail />} />
           <Route path="/content-writing" element={<ContentWriting />} />
           <Route path="/web-development" element={<WebDevelopment />} />
           <Route path="/web-development/:serviceId" element={<WebDevelopmentService />} />
