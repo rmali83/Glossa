@@ -52,7 +52,7 @@ const Translation = () => {
                         {regions.map(region => (
                             <li
                                 key={region}
-                                className={activeRegion === region ? 'active' : ''}
+                                className={`${activeRegion === region ? 'active' : ''} region-${region.toLowerCase()}`}
                                 onClick={() => setActiveRegion(region)}
                             >
                                 {region}

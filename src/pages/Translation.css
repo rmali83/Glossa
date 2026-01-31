@@ -95,6 +95,129 @@
     color: white;
 }
 
+@media (max-width: 768px) {
+    .regions-layout {
+        grid-template-columns: 1fr;
+    }
+}
+
+.regions-sidebar {
+    padding: 1.5rem;
+}
+
+.regions-sidebar h3 {
+    margin-bottom: 1.5rem;
+    color: var(--neon-cyan);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    padding-bottom: 0.5rem;
+    font-size: 1.4rem;
+    letter-spacing: 1px;
+}
+
+.regions-sidebar ul {
+    list-style: none;
+    padding: 0;
+}
+
+.regions-sidebar ul li {
+    padding: 1rem 1.2rem;
+    cursor: pointer;
+    border-radius: 10px;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    color: #999;
+    margin-bottom: 0.8rem;
+    font-weight: 500;
+    border: 1px solid transparent;
+    position: relative;
+    overflow: hidden;
+}
+
+/* Individual Region Styles */
+
+/* Europe - Cyan */
+.regions-sidebar ul li.region-europe:hover,
+.regions-sidebar ul li.region-europe.active {
+    background: rgba(0, 255, 255, 0.1);
+    color: #00ffff;
+    border-color: rgba(0, 255, 255, 0.5);
+    box-shadow: 0 0 15px rgba(0, 255, 255, 0.2);
+    text-shadow: 0 0 8px rgba(0, 255, 255, 0.8);
+}
+
+/* Asia - Pink */
+.regions-sidebar ul li.region-asia:hover,
+.regions-sidebar ul li.region-asia.active {
+    background: rgba(255, 0, 255, 0.1);
+    color: #ff00ff;
+    border-color: rgba(255, 0, 255, 0.5);
+    box-shadow: 0 0 15px rgba(255, 0, 255, 0.2);
+    text-shadow: 0 0 8px rgba(255, 0, 255, 0.8);
+}
+
+/* Americas - Green */
+.regions-sidebar ul li.region-americas:hover,
+.regions-sidebar ul li.region-americas.active {
+    background: rgba(0, 255, 128, 0.1);
+    color: #00ff80;
+    border-color: rgba(0, 255, 128, 0.5);
+    box-shadow: 0 0 15px rgba(0, 255, 128, 0.2);
+    text-shadow: 0 0 8px rgba(0, 255, 128, 0.8);
+}
+
+/* Africa - Orange */
+.regions-sidebar ul li.region-africa:hover,
+.regions-sidebar ul li.region-africa.active {
+    background: rgba(255, 165, 0, 0.1);
+    color: #ffa500;
+    border-color: rgba(255, 165, 0, 0.5);
+    box-shadow: 0 0 15px rgba(255, 165, 0, 0.2);
+    text-shadow: 0 0 8px rgba(255, 165, 0, 0.8);
+}
+
+/* Oceania - Purple */
+.regions-sidebar ul li.region-oceania:hover,
+.regions-sidebar ul li.region-oceania.active {
+    background: rgba(138, 43, 226, 0.1);
+    color: #8a2be2;
+    border-color: rgba(138, 43, 226, 0.5);
+    box-shadow: 0 0 15px rgba(138, 43, 226, 0.2);
+    text-shadow: 0 0 8px rgba(138, 43, 226, 0.8);
+}
+
+.regions-sidebar ul li:hover {
+    transform: translateX(5px);
+}
+
+.languages-display {
+    padding: 2.5rem;
+    min-height: 500px;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.languages-display h2 {
+    margin-bottom: 2.5rem;
+    font-size: 2.5rem;
+    position: relative;
+    display: inline-block;
+}
+
+.languages-display h2::after {
+    content: '';
+    position: absolute;
+    bottom: -10px;
+    left: 0;
+    width: 60px;
+    height: 4px;
+    background: var(--neon-cyan);
+    border-radius: 2px;
+}
+
+.languages-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 1.2rem;
+}
+
 @keyframes fadeInDown {
     from {
         opacity: 0;
