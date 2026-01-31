@@ -356,7 +356,6 @@ const TranslatorOnboarding = () => {
                         </Section>
 
                         <div className="final-actions glass-panel">
-                            <h2 className="text-neon-pink">✅ 14. Final Actions</h2>
                             <label className="checkbox-item full-width mt-1"><input type="checkbox" required /><span>I confirm the information is accurate</span></label>
                             <button type="submit" className="btn btn-primary submit-btn-large">Submit Application</button>
                         </div>
@@ -497,7 +496,6 @@ const TranslatorOnboarding = () => {
                         </Section>
 
                         <div className="final-actions glass-panel">
-                            <h2 className="text-neon-pink">✅ 13. Submission</h2>
                             <label className="checkbox-item full-width mt-1"><input type="checkbox" required /><span>I confirm I am authorized to represent this agency</span></label>
                             <button type="submit" className="btn btn-primary submit-btn-large">Submit Agency Application</button>
                         </div>
