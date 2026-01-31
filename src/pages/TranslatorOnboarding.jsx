@@ -12,29 +12,37 @@ const freelancerSpecs = [
     'Energy & Environment', 'Luxury Goods', 'Military & Defense'
 ];
 
-const agencySpecs = [
-    'Legal', 'Medical', 'Technical', 'IT / Software', 'Finance',
-    'Marketing', 'Media & Broadcasting', 'Government / NGO',
-    'Subtitling & Media Localization', 'E-commerce', 'Agriculture / Industrial'
+const popularTimezones = [
+    'Asia/Karachi',
+    'Europe/Istanbul',
+    'America/New_York',
+    'Europe/London',
+    'Asia/Dubai',
+    'Asia/Singapore',
+    'Australia/Sydney',
+    'Asia/Tokyo',
+    'Europe/Paris',
+    'America/Los_Angeles'
 ];
 
 const TranslatorOnboarding = () => {
     const [status, setStatus] = useState('idle'); // idle, submitting, success
     const [userType, setUserType] = useState('Freelance Translator');
+    const [isOtherTZ, setIsOtherTZ] = useState(false);
 
     const [formData, setFormData] = useState({
         // Common / Shared
         email: '',
-        phone: '',
         country: '',
         city: '',
         timeZone: (() => {
             try {
-                return Intl.DateTimeFormat().resolvedOptions().timeZone || "";
+                return Intl.DateTimeFormat().resolvedOptions().timeZone || "UTC";
             } catch (e) {
-                return "";
+                return "UTC";
             }
         })(),
+        otherTimeZone: '',
         sourceLanguages: [],
         targetLanguages: [],
         direction: 'Into native only',
@@ -107,16 +115,22 @@ const TranslatorOnboarding = () => {
     });
 
     useEffect(() => {
-        // Fallback or re-verify if initial state failed or for persistence
-        if (!formData.timeZone) {
-            try {
-                const detectedTZ = Intl.DateTimeFormat().resolvedOptions().timeZone;
-                if (detectedTZ) {
-                    setFormData(prev => ({ ...prev, timeZone: detectedTZ }));
-                }
-            } catch (e) { }
+        const detected = Intl.DateTimeFormat().resolvedOptions().timeZone;
+        if (!popularTimezones.includes(formData.timeZone) && formData.timeZone !== 'Other') {
+            // Keep the detected one if it's not in popular list but is what we have
         }
-    }, [userType]); // Reset/Re-detect if userType changes or on mount
+    }, []);
+
+    const handleTZChange = (e) => {
+        const value = e.target.value;
+        if (value === 'Other') {
+            setIsOtherTZ(true);
+            setFormData(prev => ({ ...prev, timeZone: 'Other' }));
+        } else {
+            setIsOtherTZ(false);
+            setFormData(prev => ({ ...prev, timeZone: value }));
+        }
+    };
 
 
     const handleInputChange = (e) => {
@@ -235,16 +249,33 @@ const TranslatorOnboarding = () => {
                                 <div className="form-group"><label>Country *</label><input type="text" name="country" value={formData.country} onChange={handleInputChange} required className="glass-input" /></div>
                                 <div className="form-group"><label>City *</label><input type="text" name="city" value={formData.city} onChange={handleInputChange} required className="glass-input" /></div>
                                 <div className="form-group">
-                                    <label>Time Zone (Auto + Override) *</label>
-                                    <input
-                                        type="text"
+                                    <label>Time Zone *</label>
+                                    <select
                                         name="timeZone"
                                         value={formData.timeZone}
-                                        onChange={handleInputChange}
+                                        onChange={handleTZChange}
                                         required
                                         className="glass-input"
-                                        placeholder="Detected: e.g. UTC+0"
-                                    />
+                                    >
+                                        {!popularTimezones.includes(formData.timeZone) && formData.timeZone !== 'Other' && (
+                                            <option value={formData.timeZone}>{formData.timeZone} (Detected)</option>
+                                        )}
+                                        {popularTimezones.map(tz => (
+                                            <option key={tz} value={tz}>{tz}</option>
+                                        ))}
+                                        <option value="Other">Other</option>
+                                    </select>
+                                    {isOtherTZ && (
+                                        <input
+                                            type="text"
+                                            name="otherTimeZone"
+                                            placeholder="Enter time zone"
+                                            className="glass-input mt-1"
+                                            value={formData.otherTimeZone}
+                                            onChange={handleInputChange}
+                                            required
+                                        />
+                                    )}
                                 </div>
                                 <div className="form-group">
                                     <label>Native Language *</label>
@@ -395,7 +426,35 @@ const TranslatorOnboarding = () => {
                                 <div className="form-group"><label>Country *</label><input type="text" name="country" required className="glass-input" /></div>
                                 <div className="form-group"><label>City *</label><input type="text" name="city" required className="glass-input" /></div>
                                 <div className="form-group"><label>Office Address</label><input type="text" name="officeAddress" className="glass-input" /></div>
-                                <div className="form-group"><label>Time Zone (Auto + Override) *</label><input type="text" name="timeZone" value={formData.timeZone} onChange={handleInputChange} required className="glass-input" /></div>
+                                <div className="form-group">
+                                    <label>Time Zone *</label>
+                                    <select
+                                        name="timeZone"
+                                        value={formData.timeZone}
+                                        onChange={handleTZChange}
+                                        required
+                                        className="glass-input"
+                                    >
+                                        {!popularTimezones.includes(formData.timeZone) && formData.timeZone !== 'Other' && (
+                                            <option value={formData.timeZone}>{formData.timeZone} (Detected)</option>
+                                        )}
+                                        {popularTimezones.map(tz => (
+                                            <option key={tz} value={tz}>{tz}</option>
+                                        ))}
+                                        <option value="Other">Other</option>
+                                    </select>
+                                    {isOtherTZ && (
+                                        <input
+                                            type="text"
+                                            name="otherTimeZone"
+                                            placeholder="Enter time zone"
+                                            className="glass-input mt-1"
+                                            value={formData.otherTimeZone}
+                                            onChange={handleInputChange}
+                                            required
+                                        />
+                                    )}
+                                </div>
                                 <div className="form-group"><label>Website</label><input type="url" name="companyWebsite" className="glass-input" /></div>
                                 <div className="form-group"><label>Official Email *</label><input type="email" name="officialEmail" required className="glass-input" /></div>
                                 <div className="form-group"><label>Phone / WhatsApp *</label><input type="tel" name="phone" required className="glass-input" /></div>
