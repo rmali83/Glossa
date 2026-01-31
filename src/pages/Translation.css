@@ -51,20 +51,20 @@
 
 .languages-grid {
     display: flex;
-    flex-wrap: wrap;
-    gap: 1rem;
+    flex-direction: column;
+    gap: 0.8rem;
 }
 
 .language-item {
-    padding: 0.8rem 1.5rem;
-    text-align: center;
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 30px;
+    padding: 1.2rem 2rem;
+    text-align: left;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 12px;
     color: #eee;
     font-weight: 500;
     transition: all 0.3s ease;
-    white-space: nowrap;
+    width: 100%;
 }
 
 .language-item:hover {
