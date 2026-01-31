@@ -189,7 +189,7 @@ const TranslatorOnboarding = () => {
         <div className={`form-section glass-panel animate-fade-in ${userType === 'Agencies' ? 'agency-mode' : ''}`} id={id}>
             <div className="section-header">
                 <span className="section-icon">{icon}</span>
-                <h2 className={userType === 'Agencies' ? 'text-neon-orange' : ''}>{title}</h2>
+                <h2 className={userType === 'Agencies' ? 'text-neon-yellow' : ''}>{title}</h2>
             </div>
             <div className="section-content">
                 {children}
@@ -202,9 +202,9 @@ const TranslatorOnboarding = () => {
             <div className="onboarding-container page-container">
                 <div className="success-wrapper glass-panel animate-fade-in">
                     <div className="success-icon">✅</div>
-                    <h1 className={userType === 'Agencies' ? 'text-neon-orange' : 'text-neon-cyan'}>Application Received!</h1>
+                    <h1 className={userType === 'Agencies' ? 'text-neon-yellow' : 'text-neon-cyan'}>Application Received!</h1>
                     <p>Thank you. Our team will review your {userType === 'Agencies' ? 'agency' : ''} application and contact you within 3-5 business days.</p>
-                    <button className={`btn ${userType === 'Agencies' ? 'btn-orange' : 'btn-primary'}`} onClick={() => setStatus('idle')}>Submit Another Application</button>
+                    <button className={`btn ${userType === 'Agencies' ? 'btn-yellow' : 'btn-primary'}`} onClick={() => setStatus('idle')}>Submit Another Application</button>
                 </div>
             </div>
         );
@@ -213,7 +213,7 @@ const TranslatorOnboarding = () => {
     return (
         <div className="onboarding-container page-container">
             <header className="onboarding-header">
-                <h1 className={`${userType === 'Agencies' ? 'text-neon-orange' : 'text-neon-cyan'} section-title`}>Glossa Partnership Portal</h1>
+                <h1 className={`${userType === 'Agencies' ? 'text-neon-yellow' : 'text-neon-cyan'} section-title`}>Glossa Partnership Portal</h1>
                 <p className="intro-text">
                     {userType === 'Freelance Translator'
                         ? "Join our elite global network of linguists. Showcase your skills to top-tier clients."
@@ -581,7 +581,7 @@ const TranslatorOnboarding = () => {
 
                         <div className="final-actions glass-panel">
                             <label className="checkbox-item full-width mt-1"><input type="checkbox" required /><span>I confirm I am authorized to represent this agency</span></label>
-                            <button type="submit" className="btn btn-primary submit-btn-large btn-orange">Submit Agency Application</button>
+                            <button type="submit" className="btn btn-primary submit-btn-large btn-yellow">Submit Agency Application</button>
                         </div>
                     </>
                 )}
