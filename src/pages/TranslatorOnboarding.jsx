@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { languagesData } from '../data/languagesData';
 import './TranslatorOnboarding.css';
 
@@ -99,6 +99,18 @@ const TranslatorOnboarding = () => {
         minProjectSize: '',
         preferredCurrency: 'USD'
     });
+
+    useEffect(() => {
+        try {
+            const detectedTZ = Intl.DateTimeFormat().resolvedOptions().timeZone;
+            if (detectedTZ) {
+                setFormData(prev => ({ ...prev, timeZone: detectedTZ }));
+            }
+        } catch (e) {
+            console.warn("Timezone detection failed", e);
+        }
+    }, [userType]); // Reset/Re-detect if userType changes or on mount
+
 
     const handleInputChange = (e) => {
         const { name, value, type, checked } = e.target;
@@ -216,11 +228,16 @@ const TranslatorOnboarding = () => {
                                 <div className="form-group"><label>Country *</label><input type="text" name="country" value={formData.country} onChange={handleInputChange} required className="glass-input" /></div>
                                 <div className="form-group"><label>City *</label><input type="text" name="city" value={formData.city} onChange={handleInputChange} required className="glass-input" /></div>
                                 <div className="form-group">
-                                    <label>Time Zone *</label>
-                                    <select name="timeZone" value={formData.timeZone} onChange={handleInputChange} required className="glass-input">
-                                        <option value="">Select Time Zone</option>
-                                        <option value="EST">EST (UTC-5)</option><option value="GMT">GMT (UTC+0)</option><option value="CET">CET (UTC+1)</option><option value="IST">IST (UTC+5:30)</option><option value="CST">CST (UTC+8)</option>
-                                    </select>
+                                    <label>Time Zone (Auto + Override) *</label>
+                                    <input
+                                        type="text"
+                                        name="timeZone"
+                                        value={formData.timeZone}
+                                        onChange={handleInputChange}
+                                        required
+                                        className="glass-input"
+                                        placeholder="Detected: e.g. UTC+0"
+                                    />
                                 </div>
                                 <div className="form-group">
                                     <label>Native Language *</label>
@@ -371,7 +388,7 @@ const TranslatorOnboarding = () => {
                                 <div className="form-group"><label>Country *</label><input type="text" name="country" required className="glass-input" /></div>
                                 <div className="form-group"><label>City *</label><input type="text" name="city" required className="glass-input" /></div>
                                 <div className="form-group"><label>Office Address</label><input type="text" name="officeAddress" className="glass-input" /></div>
-                                <div className="form-group"><label>Time Zone *</label><input type="text" name="timeZone" required className="glass-input" /></div>
+                                <div className="form-group"><label>Time Zone (Auto + Override) *</label><input type="text" name="timeZone" value={formData.timeZone} onChange={handleInputChange} required className="glass-input" /></div>
                                 <div className="form-group"><label>Website</label><input type="url" name="companyWebsite" className="glass-input" /></div>
                                 <div className="form-group"><label>Official Email *</label><input type="email" name="officialEmail" required className="glass-input" /></div>
                                 <div className="form-group"><label>Phone / WhatsApp *</label><input type="tel" name="phone" required className="glass-input" /></div>
