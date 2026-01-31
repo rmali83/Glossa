@@ -26,6 +26,31 @@
     margin-right: auto;
 }
 
+.min-height-subtitle {
+    min-height: 4.5rem;
+    /* Prevent layout jump across multiple lines */
+}
+
+.cursor {
+    color: var(--neon-cyan);
+    font-weight: bold;
+    margin-left: 2px;
+    animation: blink 0.8s infinite;
+}
+
+@keyframes blink {
+
+    0%,
+    100% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0;
+    }
+}
+
+
 .hero-actions {
     display: flex;
     gap: 1.5rem;
