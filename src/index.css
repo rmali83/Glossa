@@ -6,6 +6,7 @@
   --neon-pink: #ff00ff;
   --neon-green: #39ff14;
   --neon-purple: #9d00ff;
+  --neon-orange: #ff8c00;
   --glass-bg: rgba(255, 255, 255, 0.05);
   --glass-border: rgba(255, 255, 255, 0.1);
   --font-main: 'Inter', system-ui, Avenir, Helvetica, Arial, sans-serif;
@@ -56,6 +57,12 @@ ul {
   color: var(--neon-purple);
   text-shadow: 0 0 5px var(--neon-purple), 0 0 10px var(--neon-purple);
 }
+
+.text-neon-orange {
+  color: var(--neon-orange);
+  text-shadow: 0 0 5px var(--neon-orange), 0 0 10px var(--neon-orange);
+}
+
 
 .neon-border {
   border: 1px solid var(--neon-cyan);
@@ -141,4 +148,16 @@ h3 {
   background: var(--neon-pink);
   color: #fff;
   box-shadow: 0 0 20px var(--neon-pink);
+}
+
+.btn-orange {
+  border-color: var(--neon-orange) !important;
+  color: var(--neon-orange) !important;
+  box-shadow: 0 0 8px var(--neon-orange);
+}
+
+.btn-orange:hover {
+  background: var(--neon-orange) !important;
+  color: #fff !important;
+  box-shadow: 0 0 20px var(--neon-orange);
 }
