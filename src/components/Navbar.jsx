@@ -1,35 +1,46 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import './Navbar.css';
 
 const Navbar = () => {
     const location = useLocation();
+    const [isMenuOpen, setIsMenuOpen] = useState(false);
 
     const isActive = (path) => location.pathname === path ? 'active' : '';
+
+    const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
+    const closeMenu = () => setIsMenuOpen(false);
 
     return (
         <nav className="navbar glass-panel">
             <div className="navbar-logo text-neon-cyan">
-                <Link to="/">GLOSSA</Link>
+                <Link to="/" onClick={closeMenu}>GLOSSA</Link>
             </div>
-            <ul className="navbar-links">
+
+            <div className={`menu-toggle ${isMenuOpen ? 'open' : ''}`} onClick={toggleMenu}>
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+
+            <ul className={`navbar-links ${isMenuOpen ? 'mobile-open' : ''}`}>
                 <li>
-                    <Link to="/" className={isActive('/')}>Home</Link>
+                    <Link to="/" className={isActive('/')} onClick={closeMenu}>Home</Link>
                 </li>
                 <li>
-                    <Link to="/translation" className={isActive('/translation')}>Translation</Link>
+                    <Link to="/translation" className={isActive('/translation')} onClick={closeMenu}>Translation</Link>
                 </li>
                 <li>
-                    <Link to="/content-writing" className={isActive('/content-writing')}>Content Writing</Link>
+                    <Link to="/content-writing" className={isActive('/content-writing')} onClick={closeMenu}>Content Writing</Link>
                 </li>
                 <li>
-                    <Link to="/web-development" className={isActive('/web-development')}>Web & App Dev</Link>
+                    <Link to="/web-development" className={isActive('/web-development')} onClick={closeMenu}>Web & App Dev</Link>
                 </li>
                 <li>
-                    <Link to="/join-us" className={`btn-nav ${isActive('/join-us')}`}>Join as Translator</Link>
+                    <Link to="/contact" className={isActive('/contact')} onClick={closeMenu}>Contact</Link>
                 </li>
                 <li>
-                    <Link to="/contact" className={isActive('/contact')}>Contact</Link>
+                    <Link to="/join-us" className={`btn-nav ${isActive('/join-us')}`} onClick={closeMenu}>Join as Translator</Link>
                 </li>
             </ul>
         </nav>

@@ -6,9 +6,10 @@
     margin-bottom: 2rem;
     position: sticky;
     top: 1rem;
-    z-index: 100;
+    z-index: 1000;
     margin-left: 1rem;
     margin-right: 1rem;
+    border-radius: 15px;
 }
 
 .navbar-logo {
@@ -19,7 +20,7 @@
 
 .navbar-links {
     display: flex;
-    gap: 2rem;
+    gap: 1.5rem;
     align-items: center;
 }
 
@@ -27,6 +28,7 @@
     font-weight: 500;
     position: relative;
     color: #aaa;
+    transition: all 0.3s ease;
 }
 
 .navbar-links a:hover,
@@ -47,12 +49,10 @@
 }
 
 .navbar-links .btn-nav {
-    margin-left: 1rem;
-    padding: 0.5rem 1rem;
+    padding: 0.5rem 1.2rem;
     border: 1px solid var(--neon-pink);
-    border-radius: 4px;
+    border-radius: 20px;
     color: var(--neon-pink) !important;
-    transition: all 0.3s ease;
 }
 
 .navbar-links .btn-nav:hover,
@@ -64,4 +64,87 @@
 
 .navbar-links .btn-nav.active::after {
     display: none;
+}
+
+/* Mobile Toggle Switch */
+.menu-toggle {
+    display: none;
+    flex-direction: column;
+    gap: 6px;
+    cursor: pointer;
+    z-index: 1100;
+}
+
+.menu-toggle span {
+    width: 30px;
+    height: 3px;
+    background: var(--neon-cyan);
+    transition: all 0.3s ease;
+    border-radius: 5px;
+}
+
+@media (max-width: 1024px) {
+    .navbar {
+        padding: 0.8rem 1.5rem;
+    }
+
+    .navbar-links {
+        gap: 1rem;
+        font-size: 0.9rem;
+    }
+}
+
+@media (max-width: 900px) {
+    .menu-toggle {
+        display: flex;
+    }
+
+    .navbar-links {
+        position: fixed;
+        top: 0;
+        right: -100%;
+        width: 70%;
+        height: 100vh;
+        background: rgba(13, 13, 43, 0.98);
+        backdrop-filter: blur(20px);
+        flex-direction: column;
+        justify-content: center;
+        transition: right 0.4s cubic-bezier(0.19, 1, 0.22, 1);
+        padding: 4rem 2rem;
+        border-left: 1px solid var(--glass-border);
+    }
+
+    .navbar-links.mobile-open {
+        right: 0;
+    }
+
+    .navbar-links li {
+        width: 100%;
+        text-align: center;
+    }
+
+    .navbar-links a {
+        font-size: 1.5rem;
+        display: block;
+        padding: 1rem;
+    }
+
+    .btn-nav {
+        margin-top: 2rem;
+        width: fit-content;
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    .menu-toggle.open span:nth-child(1) {
+        transform: rotate(45deg) translate(8px, 8px);
+    }
+
+    .menu-toggle.open span:nth-child(2) {
+        opacity: 0;
+    }
+
+    .menu-toggle.open span:nth-child(3) {
+        transform: rotate(-45deg) translate(5px, -5px);
+    }
 }

@@ -4,41 +4,70 @@
     align-items: center;
     justify-content: center;
     min-height: 60vh;
+    padding: 2rem 1rem;
+    text-align: center;
 }
 
 .title {
-    font-size: 4rem;
-    margin-bottom: 3rem;
+    font-size: clamp(2.5rem, 8vw, 4.5rem);
+    margin-bottom: 2rem;
     color: white;
     text-shadow:
         0 0 5px #fff,
         0 0 10px #fff,
         0 0 20px var(--neon-cyan),
-        0 0 30px var(--neon-cyan),
-        0 0 40px var(--neon-cyan);
+        0 0 30px var(--neon-cyan);
+    line-height: 1.2;
 }
 
 .contact-info {
     display: flex;
-    justify-content: space-around;
+    justify-content: center;
     width: 100%;
-    padding: 3rem;
+    max-width: 1000px;
+    padding: 2rem;
     flex-wrap: wrap;
-    gap: 2rem;
+    gap: 3rem;
 }
 
 .info-item {
     text-align: center;
+    flex: 1 1 250px;
+    padding: 2rem;
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 15px;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    transition: all 0.3s ease;
+}
+
+.info-item:hover {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: var(--neon-cyan);
+    transform: translateY(-5px);
 }
 
 .info-item h2 {
     margin-bottom: 1rem;
-    font-size: 1.8rem;
+    font-size: clamp(1.4rem, 4vw, 1.8rem);
+    color: var(--neon-pink);
 }
 
 .info-item p {
-    font-size: 1.2rem;
+    font-size: clamp(1rem, 2.5vw, 1.2rem);
     color: #ddd;
+    word-break: break-word;
+}
+
+@media (max-width: 768px) {
+    .contact-info {
+        padding: 1rem;
+        gap: 1.5rem;
+    }
+
+    .info-item {
+        padding: 1.5rem;
+        flex: 1 1 100%;
+    }
 }
 
 @keyframes flicker {
@@ -52,12 +81,7 @@
     56%,
     100% {
         opacity: 1;
-        text-shadow:
-            0 0 5px #fff,
-            0 0 10px #fff,
-            0 0 20px var(--neon-cyan),
-            0 0 30px var(--neon-cyan),
-            0 0 40px var(--neon-cyan);
+        text-shadow: 0 0 5px #fff, 0 0 10px #fff, 0 0 20px var(--neon-cyan), 0 0 30px var(--neon-cyan);
     }
 
     20%,
@@ -69,5 +93,5 @@
 }
 
 .neon-text-flicker {
-    animation: flicker 3s infinite alternate;
+    animation: flicker 4s infinite alternate;
 }
