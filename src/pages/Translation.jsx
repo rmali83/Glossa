@@ -9,8 +9,7 @@ const regions = [...new Set(Object.values(languagesData).map(l => l.region))];
 const Translation = () => {
     const [activeRegion, setActiveRegion] = useState(regions[0]);
 
-    // Select a few featured languages for the top
-    const featuredLanguages = ['English', 'Spanish', 'Mandarin', 'Arabic', 'French', 'Japanese'];
+
 
     const getLanguageSlug = (name) => name.toLowerCase().replace(/\s+/g, '-').replace(/[()]/g, '');
 
@@ -24,26 +23,7 @@ const Translation = () => {
                 </p>
             </header>
 
-            <section className="featured-section glass-panel">
-                <h3 className="section-subtitle text-neon-pink">Featured Languages</h3>
-                <div className="featured-grid">
-                    {featuredLanguages.map(name => {
-                        const lang = languagesData[name];
-                        return (
-                            <Link
-                                key={name}
-                                to={`/translation/language/${getLanguageSlug(name)}`}
-                                className="featured-card neon-border"
-                            >
-                                <div className="featured-card-content">
-                                    <h4>{name}</h4>
-                                    <span>{lang.region}</span>
-                                </div>
-                            </Link>
-                        );
-                    })}
-                </div>
-            </section>
+
 
             <div className="regions-layout">
                 <div className="regions-sidebar glass-panel">
