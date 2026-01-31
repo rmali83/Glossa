@@ -103,6 +103,16 @@ export const languagesData = {
         writingSystem: 'Chinese characters (Hanzi) - Simplified in mainland China, Traditional in Taiwan and Hong Kong; Pinyin romanization for phonetic representation',
         culturalImage: 'mandarin_culture'
     },
+    'Chinese': {
+        name: 'Chinese',
+        region: 'Asia',
+        intro: 'Chinese is a group of languages that form the Sinitic branch of the Sino-Tibetan languages, with over 1.3 billion speakers worldwide.',
+        history: 'Chinese history spans thousands of years, from Oracle Bone Script to Modern Standard Chinese. It became a unified language under various dynasties and was standardized as Mandarin in the early 20th century.',
+        whereSpoken: 'China, Taiwan, Singapore, Malaysia, and Chinese communities globally.',
+        speakers: '1.3+ Billion',
+        writingSystem: 'Simplified and Traditional Chinese characters.',
+        culturalImage: 'chinese_culture'
+    },
     'Japanese': {
         name: 'Japanese',
         region: 'Asia',
@@ -294,6 +304,16 @@ export const languagesData = {
         speakers: 'Approximately 12 million speakers',
         writingSystem: 'Latin alphabet (standardized orthography)',
         culturalImage: 'haitian_culture'
+    },
+    'English (US)': {
+        name: 'English (US)',
+        region: 'Americas',
+        intro: 'American English (English US) is the set of varieties of the English language native to the United States.',
+        history: 'The use of English in the United States is a result of British colonization of the Americas. The first wave of English-speaking settlers arrived in North America during the 17th century, followed by further migrations in the 18th and 19th centuries.',
+        whereSpoken: 'United States',
+        speakers: 'Approximately 300 million native speakers.',
+        writingSystem: 'Latin alphabet',
+        culturalImage: 'english_us_culture'
     },
 
     // AFRICA
