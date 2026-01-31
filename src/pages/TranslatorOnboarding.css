@@ -39,12 +39,7 @@
     box-shadow: 0 0 15px var(--neon-cyan);
 }
 
-.type-btn.active.agencies-tab {
-    background: var(--neon-orange);
-    color: white;
-    box-shadow: 0 0 15px var(--neon-orange);
-    border-color: var(--neon-orange);
-}
+
 
 
 .premium-form {
@@ -156,22 +151,7 @@
     border: 1px solid rgba(0, 255, 255, 0.2);
 }
 
-/* Agency Theme Accents */
-.agency-mode .glass-input:focus {
-    border-color: var(--neon-orange);
-    box-shadow: 0 0 10px rgba(255, 140, 0, 0.2);
-}
 
-.agency-mode .checkbox-item.selected {
-    background: rgba(255, 140, 0, 0.1);
-    border-color: var(--neon-orange);
-}
-
-.agency-mode .tag {
-    background: rgba(255, 140, 0, 0.1);
-    color: var(--neon-orange);
-    border-color: rgba(255, 140, 0, 0.2);
-}
 
 
 .final-actions {
