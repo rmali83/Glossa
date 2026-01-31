@@ -97,6 +97,12 @@
     box-shadow: 0 0 10px rgba(0, 255, 255, 0.2);
 }
 
+.glass-input option {
+    background-color: var(--bg-color);
+    color: white;
+}
+
+
 .checkbox-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
