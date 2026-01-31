@@ -1,5 +1,16 @@
 import React, { useState } from 'react';
+import { languagesData } from '../data/languagesData';
 import './TranslatorOnboarding.css';
+
+const allLanguages = Object.keys(languagesData).sort();
+
+const specializationsList = [
+    'Legal', 'Medical', 'Technical', 'IT / Software', 'Marketing',
+    'Finance', 'E-commerce', 'News & Media', 'Subtitling', 'Gaming',
+    'Civil Rights / NGO', 'Agriculture / Agritech', 'Aerospace', 'Automotive',
+    'Life Sciences', 'Education / E-learning', 'Tourism & Hospitality',
+    'Energy & Environment', 'Luxury Goods', 'Military & Defense'
+];
 
 const TranslatorOnboarding = () => {
     const [status, setStatus] = useState('idle'); // idle, submitting, success, error
@@ -16,7 +27,6 @@ const TranslatorOnboarding = () => {
         city: '',
         timeZone: '',
         nativeLanguage: '',
-        secondaryLanguages: '',
 
         // 2. Language Pairs
         sourceLanguages: [],
@@ -90,21 +100,50 @@ const TranslatorOnboarding = () => {
         }));
     };
 
-    const handleMultiSelect = (name, value) => {
+    const handleMultiSelect = (name, value, limit = 0) => {
         setFormData(prev => {
             const current = prev[name];
             if (current.includes(value)) {
                 return { ...prev, [name]: current.filter(item => item !== value) };
             } else {
+                if (limit > 0 && current.length >= limit) {
+                    alert(`Selection limit reached: You can only select up to ${limit} ${name === 'specializations' ? 'specializations' : 'items'}.`);
+                    return prev;
+                }
                 return { ...prev, [name]: [...current, value] };
             }
         });
     };
 
+    const handleDropdownMultiSelect = (name, e) => {
+        const value = e.target.value;
+        if (value && !formData[name].includes(value)) {
+            setFormData(prev => ({
+                ...prev,
+                [name]: [...prev[name], value]
+            }));
+        }
+        e.target.value = '';
+    };
+
+    const removeItem = (name, value) => {
+        setFormData(prev => ({
+            ...prev,
+            [name]: prev[name].filter(item => item !== value)
+        }));
+    };
+
     const handleSubmit = async (e) => {
         e.preventDefault();
+
+        if (formData.specializations.length !== 5) {
+            alert("Please select exactly 5 areas of specialization.");
+            const specElement = document.getElementById('specialization');
+            specElement.scrollIntoView({ behavior: 'smooth' });
+            return;
+        }
+
         setStatus('submitting');
-        // Simulate API call
         setTimeout(() => {
             setStatus('success');
             window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -147,6 +186,7 @@ const TranslatorOnboarding = () => {
                     {['Freelance Translator', 'Agencies', 'Platforms (Smartcat/Mars/etc.)'].map(type => (
                         <button
                             key={type}
+                            type="button"
                             className={`type-btn ${formData.userType === type ? 'active' : ''}`}
                             onClick={() => setFormData({ ...formData, userType: type })}
                         >
@@ -198,28 +238,41 @@ const TranslatorOnboarding = () => {
                         </div>
                         <div className="form-group">
                             <label>Native Language *</label>
-                            <input type="text" name="nativeLanguage" value={formData.nativeLanguage} onChange={handleInputChange} required className="glass-input" placeholder="e.g. Arabic" />
+                            <select name="nativeLanguage" value={formData.nativeLanguage} onChange={handleInputChange} required className="glass-input">
+                                <option value="">Select Native Language</option>
+                                {allLanguages.map(lang => <option key={lang} value={lang}>{lang}</option>)}
+                            </select>
                         </div>
                     </div>
                 </Section>
 
                 <Section title="2. Language Pairs" icon="🌍" id="languages">
                     <div className="lang-pairs-container">
-                        <div className="multi-select-group">
-                            <label>Source Languages *</label>
-                            <div className="checkbox-grid">
-                                {['English', 'Urdu', 'Turkish', 'Arabic', 'Dari', 'Pashto', 'French', 'Spanish', 'German'].map(lang => (
-                                    <label key={lang} className="checkbox-item">
-                                        <input type="checkbox" checked={formData.sourceLanguages.includes(lang)} onChange={() => handleMultiSelect('sourceLanguages', lang)} />
-                                        <span>{lang}</span>
-                                    </label>
-                                ))}
+                        <div className="form-grid">
+                            <div className="form-group">
+                                <label>Source Languages *</label>
+                                <select className="glass-input" onChange={(e) => handleDropdownMultiSelect('sourceLanguages', e)}>
+                                    <option value="">Add Source Language</option>
+                                    {allLanguages.map(lang => <option key={lang} value={lang}>{lang}</option>)}
+                                </select>
+                                <div className="selected-tags">
+                                    {formData.sourceLanguages.map(lang => (
+                                        <span key={lang} className="tag">{lang} <button type="button" onClick={() => removeItem('sourceLanguages', lang)}>×</button></span>
+                                    ))}
+                                </div>
                             </div>
-                        </div>
-
-                        <div className="form-group mt-1">
-                            <label>Target Languages (specified)</label>
-                            <input type="text" name="targetLanguagesText" className="glass-input" placeholder="e.g. Urdu, Pashto, English" />
+                            <div className="form-group">
+                                <label>Target Languages *</label>
+                                <select className="glass-input" onChange={(e) => handleDropdownMultiSelect('targetLanguages', e)}>
+                                    <option value="">Add Target Language</option>
+                                    {allLanguages.map(lang => <option key={lang} value={lang}>{lang}</option>)}
+                                </select>
+                                <div className="selected-tags">
+                                    {formData.targetLanguages.map(lang => (
+                                        <span key={lang} className="tag">{lang} <button type="button" onClick={() => removeItem('targetLanguages', lang)}>×</button></span>
+                                    ))}
+                                </div>
+                            </div>
                         </div>
 
                         <div className="form-group mt-1">
@@ -233,10 +286,18 @@ const TranslatorOnboarding = () => {
                 </Section>
 
                 <Section title="3. Areas of Specialization" icon="📚" id="specialization">
+                    <p className="note text-neon-pink" style={{ fontWeight: 'bold', marginBottom: '1.5rem' }}>
+                        Note: Please choose EXACTLY 5 specializations from the 20 options below.
+                        ({formData.specializations.length}/5 selected)
+                    </p>
                     <div className="checkbox-grid-large">
-                        {['Legal', 'Medical', 'Technical', 'IT / Software', 'Marketing', 'Finance', 'E-commerce', 'News & Media', 'Subtitling', 'Gaming', 'Civil Rights / NGO', 'Agriculture / Agritech'].map(spec => (
-                            <label key={spec} className="checkbox-item card-style">
-                                <input type="checkbox" checked={formData.specializations.includes(spec)} onChange={() => handleMultiSelect('specializations', spec)} />
+                        {specializationsList.map(spec => (
+                            <label key={spec} className={`checkbox-item card-style ${formData.specializations.includes(spec) ? 'selected' : ''}`}>
+                                <input
+                                    type="checkbox"
+                                    checked={formData.specializations.includes(spec)}
+                                    onChange={() => handleMultiSelect('specializations', spec, 5)}
+                                />
                                 <span>{spec}</span>
                             </label>
                         ))}
