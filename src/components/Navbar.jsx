@@ -40,7 +40,7 @@ const Navbar = () => {
                     <Link to="/contact" className={isActive('/contact')} onClick={closeMenu}>Contact</Link>
                 </li>
                 <li>
-                    <Link to="/join-us" className={`btn-nav ${isActive('/join-us')}`} onClick={closeMenu}>Join as Translator</Link>
+                    <Link to="/join-us" className={`btn-nav ${isActive('/join-us')}`} onClick={closeMenu}>Join Glossa</Link>
                 </li>
             </ul>
         </nav>
