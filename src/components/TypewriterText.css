@@ -1,0 +1,22 @@
+.typewriter-wrapper {
+    display: inline-block;
+}
+
+.typewriter-cursor {
+    color: inherit;
+    font-weight: bold;
+    margin-left: 2px;
+    animation: typewriter-blink 0.8s infinite;
+}
+
+@keyframes typewriter-blink {
+
+    0%,
+    100% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0;
+    }
+}

@@ -1,12 +1,17 @@
-import React from 'react';
-import './ContentWriting.css';
+import TypewriterText from '../components/TypewriterText';
+
+const contentPhrases = [
+    "Words that captivate, convince, and convert.",
+    "Expert content tailored for your audience.",
+    "Engaging narratives that drive real results."
+];
 
 const ContentWriting = () => {
     return (
         <div className="content-container page-container">
             <h1 className="text-neon-pink section-title">Content Writing</h1>
-            <p className="intro-text">
-                Words that captivate, convince, and convert.
+            <p className="intro-text" style={{ minHeight: '1.5em' }}>
+                <TypewriterText phrases={contentPhrases} />
             </p>
 
             <div className="services-grid">

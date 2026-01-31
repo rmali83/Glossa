@@ -1,14 +1,20 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import './WebDevelopment.css';
+import TypewriterText from '../components/TypewriterText';
+
+const webPhrases = [
+    "Cutting-edge digital solutions tailored to your business needs.",
+    "From responsive websites to powerful mobile applications.",
+    "Innovating the digital landscape with modern technology."
+];
 
 const WebDevelopment = () => {
     return (
         <div className="web-dev-container page-container">
             <h1 className="text-neon-cyan section-title">Web & Mobile Development</h1>
-            <p className="intro-text">
-                Cutting-edge digital solutions tailored to your business needs.
-                From responsive websites to powerful mobile applications.
+            <p className="intro-text" style={{ minHeight: '3em' }}>
+                <TypewriterText phrases={webPhrases} />
             </p>
 
             <div className="services-grid">

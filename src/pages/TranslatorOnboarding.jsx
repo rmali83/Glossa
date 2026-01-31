@@ -12,6 +12,20 @@ const freelancerSpecs = [
     'Energy & Environment', 'Luxury Goods', 'Military & Defense'
 ];
 
+import TypewriterText from '../components/TypewriterText';
+
+const freelancerPhrases = [
+    "Join our elite global network of linguists.",
+    "Showcase your skills to top-tier clients.",
+    "Elevate your freelance career with Glossa."
+];
+
+const agencyPhrases = [
+    "Partner with Glossa to scale your language operations.",
+    "Connect your agency with our global infrastructure.",
+    "Drive growth through our strategic partnership model."
+];
+
 const popularTimezones = [
     'Asia/Karachi', 'Europe/Istanbul', 'America/New_York', 'Europe/London',
     'Asia/Dubai', 'Asia/Singapore', 'Australia/Sydney', 'Asia/Tokyo',
@@ -214,10 +228,11 @@ const TranslatorOnboarding = () => {
         <div className="onboarding-container page-container">
             <header className="onboarding-header">
                 <h1 className={`${userType === 'Agencies' ? 'text-neon-yellow' : 'text-neon-cyan'} section-title`}>Glossa Partnership Portal</h1>
-                <p className="intro-text">
-                    {userType === 'Freelance Translator'
-                        ? "Join our elite global network of linguists. Showcase your skills to top-tier clients."
-                        : "Partner with Glossa to scale your language operations. Connect your agency with our global infrastructure."}
+                <p className="intro-text" style={{ minHeight: '3em' }}>
+                    <TypewriterText
+                        key={userType} // Force reset on toggle
+                        phrases={userType === 'Freelance Translator' ? freelancerPhrases : agencyPhrases}
+                    />
                 </p>
                 <div className="user-type-selector">
                     {['Freelance Translator', 'Agencies'].map(type => (

@@ -2,6 +2,13 @@ import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { languagesData } from '../data/languagesData';
 import './Translation.css';
+import TypewriterText from '../components/TypewriterText';
+
+const translationPhrases = [
+    "Bridging the gap between languages and ideas.",
+    "Bridging cultures through professional linguistic expertise in over 50 languages.",
+    "Explore our reach and dive into the history of each tongue."
+];
 
 // Group languages by region from the centralized data
 const regions = [...new Set(Object.values(languagesData).map(l => l.region))];
@@ -17,9 +24,8 @@ const Translation = () => {
         <div className="translation-container page-container">
             <header className="translation-header">
                 <h1 className="text-neon-cyan section-title">Global Translation Services</h1>
-                <p className="intro-text">
-                    Bridging cultures through professional linguistic expertise in over 50 languages.
-                    Explore our reach and dive into the history of each tongue.
+                <p className="intro-text" style={{ minHeight: '3em' }}>
+                    <TypewriterText phrases={translationPhrases} />
                 </p>
             </header>
 
