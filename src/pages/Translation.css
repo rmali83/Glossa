@@ -42,6 +42,10 @@
     gap: 0.8rem;
 }
 
+.regions-sidebar ul li {
+    cursor: pointer;
+}
+
 .languages-display {
     padding: 2.5rem;
     min-height: 500px;
@@ -56,11 +60,11 @@
 }
 
 .language-item {
-    padding: 1.2rem 2rem;
-    text-align: left;
+    padding: 1rem 2rem;
+    text-align: center;
     background: rgba(255, 255, 255, 0.03);
-    border: 1px solid rgba(255, 255, 255, 0.05);
-    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 50px;
     color: #eee;
     font-weight: 500;
     transition: all 0.3s ease;
