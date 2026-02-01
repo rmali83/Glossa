@@ -16,20 +16,36 @@ const Home = () => {
     return (
         <div className="home-container page-container">
             <section className="hero-section">
-                <h1 className="hero-title text-neon-cyan">GLOSSA</h1>
-                <p className="hero-subtitle min-height-subtitle">
-                    <TypewriterText phrases={dynamicPhrases} />
-                </p>
-                <div className="hero-actions">
-                    <Link to="/translation" className="btn btn-primary">
-                        Translation Services
-                    </Link>
-                    <Link to="/content-writing" className="btn btn-secondary">
-                        Content Writing
-                    </Link>
-                    <Link to="/web-development" className="btn btn-primary">
-                        Web & App Dev
-                    </Link>
+                <div className="hero-video-container">
+                    <video
+                        autoPlay
+                        muted
+                        loop
+                        playsInline
+                        className="hero-video"
+                    >
+                        <source src="/assets/hero-video.mp4" type="video/mp4" />
+                        Your browser does not support the video tag.
+                    </video>
+                    <div className="hero-overlay"></div>
+                </div>
+
+                <div className="hero-content">
+                    <h1 className="hero-title text-neon-cyan">GLOSSA</h1>
+                    <p className="hero-subtitle min-height-subtitle">
+                        <TypewriterText phrases={dynamicPhrases} />
+                    </p>
+                    <div className="hero-actions">
+                        <Link to="/translation" className="btn btn-primary">
+                            Translation Services
+                        </Link>
+                        <Link to="/content-writing" className="btn btn-secondary">
+                            Content Writing
+                        </Link>
+                        <Link to="/web-development" className="btn btn-primary">
+                            Web & App Dev
+                        </Link>
+                    </div>
                 </div>
             </section>
 
