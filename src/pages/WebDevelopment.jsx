@@ -14,7 +14,7 @@ const WebDevelopment = () => {
         <div className="web-dev-container page-container">
             <h1 className="text-neon-cyan section-title">Web & Mobile Development</h1>
             <p className="intro-text" style={{ minHeight: '3em' }}>
-                <TypewriterText phrases={webPhrases} />
+                <TypewriterText phrases={webPhrases} className="text-neon-gamma" />
             </p>
 
             <div className="services-grid">

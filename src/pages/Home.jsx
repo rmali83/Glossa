@@ -33,7 +33,7 @@ const Home = () => {
                 <div className="hero-content">
                     <h1 className="hero-title text-neon-cyan">GLOSSA</h1>
                     <p className="hero-subtitle min-height-subtitle">
-                        <TypewriterText phrases={dynamicPhrases} />
+                        <TypewriterText phrases={dynamicPhrases} className="text-neon-gamma" />
                     </p>
                     <div className="hero-actions">
                         <Link to="/translation" className="btn btn-primary">

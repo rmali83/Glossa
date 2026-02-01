@@ -11,7 +11,7 @@ const ContentWriting = () => {
         <div className="content-container page-container">
             <h1 className="text-neon-pink section-title">Content Writing</h1>
             <p className="intro-text" style={{ minHeight: '1.5em' }}>
-                <TypewriterText phrases={contentPhrases} />
+                <TypewriterText phrases={contentPhrases} className="text-neon-gamma" />
             </p>
 
             <div className="services-grid">

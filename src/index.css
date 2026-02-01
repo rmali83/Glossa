@@ -8,6 +8,7 @@
   --neon-purple: #9d00ff;
   --neon-orange: #ff8c00;
   --neon-yellow: #ffff00;
+  --neon-gamma: #13c6e9;
   --glass-bg: rgba(255, 255, 255, 0.05);
   --glass-border: rgba(255, 255, 255, 0.1);
   --font-main: 'Inter', system-ui, Avenir, Helvetica, Arial, sans-serif;
@@ -67,6 +68,11 @@ ul {
 .text-neon-yellow {
   color: var(--neon-yellow);
   text-shadow: 0 0 5px var(--neon-yellow), 0 0 10px var(--neon-yellow);
+}
+
+.text-neon-gamma {
+  color: var(--neon-gamma);
+  text-shadow: 0 0 8px var(--neon-gamma), 0 0 16px var(--neon-gamma), 0 0 24px var(--neon-gamma);
 }
 
 

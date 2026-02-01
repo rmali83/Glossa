@@ -25,7 +25,7 @@ const Translation = () => {
             <header className="translation-header">
                 <h1 className="text-neon-cyan section-title">Global Translation Services</h1>
                 <p className="intro-text" style={{ minHeight: '3em' }}>
-                    <TypewriterText phrases={translationPhrases} />
+                    <TypewriterText phrases={translationPhrases} className="text-neon-gamma" />
                 </p>
             </header>
 
