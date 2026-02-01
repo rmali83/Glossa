@@ -42,7 +42,7 @@ const Home = () => {
                         <Link to="/content-writing" className="btn btn-secondary">
                             Content Writing
                         </Link>
-                        <Link to="/web-development" className="btn btn-primary">
+                        <Link to="/web-development" className="btn btn-green">
                             Web & App Dev
                         </Link>
                     </div>
