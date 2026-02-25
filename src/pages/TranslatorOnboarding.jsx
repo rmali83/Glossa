@@ -39,6 +39,18 @@ const agencySpecs = [
 ];
 
 
+const Section = ({ title, icon, children, id, userType }) => (
+    <div className={`form-section glass-panel animate-fade-in ${userType === 'Agencies' ? 'agency-mode' : ''}`} id={id}>
+        <div className="section-header">
+            <span className="section-icon">{icon}</span>
+            <h2 className={userType === 'Agencies' ? 'text-neon-yellow' : ''}>{title}</h2>
+        </div>
+        <div className="section-content">
+            {children}
+        </div>
+    </div>
+);
+
 const TranslatorOnboarding = () => {
     const [status, setStatus] = useState('idle'); // idle, submitting, success
     const [userType, setUserType] = useState('Freelance Translator');
@@ -200,17 +212,7 @@ const TranslatorOnboarding = () => {
         }, 1500);
     };
 
-    const Section = ({ title, icon, children, id }) => (
-        <div className={`form-section glass-panel animate-fade-in ${userType === 'Agencies' ? 'agency-mode' : ''}`} id={id}>
-            <div className="section-header">
-                <span className="section-icon">{icon}</span>
-                <h2 className={userType === 'Agencies' ? 'text-neon-yellow' : ''}>{title}</h2>
-            </div>
-            <div className="section-content">
-                {children}
-            </div>
-        </div>
-    );
+
 
     if (status === 'success') {
         return (
@@ -257,7 +259,7 @@ const TranslatorOnboarding = () => {
                 {userType === 'Freelance Translator' ? (
                     /* FREELANCER FORM */
                     <>
-                        <Section title="1. Personal Information" icon="🧑💼" id="personal">
+                        <Section userType={userType} title="1. Personal Information" icon="🧑💼" id="personal">
                             <div className="form-grid">
                                 <div className="form-group"><label>Full Name *</label><input type="text" name="fullName" value={formData.fullName} onChange={handleInputChange} required className="glass-input" /></div>
                                 <div className="form-group"><label>Display Name</label><input type="text" name="displayName" value={formData.displayName} onChange={handleInputChange} className="glass-input" /></div>
@@ -304,7 +306,7 @@ const TranslatorOnboarding = () => {
                             </div>
                         </Section>
 
-                        <Section title="2. Language Pairs" icon="🌍" id="languages">
+                        <Section userType={userType} title="2. Language Pairs" icon="🌍" id="languages">
                             <div className="form-grid">
                                 <div className="form-group">
                                     <label>Source Languages *</label>
@@ -333,7 +335,7 @@ const TranslatorOnboarding = () => {
                             </div>
                         </Section>
 
-                        <Section title="3. Areas of Specialization" icon="📚" id="specialization">
+                        <Section userType={userType} title="3. Areas of Specialization" icon="📚" id="specialization">
                             <p className="note text-neon-pink" style={{ fontWeight: 'bold' }}>Note: Choose EXACTLY 5 specializations. ({formData.specializations.length}/5)</p>
                             <div className="checkbox-grid-large mt-1">
                                 {freelancerSpecs.map(spec => (
@@ -345,7 +347,7 @@ const TranslatorOnboarding = () => {
                             </div>
                         </Section>
 
-                        <Section title="4. Services Offered" icon="🛠️" id="services">
+                        <Section userType={userType} title="4. Services Offered" icon="🛠️" id="services">
                             <div className="checkbox-grid">
                                 {['Translation', 'Editing', 'MTPE', 'Subtitling', 'Transcription', 'Localization'].map(svc => (
                                     <label key={svc} className="checkbox-item">
@@ -356,7 +358,7 @@ const TranslatorOnboarding = () => {
                             </div>
                         </Section>
 
-                        <Section title="5. Tools & Technology" icon="💻" id="tools">
+                        <Section userType={userType} title="5. Tools & Technology" icon="💻" id="tools">
                             <div className="checkbox-grid">
                                 {['Smartcat', 'MemoQ', 'Trados', 'Wordfast', 'Subtitle Edit'].map(tool => (
                                     <label key={tool} className="checkbox-item">
@@ -373,7 +375,7 @@ const TranslatorOnboarding = () => {
                             </div>
                         </Section>
 
-                        <Section title="6. Education & Certification" icon="🎓">
+                        <Section userType={userType} title="6. Education & Certification" icon="🎓">
                             <div className="form-grid">
                                 <div className="form-group"><label>Highest Degree</label><input type="text" name="highestDegree" value={formData.highestDegree} onChange={handleInputChange} className="glass-input" /></div>
                                 <div className="form-group"><label>Field of Study</label><input type="text" name="fieldOfStudy" value={formData.fieldOfStudy} onChange={handleInputChange} className="glass-input" /></div>
@@ -384,48 +386,48 @@ const TranslatorOnboarding = () => {
                             </div>
                         </Section>
 
-                        <Section title="7. Work Experience" icon="🧾">
+                        <Section userType={userType} title="7. Work Experience" icon="🧾">
                             <div className="form-grid">
                                 <div className="form-group"><label>Major Clients</label><input type="text" name="majorClients" value={formData.majorClients} onChange={handleInputChange} className="glass-input" /></div>
                                 <div className="form-group"><label>Total Words Translated</label><input type="text" name="totalWordsTranslated" value={formData.totalWordsTranslated} onChange={handleInputChange} className="glass-input" placeholder="e.g. 500k+" /></div>
                             </div>
                         </Section>
 
-                        <Section title="8. Portfolio & Samples" icon="📂">
+                        <Section userType={userType} title="8. Portfolio & Samples" icon="📂">
                             <div className="form-grid">
                                 <div className="form-group"><label>Portfolio URL</label><input type="url" name="portfolioUrl" value={formData.portfolioUrl} onChange={handleInputChange} className="glass-input" placeholder="https://..." /></div>
                                 <div className="form-group"><label>LinkedIn Profile</label><input type="url" name="websiteLinkedIn" value={formData.websiteLinkedIn} onChange={handleInputChange} className="glass-input" /></div>
                             </div>
                         </Section>
 
-                        <Section title="9. Availability & Capacity" icon="⏱️">
+                        <Section userType={userType} title="9. Availability & Capacity" icon="⏱️">
                             <div className="form-grid">
                                 <div className="form-group"><label>Daily Capacity</label><select className="glass-input"><option>1,000 words</option><option>2,000 words</option><option>3,000+ words</option></select></div>
                                 <div className="form-group"><label>Weekend Availability</label><select className="glass-input"><option>Yes</option><option>No</option></select></div>
                             </div>
                         </Section>
 
-                        <Section title="10. Rates" icon="💰">
+                        <Section userType={userType} title="10. Rates" icon="💰">
                             <div className="form-grid">
                                 <div className="form-group"><label>Rate (USD/word)</label><input type="number" name="rate" value={formData.rate} onChange={handleInputChange} step="0.01" className="glass-input" /></div>
                                 <div className="form-group"><label>Min Charge</label><input type="number" name="minCharge" value={formData.minCharge} onChange={handleInputChange} className="glass-input" /></div>
                             </div>
                         </Section>
 
-                        <Section title="11. Legal & Compliance" icon="🛡️">
+                        <Section userType={userType} title="11. Legal & Compliance" icon="🛡️">
                             <div className="checkbox-stack">
                                 {['Accept NDA', 'Accept Confidentiality', 'Accept AI Policy', 'Accept GDPR Data Consent'].map(c => <label key={c} className="checkbox-item full-width"><input type="checkbox" required /><span>{c}</span></label>)}
                             </div>
                         </Section>
 
-                        <Section title="12. Skill Self-Assessment" icon="🧠">
+                        <Section userType={userType} title="12. Skill Self-Assessment" icon="🧠">
                             <div className="form-grid">
                                 <div className="form-group"><label>Accuracy (1-5)</label><input type="range" min="1" max="5" defaultValue="3" className="range-input" /></div>
                                 <div className="form-group"><label>CAT Proficiency (1-5)</label><input type="range" min="1" max="5" defaultValue="3" className="range-input" /></div>
                             </div>
                         </Section>
 
-                        <Section title="13. Additional Notes" icon="📝">
+                        <Section userType={userType} title="13. Additional Notes" icon="📝">
                             <textarea className="glass-input" rows="4" placeholder="Anything else..."></textarea>
                         </Section>
 
@@ -437,7 +439,7 @@ const TranslatorOnboarding = () => {
                 ) : (
                     /* AGENCY FORM - FULL SPECS AS REQUESTED */
                     <>
-                        <Section title="1. Agency Information" icon="🏢" id="agency-info">
+                        <Section userType={userType} title="1. Agency Information" icon="🏢" id="agency-info">
                             <div className="form-grid">
                                 <div className="form-group"><label>Agency Name *</label><input type="text" name="agencyName" value={formData.agencyName} onChange={handleInputChange} required className="glass-input" /></div>
                                 <div className="form-group"><label>Legal Business Name</label><input type="text" name="legalBusinessName" value={formData.legalBusinessName} onChange={handleInputChange} className="glass-input" /></div>
@@ -480,7 +482,7 @@ const TranslatorOnboarding = () => {
                             </div>
                         </Section>
 
-                        <Section title="2. Primary Contact Person" icon="👤">
+                        <Section userType={userType} title="2. Primary Contact Person" icon="👤">
                             <div className="form-grid">
                                 <div className="form-group"><label>Full Name *</label><input type="text" name="contactFullName" value={formData.contactFullName} onChange={handleInputChange} required className="glass-input" /></div>
                                 <div className="form-group"><label>Job Title</label><input type="text" name="contactJobTitle" value={formData.contactJobTitle} onChange={handleInputChange} className="glass-input" placeholder="PM / Vendor Manager / Director" /></div>
@@ -489,7 +491,7 @@ const TranslatorOnboarding = () => {
                             </div>
                         </Section>
 
-                        <Section title="3. Language Coverage" icon="🌍">
+                        <Section userType={userType} title="3. Language Coverage" icon="🌍">
                             <div className="form-grid">
                                 <div className="form-group">
                                     <label>Source Languages</label>
@@ -519,7 +521,7 @@ const TranslatorOnboarding = () => {
                             </div>
                         </Section>
 
-                        <Section title="4. Subject Matter Expertise" icon="📚">
+                        <Section userType={userType} title="4. Subject Matter Expertise" icon="📚">
                             <div className="checkbox-grid-large">
                                 {agencySpecs.map(spec => (
                                     <label key={spec} className={`checkbox-item card-style ${formData.specializations.includes(spec) ? 'selected' : ''}`}>
@@ -531,7 +533,7 @@ const TranslatorOnboarding = () => {
                             <div className="form-group mt-1"><label>Other</label><input type="text" className="glass-input" /></div>
                         </Section>
 
-                        <Section title="5. Services Offered" icon="🛠️">
+                        <Section userType={userType} title="5. Services Offered" icon="🛠️">
                             <div className="checkbox-grid">
                                 {['Translation', 'Editing', 'MTPE', 'Subtitling', 'Transcription', 'Localization', 'Voice-over/Dubbing', 'DTP', 'Linguistic Review'].map(svc => (
                                     <label key={svc} className="checkbox-item">
@@ -542,7 +544,7 @@ const TranslatorOnboarding = () => {
                             </div>
                         </Section>
 
-                        <Section title="6. Technology & Infrastructure" icon="💻">
+                        <Section userType={userType} title="6. Technology & Infrastructure" icon="💻">
                             <div className="form-group"><label>CAT Tools Used</label>
                                 <div className="checkbox-grid">{['Trados', 'MemoQ', 'Smartcat', 'Phrase', 'Wordfast'].map(t => <label key={t} className="checkbox-item"><input type="checkbox" onChange={() => handleMultiSelect('tools', t)} />{t}</label>)}</div>
                             </div>
@@ -553,7 +555,7 @@ const TranslatorOnboarding = () => {
                             <div className="form-group mt-1"><label>File Formats Supported</label><input type="text" className="glass-input" placeholder="DOCX, PDF, InDesign, etc." /></div>
                         </Section>
 
-                        <Section title="7. Certifications & Compliance" icon="🏅">
+                        <Section userType={userType} title="7. Certifications & Compliance" icon="🏅">
                             <div className="checkbox-grid">
                                 {['ISO 17100', 'ISO 9001', 'ISO 27001', 'ATA Corporate Member'].map(c => <label key={c} className="checkbox-item"><input type="checkbox" />{c}</label>)}
                             </div>
@@ -562,7 +564,7 @@ const TranslatorOnboarding = () => {
                             </div>
                         </Section>
 
-                        <Section title="8. Portfolio & Clients" icon="📂">
+                        <Section userType={userType} title="8. Portfolio & Clients" icon="📂">
                             <div className="form-grid">
                                 <div className="form-group"><label>Key Clients</label><input type="text" className="glass-input" /></div>
                                 <div className="form-group"><label>Industries Served</label><input type="text" className="glass-input" /></div>
@@ -573,7 +575,7 @@ const TranslatorOnboarding = () => {
                             </div>
                         </Section>
 
-                        <Section title="9. Capacity & Turnaround" icon="⏱️">
+                        <Section userType={userType} title="9. Capacity & Turnaround" icon="⏱️">
                             <div className="form-grid">
                                 <div className="form-group"><label>Daily Capacity</label><select className="glass-input"><option>10k–50k words</option><option>50k–200k words</option><option>200k+ words</option></select></div>
                                 <div className="form-group"><label>Rush Support</label><select className="glass-input"><option>Yes</option><option>No</option></select></div>
@@ -582,20 +584,20 @@ const TranslatorOnboarding = () => {
                             </div>
                         </Section>
 
-                        <Section title="10. Commercial Details" icon="💰">
+                        <Section userType={userType} title="10. Commercial Details" icon="💰">
                             <div className="form-grid">
                                 <div className="form-group"><label>Pricing Model</label><select name="pricingModel" value={formData.pricingModel} onChange={handleInputChange} className="glass-input"><option>Per word</option><option>Per hour</option><option>Project-based</option></select></div>
                                 <div className="form-group"><label>Payment Terms</label><select name="paymentTerms" value={formData.paymentTerms} onChange={handleInputChange} className="glass-input"><option>Net 15</option><option>Net 30</option></select></div>
                             </div>
                         </Section>
 
-                        <Section title="11. Legal Agreements" icon="🛡️">
+                        <Section userType={userType} title="11. Legal Agreements" icon="🛡️">
                             <div className="checkbox-stack">
                                 {['NDA Agreement', 'Data Protection Policy', 'AI Usage Policy', 'Subcontracting Policy'].map(a => <label key={a} className="checkbox-item full-width"><input type="checkbox" required />{a}</label>)}
                             </div>
                         </Section>
 
-                        <Section title="12. Additional Information" icon="📝">
+                        <Section userType={userType} title="12. Additional Information" icon="📝">
                             <textarea className="glass-input" rows="4" placeholder="Tell us about your team, strengths, etc."></textarea>
                         </Section>
 
