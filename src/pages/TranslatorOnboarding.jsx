@@ -90,6 +90,7 @@ const TranslatorOnboarding = () => {
         dailyCapacity: '2,000 words',
         weekendAvailability: 'No',
         rateType: 'Per word',
+        rate: '',
         currency: 'USD',
         minCharge: '',
         ndaAccepted: false,
@@ -311,6 +312,7 @@ const TranslatorOnboarding = () => {
                                         <option value="">Add Source Language</option>
                                         {allLanguages.map(l => <option key={l} value={l}>{l}</option>)}
                                     </select>
+                                    <p className="helper-text">Select a language to add it to your list.</p>
                                     <div className="selected-tags">{formData.sourceLanguages.map(l => <span key={l} className="tag">{l} <button type="button" onClick={() => removeItem('sourceLanguages', l)}>×</button></span>)}</div>
                                 </div>
                                 <div className="form-group">
@@ -319,6 +321,7 @@ const TranslatorOnboarding = () => {
                                         <option value="">Add Target Language</option>
                                         {allLanguages.map(l => <option key={l} value={l}>{l}</option>)}
                                     </select>
+                                    <p className="helper-text">Select a language to add it to your list.</p>
                                     <div className="selected-tags">{formData.targetLanguages.map(l => <span key={l} className="tag">{l} <button type="button" onClick={() => removeItem('targetLanguages', l)}>×</button></span>)}</div>
                                 </div>
                             </div>
@@ -372,26 +375,26 @@ const TranslatorOnboarding = () => {
 
                         <Section title="6. Education & Certification" icon="🎓">
                             <div className="form-grid">
-                                <div className="form-group"><label>Highest Degree</label><input type="text" name="highestDegree" className="glass-input" /></div>
-                                <div className="form-group"><label>Field of Study</label><input type="text" name="fieldOfStudy" className="glass-input" /></div>
+                                <div className="form-group"><label>Highest Degree</label><input type="text" name="highestDegree" value={formData.highestDegree} onChange={handleInputChange} className="glass-input" /></div>
+                                <div className="form-group"><label>Field of Study</label><input type="text" name="fieldOfStudy" value={formData.fieldOfStudy} onChange={handleInputChange} className="glass-input" /></div>
                                 <div className="form-group">
                                     <label>Years of Experience *</label>
-                                    <select name="yearsExperience" className="glass-input"><option>1-3 years</option><option>3-5 years</option><option>5-10 years</option><option>Expert (10+)</option></select>
+                                    <select name="yearsExperience" value={formData.yearsExperience} onChange={handleInputChange} className="glass-input"><option>1-3 years</option><option>3-5 years</option><option>5-10 years</option><option>Expert (10+)</option></select>
                                 </div>
                             </div>
                         </Section>
 
                         <Section title="7. Work Experience" icon="🧾">
                             <div className="form-grid">
-                                <div className="form-group"><label>Major Clients</label><input type="text" className="glass-input" /></div>
-                                <div className="form-group"><label>Total Words Translated</label><input type="text" className="glass-input" placeholder="e.g. 500k+" /></div>
+                                <div className="form-group"><label>Major Clients</label><input type="text" name="majorClients" value={formData.majorClients} onChange={handleInputChange} className="glass-input" /></div>
+                                <div className="form-group"><label>Total Words Translated</label><input type="text" name="totalWordsTranslated" value={formData.totalWordsTranslated} onChange={handleInputChange} className="glass-input" placeholder="e.g. 500k+" /></div>
                             </div>
                         </Section>
 
                         <Section title="8. Portfolio & Samples" icon="📂">
                             <div className="form-grid">
-                                <div className="form-group"><label>Portfolio URL</label><input type="url" className="glass-input" placeholder="https://..." /></div>
-                                <div className="form-group"><label>LinkedIn Profile</label><input type="url" className="glass-input" /></div>
+                                <div className="form-group"><label>Portfolio URL</label><input type="url" name="portfolioUrl" value={formData.portfolioUrl} onChange={handleInputChange} className="glass-input" placeholder="https://..." /></div>
+                                <div className="form-group"><label>LinkedIn Profile</label><input type="url" name="websiteLinkedIn" value={formData.websiteLinkedIn} onChange={handleInputChange} className="glass-input" /></div>
                             </div>
                         </Section>
 
@@ -404,8 +407,8 @@ const TranslatorOnboarding = () => {
 
                         <Section title="10. Rates" icon="💰">
                             <div className="form-grid">
-                                <div className="form-group"><label>Rate (USD/word)</label><input type="number" step="0.01" className="glass-input" /></div>
-                                <div className="form-group"><label>Min Charge</label><input type="number" className="glass-input" /></div>
+                                <div className="form-group"><label>Rate (USD/word)</label><input type="number" name="rate" value={formData.rate} onChange={handleInputChange} step="0.01" className="glass-input" /></div>
+                                <div className="form-group"><label>Min Charge</label><input type="number" name="minCharge" value={formData.minCharge} onChange={handleInputChange} className="glass-input" /></div>
                             </div>
                         </Section>
 
@@ -436,12 +439,12 @@ const TranslatorOnboarding = () => {
                     <>
                         <Section title="1. Agency Information" icon="🏢" id="agency-info">
                             <div className="form-grid">
-                                <div className="form-group"><label>Agency Name *</label><input type="text" name="agencyName" required className="glass-input" /></div>
-                                <div className="form-group"><label>Legal Business Name</label><input type="text" name="legalBusinessName" className="glass-input" /></div>
-                                <div className="form-group"><label>Registration Number</label><input type="text" name="registrationNumber" className="glass-input" /></div>
-                                <div className="form-group"><label>Country *</label><input type="text" name="country" required className="glass-input" /></div>
-                                <div className="form-group"><label>City *</label><input type="text" name="city" required className="glass-input" /></div>
-                                <div className="form-group"><label>Office Address</label><input type="text" name="officeAddress" className="glass-input" /></div>
+                                <div className="form-group"><label>Agency Name *</label><input type="text" name="agencyName" value={formData.agencyName} onChange={handleInputChange} required className="glass-input" /></div>
+                                <div className="form-group"><label>Legal Business Name</label><input type="text" name="legalBusinessName" value={formData.legalBusinessName} onChange={handleInputChange} className="glass-input" /></div>
+                                <div className="form-group"><label>Registration Number</label><input type="text" name="registrationNumber" value={formData.registrationNumber} onChange={handleInputChange} className="glass-input" /></div>
+                                <div className="form-group"><label>Country *</label><input type="text" name="country" value={formData.country} onChange={handleInputChange} required className="glass-input" /></div>
+                                <div className="form-group"><label>City *</label><input type="text" name="city" value={formData.city} onChange={handleInputChange} required className="glass-input" /></div>
+                                <div className="form-group"><label>Office Address</label><input type="text" name="officeAddress" value={formData.officeAddress} onChange={handleInputChange} className="glass-input" /></div>
                                 <div className="form-group">
                                     <label>Time Zone *</label>
                                     <select
@@ -471,18 +474,18 @@ const TranslatorOnboarding = () => {
                                         />
                                     )}
                                 </div>
-                                <div className="form-group"><label>Website</label><input type="url" name="companyWebsite" className="glass-input" /></div>
-                                <div className="form-group"><label>Official Email *</label><input type="email" name="officialEmail" required className="glass-input" /></div>
-                                <div className="form-group"><label>Phone / WhatsApp *</label><input type="tel" name="phone" required className="glass-input" /></div>
+                                <div className="form-group"><label>Website</label><input type="url" name="companyWebsite" value={formData.companyWebsite} onChange={handleInputChange} className="glass-input" /></div>
+                                <div className="form-group"><label>Official Email *</label><input type="email" name="officialEmail" value={formData.officialEmail} onChange={handleInputChange} required className="glass-input" /></div>
+                                <div className="form-group"><label>Phone / WhatsApp *</label><input type="tel" name="phone" value={formData.phone} onChange={handleInputChange} required className="glass-input" /></div>
                             </div>
                         </Section>
 
                         <Section title="2. Primary Contact Person" icon="👤">
                             <div className="form-grid">
-                                <div className="form-group"><label>Full Name *</label><input type="text" name="contactFullName" required className="glass-input" /></div>
-                                <div className="form-group"><label>Job Title</label><input type="text" name="contactJobTitle" className="glass-input" placeholder="PM / Vendor Manager / Director" /></div>
-                                <div className="form-group"><label>Email *</label><input type="email" name="email" required className="glass-input" /></div>
-                                <div className="form-group"><label>Phone</label><input type="tel" name="phone" className="glass-input" /></div>
+                                <div className="form-group"><label>Full Name *</label><input type="text" name="contactFullName" value={formData.contactFullName} onChange={handleInputChange} required className="glass-input" /></div>
+                                <div className="form-group"><label>Job Title</label><input type="text" name="contactJobTitle" value={formData.contactJobTitle} onChange={handleInputChange} className="glass-input" placeholder="PM / Vendor Manager / Director" /></div>
+                                <div className="form-group"><label>Email *</label><input type="email" name="email" value={formData.email} onChange={handleInputChange} required className="glass-input" /></div>
+                                <div className="form-group"><label>Phone</label><input type="tel" name="phone" value={formData.phone} onChange={handleInputChange} className="glass-input" /></div>
                             </div>
                         </Section>
 
@@ -494,6 +497,7 @@ const TranslatorOnboarding = () => {
                                         <option value="">Add Source Language</option>
                                         {allLanguages.map(l => <option key={l} value={l}>{l}</option>)}
                                     </select>
+                                    <p className="helper-text">Select a language to add it to your list.</p>
                                     <div className="selected-tags">{formData.sourceLanguages.map(l => <span key={l} className="tag">{l} <button type="button" onClick={() => removeItem('sourceLanguages', l)}>×</button></span>)}</div>
                                 </div>
                                 <div className="form-group">
@@ -502,14 +506,15 @@ const TranslatorOnboarding = () => {
                                         <option value="">Add Target Language</option>
                                         {allLanguages.map(l => <option key={l} value={l}>{l}</option>)}
                                     </select>
+                                    <p className="helper-text">Select a language to add it to your list.</p>
                                     <div className="selected-tags">{formData.targetLanguages.map(l => <span key={l} className="tag">{l} <button type="button" onClick={() => removeItem('targetLanguages', l)}>×</button></span>)}</div>
                                 </div>
                             </div>
                             <div className="form-grid mt-1">
-                                <div className="form-group"><label>Direction</label><select name="direction" className="glass-input"><option>Into native only</option><option>Both directions</option></select></div>
+                                <div className="form-group"><label>Direction</label><select name="direction" value={formData.direction} onChange={handleInputChange} className="glass-input"><option>Into native only</option><option>Both directions</option></select></div>
                                 <div className="form-group">
                                     <label>Active Translators</label>
-                                    <select name="numTranslators" className="glass-input"><option>1–10</option><option>11–50</option><option>51–200</option><option>200+</option></select>
+                                    <select name="numTranslators" value={formData.numTranslators} onChange={handleInputChange} className="glass-input"><option>1–10</option><option>11–50</option><option>51–200</option><option>200+</option></select>
                                 </div>
                             </div>
                         </Section>
@@ -579,8 +584,8 @@ const TranslatorOnboarding = () => {
 
                         <Section title="10. Commercial Details" icon="💰">
                             <div className="form-grid">
-                                <div className="form-group"><label>Pricing Model</label><select className="glass-input"><option>Per word</option><option>Per hour</option><option>Project-based</option></select></div>
-                                <div className="form-group"><label>Payment Terms</label><select className="glass-input"><option>Net 15</option><option>Net 30</option></select></div>
+                                <div className="form-group"><label>Pricing Model</label><select name="pricingModel" value={formData.pricingModel} onChange={handleInputChange} className="glass-input"><option>Per word</option><option>Per hour</option><option>Project-based</option></select></div>
+                                <div className="form-group"><label>Payment Terms</label><select name="paymentTerms" value={formData.paymentTerms} onChange={handleInputChange} className="glass-input"><option>Net 15</option><option>Net 30</option></select></div>
                             </div>
                         </Section>
 
