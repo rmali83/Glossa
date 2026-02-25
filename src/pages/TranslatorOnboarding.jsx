@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from 'react';
+import { useAuth } from '../context/AuthContext';
+
 import { languagesData } from '../data/languagesData';
 import './TranslatorOnboarding.css';
 
@@ -139,8 +141,12 @@ const TranslatorOnboarding = () => {
         pricingModel: 'Per word',
         paymentTerms: 'Net 30',
         minProjectSize: '',
-        preferredCurrency: 'USD'
+        preferredCurrency: 'USD',
+        password: ''
     });
+
+    const { signUp } = useAuth();
+    const [error, setError] = useState('');
 
     useEffect(() => {
         const detected = Intl.DateTimeFormat().resolvedOptions().timeZone;
@@ -196,8 +202,9 @@ const TranslatorOnboarding = () => {
         setFormData(prev => ({ ...prev, [name]: prev[name].filter(item => item !== value) }));
     };
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
+        setError('');
 
         if (userType === 'Freelance Translator' && formData.specializations.length !== 5) {
             alert("Freelancers must select exactly 5 areas of specialization.");
@@ -206,10 +213,28 @@ const TranslatorOnboarding = () => {
         }
 
         setStatus('submitting');
-        setTimeout(() => {
+
+        try {
+            const { error: signUpError } = await signUp({
+                email: formData.email,
+                password: formData.password,
+                options: {
+                    data: {
+                        full_name: formData.fullName || formData.agencyName,
+                        user_type: userType,
+                        // Add more metadata as needed
+                    }
+                }
+            });
+
+            if (signUpError) throw signUpError;
+
             setStatus('success');
             window.scrollTo({ top: 0, behavior: 'smooth' });
-        }, 1500);
+        } catch (err) {
+            setError(err.message || 'Registration failed');
+            setStatus('idle');
+        }
     };
 
 
@@ -252,6 +277,7 @@ const TranslatorOnboarding = () => {
                         </button>
                     ))}
                 </div>
+                {error && <div className="error-message" style={{ color: '#ff4d4d', background: 'rgba(255, 77, 77, 0.1)', padding: '1rem', borderRadius: '12px', margin: '2rem auto 0', maxWidth: '600px', border: '1px solid rgba(255, 77, 77, 0.2)', textAlign: 'center' }}>{error}</div>}
             </header>
 
             <form onSubmit={handleSubmit} className="premium-form">
@@ -264,6 +290,7 @@ const TranslatorOnboarding = () => {
                                 <div className="form-group"><label>Full Name *</label><input type="text" name="fullName" value={formData.fullName} onChange={handleInputChange} required className="glass-input" /></div>
                                 <div className="form-group"><label>Display Name</label><input type="text" name="displayName" value={formData.displayName} onChange={handleInputChange} className="glass-input" /></div>
                                 <div className="form-group"><label>Email Address *</label><input type="email" name="email" value={formData.email} onChange={handleInputChange} required className="glass-input" /></div>
+                                <div className="form-group"><label>Password *</label><input type="password" name="password" value={formData.password} onChange={handleInputChange} required className="glass-input" placeholder="Min 6 characters" /></div>
                                 <div className="form-group"><label>Phone / WhatsApp *</label><input type="tel" name="phone" value={formData.phone} onChange={handleInputChange} required className="glass-input" /></div>
                                 <div className="form-group"><label>Country *</label><input type="text" name="country" value={formData.country} onChange={handleInputChange} required className="glass-input" /></div>
                                 <div className="form-group"><label>City *</label><input type="text" name="city" value={formData.city} onChange={handleInputChange} required className="glass-input" /></div>
@@ -478,6 +505,7 @@ const TranslatorOnboarding = () => {
                                 </div>
                                 <div className="form-group"><label>Website</label><input type="url" name="companyWebsite" value={formData.companyWebsite} onChange={handleInputChange} className="glass-input" /></div>
                                 <div className="form-group"><label>Official Email *</label><input type="email" name="officialEmail" value={formData.officialEmail} onChange={handleInputChange} required className="glass-input" /></div>
+                                <div className="form-group"><label>Password *</label><input type="password" name="password" value={formData.password} onChange={handleInputChange} required className="glass-input" placeholder="Min 6 characters" /></div>
                                 <div className="form-group"><label>Phone / WhatsApp *</label><input type="tel" name="phone" value={formData.phone} onChange={handleInputChange} required className="glass-input" /></div>
                             </div>
                         </Section>

@@ -21,6 +21,15 @@ import Onboarding from './pages/Onboarding';
 
 import './App.css';
 
+import { Navigate } from 'react-router-dom';
+import { useAuth } from './context/AuthContext';
+import Login from './pages/Login';
+
+const PrivateRoute = ({ children }) => {
+  const { user } = useAuth();
+  return user ? children : <Navigate to="/login" />;
+};
+
 function App() {
   return (
     <div className="app">
@@ -40,6 +49,7 @@ function App() {
                 <Route path="/join-us" element={<TranslatorOnboarding />} />
                 <Route path="/contact" element={<Contact />} />
                 <Route path="/onboarding" element={<Onboarding />} />
+                <Route path="/login" element={<Login />} />
               </Routes>
             </div>
             <footer className="footer">
@@ -50,15 +60,17 @@ function App() {
 
         {/* Dashboard Routes (No Navbar/Footer) */}
         <Route path="/dashboard/*" element={
-          <DashboardLayout>
-            <Routes>
-              <Route path="/" element={<DashboardHome />} />
-              <Route path="/profile" element={<Profile />} />
-              <Route path="/jobs" element={<Jobs />} />
-              <Route path="/payments" element={<Payments />} />
-              <Route path="/settings" element={<Settings />} />
-            </Routes>
-          </DashboardLayout>
+          <PrivateRoute>
+            <DashboardLayout>
+              <Routes>
+                <Route path="/" element={<DashboardHome />} />
+                <Route path="/profile" element={<Profile />} />
+                <Route path="/jobs" element={<Jobs />} />
+                <Route path="/payments" element={<Payments />} />
+                <Route path="/settings" element={<Settings />} />
+              </Routes>
+            </DashboardLayout>
+          </PrivateRoute>
         } />
       </Routes>
     </div>

@@ -1,12 +1,16 @@
 import React from 'react';
 import './DashboardPages.css';
 import { statsCards, recentActivity, mockUser } from '../../data/mockData';
+import { useAuth } from '../../context/AuthContext';
 
 const DashboardHome = () => {
+    const { user } = useAuth();
+    const displayName = user?.user_metadata?.full_name || mockUser.fullName;
+
     return (
         <div className="dashboard-page fade-in">
             <div className="welcome-section">
-                <h2>Welcome back, {mockUser.fullName}! 👋</h2>
+                <h2>Welcome back, {displayName}! 👋</h2>
                 <p>Here's what's happening today.</p>
             </div>
 
