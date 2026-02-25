@@ -98,20 +98,38 @@
 
 .glass-input {
     width: 100%;
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(13, 13, 43, 0.6);
+    /* Use solid-ish dark color for better contrast */
+    border: 1px solid rgba(255, 255, 255, 0.15);
     border-radius: 8px;
     padding: 0.8rem 1rem;
-    color: white;
+    color: var(--neon-cyan);
+    /* Neon cyan text for maximum visibility */
     font-size: 1rem;
     transition: all 0.3s ease;
+}
+
+.glass-input::placeholder {
+    color: rgba(255, 255, 255, 0.3);
+}
+
+/* Fix for autofill issues where browser might inject white background */
+.glass-input:-webkit-autofill,
+.glass-input:-webkit-autofill:hover,
+.glass-input:-webkit-autofill:focus,
+.glass-input:-webkit-autofill:active {
+    -webkit-box-shadow: 0 0 0 30px #0d0d2b inset !important;
+    -webkit-text-fill-color: var(--neon-cyan) !important;
+    transition: background-color 5000s ease-in-out 0s;
 }
 
 .glass-input:focus {
     outline: none;
     border-color: var(--neon-cyan);
     background: rgba(255, 255, 255, 0.1);
-    box-shadow: 0 0 10px rgba(0, 255, 255, 0.2);
+    box-shadow: 0 0 15px rgba(0, 255, 255, 0.3);
+    color: white;
+    /* Switch to white when focused for the 'highlight' feel */
 }
 
 .glass-input option {
@@ -166,9 +184,21 @@
 }
 
 /* Agency Theme Accents */
+.agency-mode .glass-input {
+    color: var(--neon-yellow);
+}
+
 .agency-mode .glass-input:focus {
     border-color: var(--neon-yellow);
-    box-shadow: 0 0 10px rgba(255, 255, 0, 0.2);
+    box-shadow: 0 0 15px rgba(255, 255, 0, 0.3);
+    color: white;
+}
+
+.agency-mode .glass-input:-webkit-autofill,
+.agency-mode .glass-input:-webkit-autofill:hover,
+.agency-mode .glass-input:-webkit-autofill:focus,
+.agency-mode .glass-input:-webkit-autofill:active {
+    -webkit-text-fill-color: var(--neon-yellow) !important;
 }
 
 .agency-mode .checkbox-item.selected {
