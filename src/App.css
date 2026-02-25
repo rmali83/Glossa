@@ -6,6 +6,8 @@
 
 .main-content {
   flex: 1;
+  padding-top: 80px;
+  /* Space for fixed navbar */
 }
 
 .footer {

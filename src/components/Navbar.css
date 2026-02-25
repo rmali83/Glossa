@@ -3,13 +3,20 @@
     justify-content: space-between;
     align-items: center;
     padding: 1rem 2rem;
-    margin-bottom: 2rem;
-    position: sticky;
-    top: 1rem;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
     z-index: 1000;
-    margin-left: 1rem;
-    margin-right: 1rem;
-    border-radius: 15px;
+    background: rgba(13, 13, 43, 0.8);
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
+    border-bottom: 1px solid var(--glass-border);
+}
+
+.navbar-placeholder {
+    height: 80px;
+    /* Adjust based on navbar height */
 }
 
 .navbar-logo {
