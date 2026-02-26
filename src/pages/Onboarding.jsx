@@ -1,11 +1,19 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { languagesData } from '../data/languagesData';
+import { supabase } from '../lib/supabase';
+import { useAuth } from '../context/AuthContext';
 import './Onboarding.css';
+
+const allLanguages = Object.keys(languagesData).sort();
+const allTimezones = Intl.supportedValuesOf('timeZone');
 
 const Onboarding = () => {
     const navigate = useNavigate();
     const [formData, setFormData] = useState({
         fullName: '',
+        email: '',
+        password: '',
         translatorType: 'Freelance',
         languagePairs: [],
         experienceLevel: 'Intermediate',
@@ -13,34 +21,91 @@ const Onboarding = () => {
         timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone
     });
 
-    const [availableLanguages] = useState([
-        "English → Urdu", "Urdu → English",
-        "Turkish → English", "English → Turkish",
-        "Arabic → English", "English → Arabic",
-        "French → English", "English → French"
-    ]);
+    const [selectedSource, setSelectedSource] = useState('');
+    const [selectedTarget, setSelectedTarget] = useState('');
 
     const handleInputChange = (e) => {
         const { name, value } = e.target;
         setFormData(prev => ({ ...prev, [name]: value }));
     };
 
-    const toggleLanguage = (lang) => {
-        setFormData(prev => {
-            const current = prev.languagePairs;
-            if (current.includes(lang)) {
-                return { ...prev, languagePairs: current.filter(l => l !== lang) };
-            } else {
-                return { ...prev, languagePairs: [...current, lang] };
+    const addLanguagePair = () => {
+        if (selectedSource && selectedTarget) {
+            if (selectedSource === selectedTarget) {
+                alert("Source and target languages cannot be the same.");
+                return;
             }
-        });
+            const pair = `${selectedSource} → ${selectedTarget}`;
+            if (!formData.languagePairs.includes(pair)) {
+                setFormData(prev => ({
+                    ...prev,
+                    languagePairs: [...prev.languagePairs, pair]
+                }));
+            }
+            setSelectedSource('');
+            setSelectedTarget('');
+        }
     };
 
-    const handleSubmit = (e) => {
+    const removeLanguagePair = (pair) => {
+        setFormData(prev => ({
+            ...prev,
+            languagePairs: prev.languagePairs.filter(p => p !== pair)
+        }));
+    };
+
+    const { signUp } = useAuth();
+    const [error, setError] = useState('');
+    const [status, setStatus] = useState('idle');
+
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        console.log('Onboarding submitted:', formData);
-        // UI logic: Redirect to dashboard
-        navigate('/dashboard');
+        setError('');
+
+        if (formData.languagePairs.length === 0) {
+            alert("Please select at least one language pair.");
+            return;
+        }
+
+        setStatus('submitting');
+
+        try {
+            // 1. Sign up user (Trigger creates row in SQL)
+            const { data: authData, error: signUpError } = await signUp({
+                email: formData.email,
+                password: formData.password,
+                options: {
+                    data: {
+                        full_name: formData.fullName,
+                        user_type: formData.translatorType === 'Freelance' ? 'Freelance Translator' : 'Agencies',
+                        timezone: formData.timeZone,
+                        country: 'To be set',
+                        city: 'To be set'
+                    }
+                }
+            });
+
+            if (signUpError) throw signUpError;
+
+            // 2. Update with language pairs and experience
+            if (authData.user) {
+                const { error: dbError } = await supabase
+                    .from('profiles')
+                    .update({
+                        language_pairs: formData.languagePairs,
+                        years_experience: formData.experienceLevel,
+                        availability: formData.availability
+                    })
+                    .eq('id', authData.user.id);
+
+                if (dbError) throw dbError;
+            }
+
+            navigate('/dashboard');
+        } catch (err) {
+            setError(err.message || 'Onboarding failed');
+            setStatus('idle');
+        }
     };
 
     return (
@@ -53,6 +118,7 @@ const Onboarding = () => {
                 </div>
 
                 <form className="onboarding-form" onSubmit={handleSubmit}>
+                    {error && <div className="error-message" style={{ color: '#ff4d4d', background: 'rgba(255, 77, 77, 0.1)', padding: '10px', borderRadius: '8px', textAlign: 'center' }}>{error}</div>}
                     <section className="form-section">
                         <h3>Basic Information</h3>
                         <div className="form-group">
@@ -63,6 +129,32 @@ const Onboarding = () => {
                                 name="fullName"
                                 placeholder="Enter your full name"
                                 value={formData.fullName}
+                                onChange={handleInputChange}
+                                required
+                            />
+                        </div>
+
+                        <div className="form-group">
+                            <label htmlFor="email">Email Address</label>
+                            <input
+                                type="email"
+                                id="email"
+                                name="email"
+                                placeholder="Enter your email"
+                                value={formData.email}
+                                onChange={handleInputChange}
+                                required
+                            />
+                        </div>
+
+                        <div className="form-group">
+                            <label htmlFor="password">Password</label>
+                            <input
+                                type="password"
+                                id="password"
+                                name="password"
+                                placeholder="Create a password"
+                                value={formData.password}
                                 onChange={handleInputChange}
                                 required
                             />
@@ -98,18 +190,52 @@ const Onboarding = () => {
                     <section className="form-section">
                         <h3>Expertise</h3>
                         <div className="form-group">
-                            <label>Language Pairs (Select all that apply)</label>
-                            <div className="language-grid">
-                                {availableLanguages.map(lang => (
-                                    <div
-                                        key={lang}
-                                        className={`lang-checkbox ${formData.languagePairs.includes(lang) ? 'checked' : ''}`}
-                                        onClick={() => toggleLanguage(lang)}
-                                    >
-                                        {lang}
-                                    </div>
-                                ))}
+                            <label>Add Language Pairs</label>
+                            <div className="language-selection-row">
+                                <select
+                                    className="glass-input"
+                                    value={selectedSource}
+                                    onChange={(e) => setSelectedSource(e.target.value)}
+                                >
+                                    <option value="">Source Language</option>
+                                    {allLanguages.map(lang => (
+                                        <option key={`source-${lang}`} value={lang}>{lang}</option>
+                                    ))}
+                                </select>
+                                <span className="arrow">→</span>
+                                <select
+                                    className="glass-input"
+                                    value={selectedTarget}
+                                    onChange={(e) => setSelectedTarget(e.target.value)}
+                                >
+                                    <option value="">Target Language</option>
+                                    {allLanguages.map(lang => (
+                                        <option key={`target-${lang}`} value={lang}>{lang}</option>
+                                    ))}
+                                </select>
+                                <button
+                                    type="button"
+                                    className="add-pair-btn"
+                                    onClick={addLanguagePair}
+                                    disabled={!selectedSource || !selectedTarget}
+                                >
+                                    Add
+                                </button>
                             </div>
+
+                            {formData.languagePairs.length > 0 && (
+                                <div className="selected-pairs-container">
+                                    <label>Selected Pairs:</label>
+                                    <div className="selected-pairs-list">
+                                        {formData.languagePairs.map(pair => (
+                                            <div key={pair} className="pair-tag">
+                                                {pair}
+                                                <button type="button" onClick={() => removeLanguagePair(pair)}>×</button>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
                         </div>
 
                         <div className="form-group">
@@ -150,11 +276,10 @@ const Onboarding = () => {
                                 value={formData.timeZone}
                                 onChange={handleInputChange}
                             >
-                                <option value="Asia/Karachi">Asia/Karachi (GMT+5)</option>
-                                <option value="UTC">UTC (GMT+0)</option>
-                                <option value="America/New_York">America/New_York (GMT-5)</option>
-                                <option value="Europe/London">Europe/London (GMT+0)</option>
-                                <option value="Asia/Dubai">Asia/Dubai (GMT+4)</option>
+                                <option value="">Select Time Zone</option>
+                                {allTimezones.map(tz => (
+                                    <option key={tz} value={tz}>{tz}</option>
+                                ))}
                             </select>
                             <p className="helper-text">
                                 Used for scheduling deadlines and messages. You can change it anytime.
@@ -162,8 +287,12 @@ const Onboarding = () => {
                         </div>
                     </section>
 
-                    <button type="submit" className="submit-onboarding-btn">
-                        Complete Onboarding
+                    <button
+                        type="submit"
+                        className="submit-onboarding-btn"
+                        disabled={status === 'submitting'}
+                    >
+                        {status === 'submitting' ? 'Processing...' : 'Complete Onboarding'}
                     </button>
                 </form>
             </div>

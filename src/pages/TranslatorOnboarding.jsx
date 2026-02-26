@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
+import { supabase } from '../lib/supabase';
 
 import { languagesData } from '../data/languagesData';
 import './TranslatorOnboarding.css';
@@ -28,11 +29,15 @@ const agencyPhrases = [
     "Drive growth through our strategic partnership model."
 ];
 
+const allTimezones = Intl.supportedValuesOf('timeZone');
 const popularTimezones = [
     'Asia/Karachi', 'Europe/Istanbul', 'America/New_York', 'Europe/London',
     'Asia/Dubai', 'Asia/Singapore', 'Australia/Sydney', 'Asia/Tokyo',
     'Europe/Paris', 'America/Los_Angeles'
-];
+].filter(tz => allTimezones.includes(tz));
+
+const otherTimezones = allTimezones.filter(tz => !popularTimezones.includes(tz));
+const sortedAllTimezones = [...popularTimezones, ...otherTimezones];
 
 const agencySpecs = [
     'Legal', 'Medical', 'Technical', 'IT / Software', 'Finance',
@@ -214,20 +219,48 @@ const TranslatorOnboarding = () => {
 
         setStatus('submitting');
 
+        const regEmail = userType === 'Agencies' ? formData.officialEmail : formData.email;
+        const regName = userType === 'Agencies' ? formData.agencyName : formData.fullName;
+
         try {
-            const { error: signUpError } = await signUp({
-                email: formData.email,
+            // 1. Sign up the user (Authentication)
+            const { data: authData, error: signUpError } = await supabase.auth.signUp({
+                email: regEmail,
                 password: formData.password,
                 options: {
                     data: {
-                        full_name: formData.fullName || formData.agencyName,
+                        full_name: regName,
                         user_type: userType,
-                        // Add more metadata as needed
+                        city: formData.city,
+                        country: formData.country,
+                        timezone: formData.timeZone
                     }
                 }
             });
 
             if (signUpError) throw signUpError;
+
+            // 2. Update detailed data (The Trigger already created the row)
+            if (authData.user) {
+                const { error: dbError } = await supabase
+                    .from('profiles')
+                    .update({
+                        display_name: formData.displayName,
+                        phone: formData.phone,
+                        native_language: formData.nativeLanguage,
+                        source_languages: formData.sourceLanguages,
+                        target_languages: formData.targetLanguages,
+                        specializations: formData.specializations,
+                        services: formData.services,
+                        tools: formData.tools,
+                        years_experience: formData.yearsExperience,
+                        rate: formData.rate ? parseFloat(formData.rate) : null,
+                        currency: formData.currency
+                    })
+                    .eq('id', authData.user.id);
+
+                if (dbError) throw dbError;
+            }
 
             setStatus('success');
             window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -303,13 +336,10 @@ const TranslatorOnboarding = () => {
                                         required
                                         className="glass-input"
                                     >
-                                        {!popularTimezones.includes(formData.timeZone) && formData.timeZone !== 'Other' && (
-                                            <option value={formData.timeZone}>{formData.timeZone} (Detected)</option>
-                                        )}
-                                        {popularTimezones.map(tz => (
-                                            <option key={tz} value={tz}>{tz}</option>
+                                        <option value="">Select Time Zone</option>
+                                        {sortedAllTimezones.map(tz => (
+                                            <option key={`tz-free-${tz}`} value={tz}>{tz}</option>
                                         ))}
-                                        <option value="Other">Other</option>
                                     </select>
                                     {isOtherTZ && (
                                         <input
@@ -483,13 +513,10 @@ const TranslatorOnboarding = () => {
                                         required
                                         className="glass-input"
                                     >
-                                        {!popularTimezones.includes(formData.timeZone) && formData.timeZone !== 'Other' && (
-                                            <option value={formData.timeZone}>{formData.timeZone} (Detected)</option>
-                                        )}
-                                        {popularTimezones.map(tz => (
-                                            <option key={tz} value={tz}>{tz}</option>
+                                        <option value="">Select Time Zone</option>
+                                        {sortedAllTimezones.map(tz => (
+                                            <option key={`tz-agency-${tz}`} value={tz}>{tz}</option>
                                         ))}
-                                        <option value="Other">Other</option>
                                     </select>
                                     {isOtherTZ && (
                                         <input

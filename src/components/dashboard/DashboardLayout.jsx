@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { useAuth } from '../../context/AuthContext';
 import './DashboardLayout.css';
 import { mockUser } from '../../data/mockData';
 
@@ -8,18 +9,30 @@ const DashboardLayout = ({ children }) => {
     const location = useLocation();
     const navigate = useNavigate();
 
+    const { user, signOut } = useAuth();
+
     const menuItems = [
         { name: 'Dashboard', path: '/dashboard', icon: '🏠' },
         { name: 'My Profile', path: '/dashboard/profile', icon: '👤' },
+        { name: 'Messages', path: '/dashboard/messages', icon: '💬' },
         { name: 'Available Jobs', path: '/dashboard/jobs', icon: '💼' },
         { name: 'Payments', path: '/dashboard/payments', icon: '💰' },
         { name: 'Settings', path: '/dashboard/settings', icon: '⚙️' },
     ];
 
-    const handleLogout = () => {
-        // UI only logout logic
-        navigate('/');
+    // Only show Admin for agencies/admins
+    const isAdmin = user?.user_metadata?.user_type === 'Agencies' || user?.email === 'rmali@live.com';
+    if (isAdmin) {
+        menuItems.splice(1, 0, { name: 'Admin Control', path: '/dashboard/admin', icon: '🛡️' });
+    }
+
+    const handleLogout = async () => {
+        await signOut();
+        navigate('/login');
     };
+
+    const userName = user?.user_metadata?.full_name || mockUser.fullName;
+    const userRole = user?.user_metadata?.user_type || mockUser.role;
 
     return (
         <div className={`dashboard-container ${isSidebarOpen ? 'sidebar-open' : 'sidebar-closed'}`}>
@@ -60,14 +73,30 @@ const DashboardLayout = ({ children }) => {
                     <div className="header-left">
                         <h1>{menuItems.find(item => item.path === location.pathname)?.name || 'Dashboard'}</h1>
                     </div>
-                    <div className="header-right">
+                    <div className="header-right" style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
+                        {/* Notification Bell */}
+                        <div className="notification-bubble" style={{ position: 'relative', cursor: 'pointer' }}>
+                            <span style={{ fontSize: '1.4rem' }}>🔔</span>
+                            <div style={{
+                                position: 'absolute',
+                                top: '-2px',
+                                right: '-2px',
+                                width: '10px',
+                                height: '10px',
+                                background: '#ff4d4d',
+                                borderRadius: '50%',
+                                border: '2px solid #0a0a1a',
+                                boxShadow: '0 0 5px #ff4d4d'
+                            }}></div>
+                        </div>
+
                         <div className="user-profile-summary">
                             <div className="user-info">
-                                <span className="user-name">{mockUser.fullName}</span>
-                                <span className="user-role">{mockUser.role}</span>
+                                <span className="user-name">{userName}</span>
+                                <span className="user-role">{userRole}</span>
                             </div>
-                            <div className="user-avatar">
-                                {mockUser.fullName.charAt(0)}
+                            <div className="user-avatar" style={{ background: 'var(--neon-cyan)', color: '#000', fontWeight: 'bold' }}>
+                                {userName.charAt(0)}
                             </div>
                         </div>
                     </div>

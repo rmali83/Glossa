@@ -17,6 +17,8 @@ import Profile from './pages/dashboard/Profile';
 import Jobs from './pages/dashboard/Jobs';
 import Payments from './pages/dashboard/Payments';
 import Settings from './pages/dashboard/Settings';
+import Messages from './pages/dashboard/Messages';
+import Admin from './pages/dashboard/Admin';
 import Onboarding from './pages/Onboarding';
 
 import './App.css';
@@ -65,9 +67,11 @@ function App() {
               <Routes>
                 <Route path="/" element={<DashboardHome />} />
                 <Route path="/profile" element={<Profile />} />
+                <Route path="/messages" element={<Messages />} />
                 <Route path="/jobs" element={<Jobs />} />
                 <Route path="/payments" element={<Payments />} />
                 <Route path="/settings" element={<Settings />} />
+                <Route path="/admin" element={<Admin />} />
               </Routes>
             </DashboardLayout>
           </PrivateRoute>

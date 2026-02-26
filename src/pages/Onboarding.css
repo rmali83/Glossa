@@ -78,15 +78,21 @@
 
 .form-group input[type="text"],
 .form-group input[type="number"],
-.form-group select {
+.form-group select,
+.glass-input {
     width: 100%;
     padding: 12px 16px;
     border-radius: 12px;
-    border: 1px solid var(--glass-border);
-    background-color: rgba(13, 13, 43, 0.6);
-    color: var(--neon-cyan);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    background-color: #1a1a3a;
+    color: #ffffff;
     font-size: 1rem;
     transition: all 0.3s ease;
+}
+
+.form-group select option {
+    background-color: var(--bg-color);
+    color: white;
 }
 
 .form-group input::placeholder {
@@ -97,16 +103,17 @@
 .form-group input:-webkit-autofill:hover,
 .form-group input:-webkit-autofill:focus,
 .form-group input:-webkit-autofill:active {
-    -webkit-box-shadow: 0 0 0 30px #0d0d2b inset !important;
-    -webkit-text-fill-color: var(--neon-cyan) !important;
+    -webkit-box-shadow: 0 0 0 30px #1a1a3a inset !important;
+    -webkit-text-fill-color: #ffffff !important;
 }
 
 .form-group input:focus,
-.form-group select:focus {
+.form-group select:focus,
+.glass-input:focus {
     outline: none;
     border-color: var(--neon-cyan);
     box-shadow: 0 0 15px rgba(0, 255, 255, 0.3);
-    background-color: rgba(255, 255, 255, 0.1);
+    background-color: #252550;
     color: white;
 }
 
@@ -139,30 +146,101 @@
     display: none;
 }
 
-.language-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+.language-selection-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 1rem;
+}
+
+.language-selection-row select {
+    flex: 1;
+}
+
+.arrow {
+    color: var(--neon-cyan);
+    font-size: 1.2rem;
+    font-weight: bold;
+}
+
+.add-pair-btn {
+    padding: 12px 20px;
+    background: var(--neon-cyan);
+    color: black;
+    border: none;
+    border-radius: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.add-pair-btn:hover:not(:disabled) {
+    background: white;
+    box-shadow: 0 0 15px rgba(0, 255, 255, 0.3);
+}
+
+.add-pair-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    background: #444;
+    color: #888;
+}
+
+.selected-pairs-container {
+    margin-top: 1.5rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--glass-border);
+}
+
+.selected-pairs-container label {
+    margin-bottom: 12px;
+    display: block;
+}
+
+.selected-pairs-list {
+    display: flex;
+    flex-wrap: wrap;
     gap: 10px;
 }
 
-.lang-checkbox {
-    padding: 10px;
-    border: 1px solid var(--glass-border);
-    border-radius: 8px;
-    font-size: 0.85rem;
-    text-align: center;
-    cursor: pointer;
-    background: rgba(255, 255, 255, 0.03);
-    color: #ccc;
-    transition: all 0.2s;
+.pair-tag {
+    background: rgba(0, 255, 255, 0.1);
+    color: var(--neon-cyan);
+    padding: 8px 14px;
+    border-radius: 20px;
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    border: 1px solid rgba(0, 255, 255, 0.2);
 }
 
-.lang-checkbox.checked {
-    background: var(--neon-cyan);
-    color: black;
-    border-color: var(--neon-cyan);
-    font-weight: 600;
-    box-shadow: 0 0 15px rgba(0, 255, 255, 0.3);
+.pair-tag button {
+    background: none;
+    border: none;
+    color: var(--neon-cyan);
+    font-size: 1.2rem;
+    line-height: 1;
+    cursor: pointer;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.pair-tag button:hover {
+    color: white;
+}
+
+.glass-input {
+    width: 100%;
+    padding: 12px 16px;
+    border-radius: 12px;
+    border: 1px solid var(--glass-border);
+    background-color: rgba(13, 13, 43, 0.6);
+    color: var(--neon-cyan);
+    font-size: 1rem;
+    transition: all 0.3s ease;
 }
 
 .helper-text {
