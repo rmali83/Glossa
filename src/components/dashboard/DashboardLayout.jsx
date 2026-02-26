@@ -22,8 +22,16 @@ const DashboardLayout = ({ children }) => {
 
     // Only show Admin for agencies/admins
     const isAdmin = user?.user_metadata?.user_type === 'Agencies' || user?.email === 'rmali@live.com';
+    const isTranslator = user?.user_metadata?.user_type === 'Freelance Translator' || user?.user_metadata?.user_type === 'Translator';
+    const isReviewer = user?.user_metadata?.user_type === 'Reviewer';
+
+    if (isTranslator || isReviewer || isAdmin) {
+        // Insert right after Dashboard
+        menuItems.splice(1, 0, { name: 'Glossa CAT', path: '/dashboard/cat', icon: '🧠' });
+    }
+
     if (isAdmin) {
-        menuItems.splice(1, 0, { name: 'Admin Control', path: '/dashboard/admin', icon: '🛡️' });
+        menuItems.push({ name: 'Admin Control', path: '/dashboard/admin', icon: '🛡️' });
     }
 
     const handleLogout = async () => {

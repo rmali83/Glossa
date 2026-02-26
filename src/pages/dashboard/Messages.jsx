@@ -94,7 +94,7 @@ const Messages = () => {
         }
     };
 
-    if (loading) return <div className="dashboard-page loading-state">Connecting to Secure Chat...</div>;
+    if (loading) return <div className="dashboard-page loading-state">Loading Messages...</div>;
 
     return (
         <div className="dashboard-page fade-in" style={{ height: 'calc(100vh - 180px)', display: 'flex', gap: '20px' }}>

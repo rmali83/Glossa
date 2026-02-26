@@ -15,7 +15,9 @@ const Admin = () => {
         targetLang: 'Urdu',
         wordCount: '',
         budget: '',
-        deadline: ''
+        deadline: '',
+        translator_id: '',
+        reviewer_id: ''
     });
 
     useEffect(() => {
@@ -51,8 +53,10 @@ const Admin = () => {
                     name: formData.name,
                     source_language: formData.sourceLang,
                     target_language: formData.targetLang,
-                    status: 'active',
+                    status: 'assigned',
                     created_by: user.id,
+                    translator_id: formData.translator_id,
+                    reviewer_id: formData.reviewer_id,
                     settings: {
                         wordCount: parseInt(formData.wordCount),
                         budget: formData.budget,
@@ -81,7 +85,7 @@ const Admin = () => {
             });
 
             alert('Project dispatched successfully!');
-            setFormData({ name: '', sourceLang: 'English', targetLang: 'Urdu', wordCount: '', budget: '', deadline: '' });
+            setFormData({ name: '', sourceLang: 'English', targetLang: 'Urdu', wordCount: '', budget: '', deadline: '', translator_id: '', reviewer_id: '' });
 
             const { data } = await supabase.from('projects').select('id');
             setStats(prev => ({ ...prev, projects: data?.length || 0 }));
@@ -91,7 +95,7 @@ const Admin = () => {
         }
     };
 
-    if (loading) return <div className="dashboard-page loading-state">Accessing Admin Command Center...</div>;
+    if (loading) return <div className="dashboard-page loading-state">Loading Admin Dashboard...</div>;
 
     return (
         <div className="dashboard-page fade-in">
@@ -187,6 +191,26 @@ const Admin = () => {
                         <div className="info-group">
                             <label>Deadline</label>
                             <input type="date" className="glass-input" value={formData.deadline} onChange={e => setFormData({ ...formData, deadline: e.target.value })} required />
+                        </div>
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+                            <div className="info-group">
+                                <label>Assign Translator</label>
+                                <select className="glass-input" value={formData.translator_id} onChange={e => setFormData({ ...formData, translator_id: e.target.value })} required>
+                                    <option value="">Select Translator</option>
+                                    {translators.filter(t => t.user_type === 'Freelance Translator' || t.user_type === 'Translator').map(t => (
+                                        <option key={t.id} value={t.id}>{t.full_name}</option>
+                                    ))}
+                                </select>
+                            </div>
+                            <div className="info-group">
+                                <label>Assign Reviewer</label>
+                                <select className="glass-input" value={formData.reviewer_id} onChange={e => setFormData({ ...formData, reviewer_id: e.target.value })} required>
+                                    <option value="">Select Reviewer</option>
+                                    {translators.filter(t => t.user_type === 'Reviewer').map(t => (
+                                        <option key={t.id} value={t.id}>{t.full_name}</option>
+                                    ))}
+                                </select>
+                            </div>
                         </div>
                         <button type="submit" className="primary-btn" style={{ marginTop: '10px' }}>Dispatch Job 🚀</button>
                     </form>

@@ -103,7 +103,7 @@ const Payments = () => {
         link.click();
     };
 
-    if (loading) return <div className="dashboard-page loading-state">Fetching financial records...</div>;
+    if (loading) return <div className="dashboard-page loading-state">Loading Payment History...</div>;
 
     return (
         <div className="dashboard-page fade-in">

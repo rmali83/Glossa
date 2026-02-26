@@ -123,7 +123,7 @@ const Jobs = () => {
         }
     });
 
-    if (loading) return <div className="dashboard-page loading-state">Connecting to CAT Tool Engine...</div>;
+    if (loading) return <div className="dashboard-page loading-state">Loading Projects...</div>;
 
     return (
         <div className="dashboard-page fade-in">

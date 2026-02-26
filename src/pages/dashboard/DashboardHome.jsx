@@ -66,7 +66,7 @@ const DashboardHome = () => {
     const displayName = profile?.full_name || user?.user_metadata?.full_name || 'Translator';
 
     if (loading) {
-        return <div className="dashboard-page loading-state">Connecting to Global Intelligence...</div>;
+        return <div className="dashboard-page loading-state">Loading Dashboard...</div>;
     }
 
     return (
@@ -161,7 +161,7 @@ const DashboardHome = () => {
                     </div>
                     <div className="profile-detail-grid" style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '20px' }}>
                         <div className="detail-item">
-                            <label style={{ color: '#888', fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '1px' }}>Active Corridors</label>
+                            <label style={{ color: '#888', fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '1px' }}>Active Language Pairs</label>
                             <div className="tag-cloud" style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginTop: '8px' }}>
                                 {(profile?.language_pairs || []).map(pair => (
                                     <span key={pair} className="pair-tag" style={{ background: 'rgba(0, 255, 255, 0.08)', color: 'var(--neon-cyan)', padding: '5px 12px', borderRadius: '4px', fontSize: '0.75rem', border: '1px solid rgba(0, 255, 255, 0.15)', fontWeight: '500' }}>

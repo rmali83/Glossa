@@ -20,6 +20,8 @@ import Settings from './pages/dashboard/Settings';
 import Messages from './pages/dashboard/Messages';
 import Admin from './pages/dashboard/Admin';
 import Onboarding from './pages/Onboarding';
+import GlossaCAT from './pages/dashboard/GlossaCAT';
+import CATProjectView from './pages/dashboard/CATProjectView';
 
 import './App.css';
 
@@ -72,6 +74,8 @@ function App() {
                 <Route path="/payments" element={<Payments />} />
                 <Route path="/settings" element={<Settings />} />
                 <Route path="/admin" element={<Admin />} />
+                <Route path="/cat" element={<GlossaCAT />} />
+                <Route path="/cat/:projectId" element={<CATProjectView />} />
               </Routes>
             </DashboardLayout>
           </PrivateRoute>
