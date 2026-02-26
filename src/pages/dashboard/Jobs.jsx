@@ -3,15 +3,17 @@ import './DashboardPages.css';
 import { mockJobs } from '../../data/mockData';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../context/AuthContext';
+import { useNavigate } from 'react-router-dom';
 
 const Jobs = () => {
     const { user } = useAuth();
+    const navigate = useNavigate();
     const [activeTab, setActiveTab] = useState('available');
     const [jobs, setJobs] = useState([]);
     const [userPairs, setUserPairs] = useState([]);
     const [loading, setLoading] = useState(true);
 
-    const KIRO_URL = "https://translatr-ai-craft.vercel.app";
+
 
     useEffect(() => {
         const fetchUserAndJobs = async () => {
@@ -68,7 +70,7 @@ const Jobs = () => {
             // Check if already assigned
             const project = jobs.find(j => j.id === jobId);
             if (project && project.assignedTranslators.includes(user.id)) {
-                window.open(`${KIRO_URL}/project/${jobId}`, '_blank');
+                navigate(`/dashboard/cat/${jobId}`);
                 return;
             }
 
@@ -95,10 +97,10 @@ const Jobs = () => {
             });
 
             alert('Successfully assigned! Opening CAT tool...');
-            window.open(`${KIRO_URL}/project/${jobId}`, '_blank');
+            navigate(`/dashboard/cat/${jobId}`);
 
             // Refresh list
-            window.location.reload();
+            // window.location.reload();
         } catch (err) {
             console.error('Application error:', err);
             alert('Error applying for job or already assigned.');
@@ -134,7 +136,7 @@ const Jobs = () => {
                         Matching: {userPairs.length > 0 ? userPairs.join(', ') : 'All Languages'}
                     </p>
                 </div>
-                <button className="primary-btn outline" onClick={() => window.open(KIRO_URL, '_blank')}>
+                <button className="primary-btn outline" onClick={() => navigate('/dashboard/cat')}>
                     Launch CAT Tool 🚀
                 </button>
             </div>
