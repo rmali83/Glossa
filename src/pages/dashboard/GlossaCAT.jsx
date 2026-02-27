@@ -45,18 +45,31 @@ const GlossaCAT = () => {
         fetchProjects();
     }, [user, isReviewer, isAdmin]);
 
-    if (loading) return <div className="cat-theme-wrapper" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>Initializing Glossa CAT...</div>;
+    const [theme, setTheme] = useState(localStorage.getItem('glossa-cat-theme') || 'dark');
+
+    const toggleTheme = () => {
+        const newTheme = theme === 'dark' ? 'light' : 'dark';
+        setTheme(newTheme);
+        localStorage.setItem('glossa-cat-theme', newTheme);
+    };
+
+    if (loading) return <div className={`cat-theme-wrapper ${theme}`} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>Initializing Glossa CAT...</div>;
 
     return (
-        <div className="cat-theme-wrapper">
+        <div className={`cat-theme-wrapper ${theme}`}>
             <div className="cat-dashboard-container">
-                <div style={{ marginBottom: '2.5rem' }}>
-                    <h2 className="cat-header-title">Glossa CAT Interface</h2>
-                    <p className="cat-header-subtitle">
-                        {isAdmin ? 'Manage projects and assignments with state-of-the-art tools.' :
-                            isReviewer ? 'Review translations intelligently.' :
-                                'Streamline your translation workflow.'}
-                    </p>
+                <div style={{ marginBottom: '2.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                    <div>
+                        <h2 className="cat-header-title">Glossa CAT Interface</h2>
+                        <p className="cat-header-subtitle">
+                            {isAdmin ? 'Manage projects and assignments with state-of-the-art tools.' :
+                                isReviewer ? 'Review translations intelligently.' :
+                                    'Streamline your translation workflow.'}
+                        </p>
+                    </div>
+                    <button className="cat-theme-toggle" onClick={toggleTheme}>
+                        {theme === 'light' ? '🌙 Dark Mode' : '☀️ Light Mode'}
+                    </button>
                 </div>
 
                 <div className="cat-glass-card">

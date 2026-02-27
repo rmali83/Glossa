@@ -85,17 +85,28 @@ const CATProjectView = () => {
         navigate('/dashboard/cat');
     };
 
-    if (loading) return <div className="cat-workspace-layout" style={{ alignItems: 'center', justifyContent: 'center' }}>Connecting to Language Engine...</div>;
+    const [theme, setTheme] = useState(localStorage.getItem('glossa-cat-theme') || 'dark');
+
+    const toggleTheme = () => {
+        const newTheme = theme === 'dark' ? 'light' : 'dark';
+        setTheme(newTheme);
+        localStorage.setItem('glossa-cat-theme', newTheme);
+    };
+
+    if (loading) return <div className={`cat-workspace-layout ${theme}`} style={{ alignItems: 'center', justifyContent: 'center' }}>Connecting to Language Engine...</div>;
 
     return (
-        <div className="cat-workspace-layout">
+        <div className={`cat-workspace-layout ${theme}`}>
             <div className="cat-topbar">
                 <div className="cat-topbar-title">
                     <button onClick={() => navigate('/dashboard/cat')} style={{ background: 'none', border: 'none', color: 'var(--muted)', cursor: 'pointer', fontSize: '1.2rem', padding: '0.2rem' }}>&larr;</button>
                     <span>{project?.name}</span>
                     <span className="cat-lang-badge">{project?.source_language} &rarr; {project?.target_language}</span>
                 </div>
-                <div style={{ display: 'flex', gap: '0.75rem' }}>
+                <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
+                    <button className="cat-theme-toggle" onClick={toggleTheme} style={{ marginRight: '1rem', padding: '0.4rem 0.6rem' }}>
+                        {theme === 'light' ? '🌙' : '☀️'}
+                    </button>
                     {!isReviewer ? (
                         <>
                             <button className="cat-btn-outline" onClick={() => alert('Saving draft...')}>Save Progress</button>
