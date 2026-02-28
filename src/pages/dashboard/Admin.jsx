@@ -73,7 +73,33 @@ const Admin = () => {
                 throw error;
             }
 
-            // 2. Log the activity
+            // 2. Create sample segments for the project
+            const sampleSegments = [
+                { segment_number: 1, source_text: "Welcome to this translation project.", target_text: "", status: "Draft" },
+                { segment_number: 2, source_text: "Please translate each segment carefully.", target_text: "", status: "Draft" },
+                { segment_number: 3, source_text: "Use the CAT tool features to improve efficiency.", target_text: "", status: "Draft" }
+            ];
+
+            await supabase.from('segments').insert(
+                sampleSegments.map(seg => ({
+                    ...seg,
+                    project_id: newProject.id,
+                    created_by: user.id
+                }))
+            );
+
+            // 3. Create notification for translator
+            if (formData.translator_id) {
+                await supabase.from('notifications').insert({
+                    user_id: formData.translator_id,
+                    title: 'New Project Assigned',
+                    message: `You have been assigned to project "${formData.name}". Click to start translating.`,
+                    type: 'info',
+                    link: `/dashboard/cat/${newProject.id}`
+                });
+            }
+
+            // 4. Log the activity
             await supabase.from('activity_log').insert({
                 user_id: user.id,
                 project_id: newProject.id,
@@ -84,7 +110,7 @@ const Admin = () => {
                 }
             });
 
-            alert('Project dispatched successfully!');
+            alert('Project dispatched successfully with sample segments!');
             setFormData({ name: '', sourceLang: 'English', targetLang: 'Urdu', wordCount: '', budget: '', deadline: '', translator_id: '', reviewer_id: '' });
 
             const { data } = await supabase.from('projects').select('id');

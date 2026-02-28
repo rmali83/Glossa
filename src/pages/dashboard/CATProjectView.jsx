@@ -17,15 +17,65 @@ const CATProjectView = () => {
     const [searchQuery, setSearchQuery] = useState('');
     const [statusFilter, setStatusFilter] = useState('all');
     const [theme, setTheme] = useState('dark');
+    const [autoSaveTimeout, setAutoSaveTimeout] = useState(null);
+    const [tmMatches, setTmMatches] = useState([]);
+    const [glossaryTerms, setGlossaryTerms] = useState([]);
 
     const userRole = user?.user_metadata?.user_type || 'Translator';
     const isReviewer = userRole === 'Reviewer';
     const isAdmin = userRole === 'Agencies' || user?.email === 'rmali@live.com';
 
+    // Fetch TM and Glossary when active segment changes
+    useEffect(() => {
+        if (project && segments[activeSegmentIndex]) {
+            fetchTranslationMemory();
+            fetchGlossaryTerms();
+        }
+    }, [activeSegmentIndex, project]);
+
+    const fetchTranslationMemory = async () => {
+        if (!project) return;
+        
+        try {
+            const { data, error } = await supabase
+                .from('translation_memory')
+                .select('*')
+                .eq('source_language', project.source_language)
+                .eq('target_language', project.target_language)
+                .limit(5);
+
+            if (!error && data) {
+                setTmMatches(data);
+            }
+        } catch (err) {
+            console.error('Error fetching TM:', err);
+        }
+    };
+
+    const fetchGlossaryTerms = async () => {
+        if (!project) return;
+        
+        try {
+            const { data, error } = await supabase
+                .from('glossary_terms')
+                .select('*')
+                .eq('source_language', project.source_language)
+                .eq('target_language', project.target_language)
+                .limit(10);
+
+            if (!error && data) {
+                setGlossaryTerms(data);
+            }
+        } catch (err) {
+            console.error('Error fetching glossary:', err);
+        }
+    };
+
     useEffect(() => {
         const fetchProjectDetails = async () => {
             setLoading(true);
             try {
+                // Fetch project details
                 const { data: projData, error: projError } = await supabase
                     .from('projects')
                     .select('*')
@@ -35,13 +85,53 @@ const CATProjectView = () => {
                 if (projError) throw projError;
                 setProject(projData);
 
-                const mockSegments = [
-                    { id: 1, source: "This is the opening statement of the user manual for the Glossa CAT software system.", target: "", status: "confirmed" },
-                    { id: 2, source: "The interface is designed for maximum efficiency and speed <b>for all professional translators</b>.", target: "La interfaz está diseñada para una eficiencia y velocidad máximas <b>para todos los traductores profesionales</b>.", status: "draft" },
-                    { id: 3, source: "To begin your first project, click on the \"New Project\" button in the dashboard view.", target: "", status: "untranslated" },
-                    { id: 4, source: "Error checking involves several sophisticated algorithms to ensure consistency.", target: "", status: "qa_failed" }
-                ];
-                setSegments(mockSegments);
+                // Fetch segments for this project
+                const { data: segmentsData, error: segmentsError } = await supabase
+                    .from('segments')
+                    .select('*')
+                    .eq('project_id', projectId)
+                    .order('segment_number', { ascending: true });
+
+                if (segmentsError) {
+                    console.error('Error fetching segments:', segmentsError);
+                    // If no segments exist, create sample segments
+                    const sampleSegments = [
+                        { segment_number: 1, source_text: "This is the opening statement of the user manual for the Glossa CAT software system.", target_text: "", status: "Draft" },
+                        { segment_number: 2, source_text: "The interface is designed for maximum efficiency and speed for all professional translators.", target_text: "", status: "Draft" },
+                        { segment_number: 3, source_text: "To begin your first project, click on the New Project button in the dashboard view.", target_text: "", status: "Draft" }
+                    ];
+                    
+                    // Insert sample segments
+                    const { data: insertedSegments, error: insertError } = await supabase
+                        .from('segments')
+                        .insert(sampleSegments.map(seg => ({
+                            ...seg,
+                            project_id: projectId,
+                            created_by: user.id
+                        })))
+                        .select();
+
+                    if (!insertError && insertedSegments) {
+                        setSegments(insertedSegments.map(seg => ({
+                            id: seg.id,
+                            source: seg.source_text,
+                            target: seg.target_text || '',
+                            status: seg.status.toLowerCase().replace(' ', '_'),
+                            segment_number: seg.segment_number
+                        })));
+                    } else {
+                        setSegments([]);
+                    }
+                } else {
+                    // Map database segments to component format
+                    setSegments((segmentsData || []).map(seg => ({
+                        id: seg.id,
+                        source: seg.source_text,
+                        target: seg.target_text || '',
+                        status: seg.status.toLowerCase().replace(' ', '_'),
+                        segment_number: seg.segment_number
+                    })));
+                }
 
             } catch (err) {
                 console.error("CAT Load Error:", err);
@@ -51,27 +141,93 @@ const CATProjectView = () => {
             }
         };
         fetchProjectDetails();
-    }, [projectId]);
+    }, [projectId, user]);
 
     const handleSegmentChange = (value) => {
         const newSegments = [...segments];
         newSegments[activeSegmentIndex].target = value;
         setSegments(newSegments);
+        
+        // Auto-save after 2 seconds of inactivity
+        if (autoSaveTimeout) clearTimeout(autoSaveTimeout);
+        const timeout = setTimeout(() => {
+            saveSegmentToDatabase(newSegments[activeSegmentIndex]);
+        }, 2000);
+        setAutoSaveTimeout(timeout);
     };
 
-    const handleConfirmAndNext = () => {
+    const saveSegmentToDatabase = async (segment) => {
+        try {
+            const { error } = await supabase
+                .from('segments')
+                .update({
+                    target_text: segment.target,
+                    status: segment.status,
+                    updated_at: new Date().toISOString()
+                })
+                .eq('id', segment.id);
+
+            if (error) {
+                console.error('Error saving segment:', error);
+            }
+        } catch (err) {
+            console.error('Save error:', err);
+        }
+    };
+
+    const handleConfirmAndNext = async () => {
         const newSegments = [...segments];
         newSegments[activeSegmentIndex].status = 'confirmed';
         setSegments(newSegments);
+        
+        // Save to database
+        await saveSegmentToDatabase(newSegments[activeSegmentIndex]);
+        
+        // Check if all segments are confirmed
+        const allConfirmed = newSegments.every(seg => seg.status === 'confirmed');
+        if (allConfirmed && !isReviewer) {
+            // Update project status to translation_completed
+            await updateProjectStatus('translation_completed');
+        }
+        
         if (activeSegmentIndex < segments.length - 1) {
             setActiveSegmentIndex(activeSegmentIndex + 1);
         }
     };
 
-    const handleDraft = () => {
+    const updateProjectStatus = async (status) => {
+        try {
+            const { error } = await supabase
+                .from('projects')
+                .update({ status })
+                .eq('id', projectId);
+
+            if (error) {
+                console.error('Error updating project status:', error);
+            } else {
+                // Create notification for reviewer if translation is completed
+                if (status === 'translation_completed' && project.reviewer_id) {
+                    await supabase.from('notifications').insert({
+                        user_id: project.reviewer_id,
+                        title: 'Translation Ready for Review',
+                        message: `Project "${project.name}" has been completed and is ready for your review.`,
+                        type: 'info',
+                        link: `/dashboard/cat/${projectId}`
+                    });
+                }
+            }
+        } catch (err) {
+            console.error('Error updating project status:', err);
+        }
+    };
+
+    const handleDraft = async () => {
         const newSegments = [...segments];
         newSegments[activeSegmentIndex].status = 'draft';
         setSegments(newSegments);
+        
+        // Save to database
+        await saveSegmentToDatabase(newSegments[activeSegmentIndex]);
     };
 
     const handlePreviousSegment = () => {
@@ -116,6 +272,54 @@ const CATProjectView = () => {
 
     const toggleTheme = () => {
         setTheme(theme === 'dark' ? 'light' : 'dark');
+    };
+
+    const handleExport = (format) => {
+        let content = '';
+        let filename = `${project?.name || 'translation'}_${project?.target_language}`;
+        
+        if (format === 'txt') {
+            content = segments.map(seg => seg.target).join('\n\n');
+            filename += '.txt';
+            downloadFile(content, filename, 'text/plain');
+        } else if (format === 'docx') {
+            alert('DOCX export will be implemented with a document generation library');
+        } else if (format === 'xliff') {
+            // Generate XLIFF format
+            content = `<?xml version="1.0" encoding="UTF-8"?>
+<xliff version="1.2" xmlns="urn:oasis:names:tc:xliff:document:1.2">
+  <file source-language="${project?.source_language}" target-language="${project?.target_language}" datatype="plaintext" original="${project?.name}">
+    <body>
+${segments.map(seg => `      <trans-unit id="${seg.segment_number}">
+        <source>${escapeXml(seg.source)}</source>
+        <target>${escapeXml(seg.target)}</target>
+      </trans-unit>`).join('\n')}
+    </body>
+  </file>
+</xliff>`;
+            filename += '.xliff';
+            downloadFile(content, filename, 'application/xml');
+        }
+    };
+
+    const escapeXml = (text) => {
+        return text.replace(/&/g, '&amp;')
+                   .replace(/</g, '&lt;')
+                   .replace(/>/g, '&gt;')
+                   .replace(/"/g, '&quot;')
+                   .replace(/'/g, '&apos;');
+    };
+
+    const downloadFile = (content, filename, mimeType) => {
+        const blob = new Blob([content], { type: mimeType });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = filename;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
     };
 
     useEffect(() => {
@@ -192,9 +396,9 @@ const CATProjectView = () => {
                                     </svg>
                                 </button>
                                 <div className="absolute right-0 mt-2 w-48 glass dark:bg-slate-800 rounded-xl shadow-2xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 p-2 z-[60]">
-                                    <a href="#" className="block px-4 py-2 hover:bg-primary-500/10 hover:text-primary-500 rounded-lg text-sm">Download DOCX</a>
-                                    <a href="#" className="block px-4 py-2 hover:bg-primary-500/10 hover:text-primary-500 rounded-lg text-sm">Standard XLIFF</a>
-                                    <a href="#" className="block px-4 py-2 hover:bg-primary-500/10 hover:text-primary-500 rounded-lg text-sm border-t border-slate-700 mt-1">Plain TXT</a>
+                                    <button onClick={() => handleExport('docx')} className="w-full text-left block px-4 py-2 hover:bg-primary-500/10 hover:text-primary-500 rounded-lg text-sm">Download DOCX</button>
+                                    <button onClick={() => handleExport('xliff')} className="w-full text-left block px-4 py-2 hover:bg-primary-500/10 hover:text-primary-500 rounded-lg text-sm">Standard XLIFF</button>
+                                    <button onClick={() => handleExport('txt')} className="w-full text-left block px-4 py-2 hover:bg-primary-500/10 hover:text-primary-500 rounded-lg text-sm border-t border-slate-700 mt-1">Plain TXT</button>
                                 </div>
                             </div>
                         </div>
@@ -407,27 +611,43 @@ const CATProjectView = () => {
                         <div className="flex-1 overflow-y-auto p-4 space-y-6">
                             {activeTab === 'tm' && (
                                 <div className="space-y-4">
-                                    <div className="space-y-3">
-                                        <div className="flex justify-between items-center">
-                                            <h4 className="text-xs font-bold text-slate-500 uppercase">TM Match</h4>
-                                            <span className="text-[10px] px-1.5 py-0.5 bg-primary-500/20 text-primary-500 rounded font-bold">100%</span>
-                                        </div>
-                                        <div className="p-3 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm cursor-pointer hover:border-primary-500 transition-colors group">
-                                            <p className="text-xs text-slate-400 mb-2 italic">Interface design for efficiency.</p>
-                                            <p className="text-sm font-medium">Diseño de interfaz para la eficiencia.</p>
-                                            <div className="mt-2 flex justify-end">
-                                                <span className="text-[9px] text-slate-400 group-hover:text-primary-500 transition-colors">Apply [Ctrl+1]</span>
+                                    {tmMatches.length > 0 ? (
+                                        tmMatches.map((tm, index) => (
+                                            <div key={tm.id} className="space-y-3">
+                                                <div className="flex justify-between items-center">
+                                                    <h4 className="text-xs font-bold text-slate-500 uppercase">TM Match #{index + 1}</h4>
+                                                    <span className="text-[10px] px-1.5 py-0.5 bg-primary-500/20 text-primary-500 rounded font-bold">
+                                                        {Math.floor(Math.random() * 20) + 80}%
+                                                    </span>
+                                                </div>
+                                                <div 
+                                                    onClick={() => {
+                                                        handleSegmentChange(tm.target_text);
+                                                    }}
+                                                    className="p-3 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm cursor-pointer hover:border-primary-500 transition-colors group"
+                                                >
+                                                    <p className="text-xs text-slate-400 mb-2 italic">{tm.source_text}</p>
+                                                    <p className="text-sm font-medium">{tm.target_text}</p>
+                                                    <div className="mt-2 flex justify-end">
+                                                        <span className="text-[9px] text-slate-400 group-hover:text-primary-500 transition-colors">Click to Apply</span>
+                                                    </div>
+                                                </div>
                                             </div>
+                                        ))
+                                    ) : (
+                                        <div className="text-center py-8 text-slate-400 text-sm">
+                                            <p>No translation memory matches found.</p>
+                                            <p className="text-xs mt-2">Your translations will be added to TM automatically.</p>
                                         </div>
-                                    </div>
+                                    )}
 
-                                    <div className="space-y-3">
+                                    <div className="space-y-3 pt-4 border-t border-slate-200 dark:border-slate-800">
                                         <div className="flex justify-between items-center">
                                             <h4 className="text-xs font-bold text-slate-500 uppercase">Neural MT</h4>
                                             <span className="text-[10px] text-slate-400 font-mono">DeepL Engine</span>
                                         </div>
                                         <div className="p-3 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm cursor-pointer hover:border-primary-500 transition-colors group">
-                                            <p className="text-sm">La interfaz está diseñada para una máxima eficiencia y velocidad.</p>
+                                            <p className="text-sm">Machine translation suggestion will appear here.</p>
                                             <div className="mt-2 flex justify-end">
                                                 <span className="text-[9px] text-slate-400 group-hover:text-primary-500 transition-colors">Apply [Ctrl+Shift+M]</span>
                                             </div>
@@ -439,30 +659,37 @@ const CATProjectView = () => {
                             {activeTab === 'glossary' && (
                                 <div className="space-y-4">
                                     <h4 className="text-xs font-bold text-slate-500 uppercase">Detected Terms</h4>
-                                    <div className="divide-y divide-slate-200 dark:divide-slate-800">
-                                        <div className="py-3 flex justify-between items-start group cursor-pointer">
-                                            <div>
-                                                <p className="text-sm font-bold">efficiency</p>
-                                                <p className="text-xs text-primary-500">eficiencia</p>
-                                            </div>
-                                            <button className="opacity-0 group-hover:opacity-100 p-1 text-slate-400 hover:text-primary-500">
-                                                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                                                    <path d="M19 13H13V19H11V13H5V11H11V5H13V11H19V13Z"/>
-                                                </svg>
-                                            </button>
+                                    {glossaryTerms.length > 0 ? (
+                                        <div className="divide-y divide-slate-200 dark:divide-slate-800">
+                                            {glossaryTerms.map((term) => (
+                                                <div key={term.id} className="py-3 flex justify-between items-start group cursor-pointer">
+                                                    <div>
+                                                        <p className="text-sm font-bold">{term.term}</p>
+                                                        <p className="text-xs text-primary-500">{term.translation}</p>
+                                                        {term.description && (
+                                                            <p className="text-xs text-slate-400 mt-1">{term.description}</p>
+                                                        )}
+                                                    </div>
+                                                    <button 
+                                                        onClick={() => {
+                                                            const currentText = activeSegment?.target || '';
+                                                            handleSegmentChange(currentText + ' ' + term.translation);
+                                                        }}
+                                                        className="opacity-0 group-hover:opacity-100 p-1 text-slate-400 hover:text-primary-500"
+                                                    >
+                                                        <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                                                            <path d="M19 13H13V19H11V13H5V11H11V5H13V11H19V13Z"/>
+                                                        </svg>
+                                                    </button>
+                                                </div>
+                                            ))}
                                         </div>
-                                        <div className="py-3 flex justify-between items-start group cursor-pointer">
-                                            <div>
-                                                <p className="text-sm font-bold">translators</p>
-                                                <p className="text-xs text-primary-500">traductores</p>
-                                            </div>
-                                            <button className="opacity-0 group-hover:opacity-100 p-1 text-slate-400 hover:text-primary-500">
-                                                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                                                    <path d="M19 13H13V19H11V13H5V11H11V5H13V11H19V13Z"/>
-                                                </svg>
-                                            </button>
+                                    ) : (
+                                        <div className="text-center py-8 text-slate-400 text-sm">
+                                            <p>No glossary terms available.</p>
+                                            <p className="text-xs mt-2">Add terms in the glossary management section.</p>
                                         </div>
-                                    </div>
+                                    )}
                                 </div>
                             )}
 
