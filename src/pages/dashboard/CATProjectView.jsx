@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../context/AuthContext';
+import { translateText, generateAISuggestions, checkTranslationQuality } from '../../services/aiTranslation';
 import './CATProjectWorkspace.css';
 
 const CATProjectView = () => {
@@ -20,6 +21,10 @@ const CATProjectView = () => {
     const [autoSaveTimeout, setAutoSaveTimeout] = useState(null);
     const [tmMatches, setTmMatches] = useState([]);
     const [glossaryTerms, setGlossaryTerms] = useState([]);
+    const [aiSuggestions, setAiSuggestions] = useState([]);
+    const [isTranslating, setIsTranslating] = useState(false);
+    const [selectedTone, setSelectedTone] = useState('professional');
+    const [mtSuggestion, setMtSuggestion] = useState(null);
 
     const userRole = user?.user_metadata?.user_type || 'Translator';
     const isReviewer = userRole === 'Reviewer';
@@ -30,6 +35,7 @@ const CATProjectView = () => {
         if (project && segments[activeSegmentIndex]) {
             fetchTranslationMemory();
             fetchGlossaryTerms();
+            fetchMTSuggestion();
         }
     }, [activeSegmentIndex, project]);
 
@@ -68,6 +74,58 @@ const CATProjectView = () => {
             }
         } catch (err) {
             console.error('Error fetching glossary:', err);
+        }
+    };
+
+    const fetchMTSuggestion = async () => {
+        if (!project || !segments[activeSegmentIndex]) return;
+        
+        setIsTranslating(true);
+        try {
+            const result = await translateText(
+                segments[activeSegmentIndex].source,
+                project.source_language,
+                project.target_language
+            );
+            
+            if (result.success) {
+                setMtSuggestion(result);
+            }
+        } catch (err) {
+            console.error('Error fetching MT:', err);
+        } finally {
+            setIsTranslating(false);
+        }
+    };
+
+    const handleGenerateAISuggestions = async () => {
+        if (!project || !segments[activeSegmentIndex]) return;
+        
+        setIsTranslating(true);
+        try {
+            const result = await generateAISuggestions(
+                segments[activeSegmentIndex].source,
+                project.source_language,
+                project.target_language,
+                selectedTone
+            );
+            
+            if (result.success) {
+                setAiSuggestions(result.suggestions);
+            } else {
+                alert('Failed to generate AI suggestions: ' + result.error);
+            }
+        } catch (err) {
+            console.error('Error generating AI suggestions:', err);
+            alert('Error generating AI suggestions');
+        } finally {
+            setIsTranslating(false);
+        }
+    };
+
+    const handleApplyMT = () => {
+        if (mtSuggestion && mtSuggestion.translation) {
+            handleSegmentChange(mtSuggestion.translation);
         }
     };
 
@@ -542,6 +600,17 @@ ${segments.map(seg => `      <trans-unit id="${seg.segment_number}">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path>
                                         </svg>
                                     </button>
+                                    <button 
+                                        onClick={handleApplyMT}
+                                        disabled={!mtSuggestion || isTranslating}
+                                        className="px-4 py-3 bg-purple-600 hover:bg-purple-700 text-white rounded-xl font-bold text-sm transition-all disabled:opacity-50 flex items-center gap-2" 
+                                        title="Apply AI Translation"
+                                    >
+                                        <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                                            <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"/>
+                                        </svg>
+                                        AI Translate
+                                    </button>
                                 </div>
 
                                 <div className="flex gap-3">
@@ -644,14 +713,29 @@ ${segments.map(seg => `      <trans-unit id="${seg.segment_number}">
                                     <div className="space-y-3 pt-4 border-t border-slate-200 dark:border-slate-800">
                                         <div className="flex justify-between items-center">
                                             <h4 className="text-xs font-bold text-slate-500 uppercase">Neural MT</h4>
-                                            <span className="text-[10px] text-slate-400 font-mono">DeepL Engine</span>
+                                            <span className="text-[10px] text-slate-400 font-mono">
+                                                {mtSuggestion?.engine || 'MyMemory'}
+                                            </span>
                                         </div>
-                                        <div className="p-3 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm cursor-pointer hover:border-primary-500 transition-colors group">
-                                            <p className="text-sm">Machine translation suggestion will appear here.</p>
-                                            <div className="mt-2 flex justify-end">
-                                                <span className="text-[9px] text-slate-400 group-hover:text-primary-500 transition-colors">Apply [Ctrl+Shift+M]</span>
+                                        {isTranslating ? (
+                                            <div className="p-3 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm">
+                                                <p className="text-sm text-slate-400">Translating...</p>
                                             </div>
-                                        </div>
+                                        ) : mtSuggestion ? (
+                                            <div 
+                                                onClick={handleApplyMT}
+                                                className="p-3 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm cursor-pointer hover:border-primary-500 transition-colors group"
+                                            >
+                                                <p className="text-sm">{mtSuggestion.translation}</p>
+                                                <div className="mt-2 flex justify-end">
+                                                    <span className="text-[9px] text-slate-400 group-hover:text-primary-500 transition-colors">Click to Apply</span>
+                                                </div>
+                                            </div>
+                                        ) : (
+                                            <div className="p-3 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm">
+                                                <p className="text-sm text-slate-400">No MT suggestion available</p>
+                                            </div>
+                                        )}
                                     </div>
                                 </div>
                             )}
@@ -697,24 +781,53 @@ ${segments.map(seg => `      <trans-unit id="${seg.segment_number}">
                                 <div className="space-y-4">
                                     <div className="space-y-4">
                                         <label className="text-xs font-bold text-slate-500 uppercase block">Refine with AI</label>
-                                        <select className="w-full bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 rounded-lg p-2 text-xs focus:ring-1 focus:ring-primary-500">
-                                            <option>Professional Tone</option>
-                                            <option>Casual / Informal</option>
-                                            <option>Marketing / Creative</option>
-                                            <option>Simplified Chinese</option>
+                                        <select 
+                                            value={selectedTone}
+                                            onChange={(e) => setSelectedTone(e.target.value)}
+                                            className="w-full bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 rounded-lg p-2 text-xs focus:ring-1 focus:ring-primary-500"
+                                        >
+                                            <option value="professional">Professional Tone</option>
+                                            <option value="casual">Casual / Informal</option>
+                                            <option value="formal">Formal / Academic</option>
+                                            <option value="marketing">Marketing / Creative</option>
                                         </select>
-                                        <button className="w-full py-2 bg-gradient-to-r from-purple-600 to-primary-600 text-white rounded-lg text-xs font-bold shadow-lg shadow-primary-500/10 hover:shadow-primary-500/30 transition-all">
-                                            Generate Suggestions
+                                        <button 
+                                            onClick={handleGenerateAISuggestions}
+                                            disabled={isTranslating}
+                                            className="w-full py-2 bg-gradient-to-r from-purple-600 to-primary-600 text-white rounded-lg text-xs font-bold shadow-lg shadow-primary-500/10 hover:shadow-primary-500/30 transition-all disabled:opacity-50"
+                                        >
+                                            {isTranslating ? 'Generating...' : 'Generate Suggestions'}
                                         </button>
                                     </div>
 
-                                    <div className="space-y-3 pt-4 border-t border-slate-200 dark:border-slate-800">
-                                        <div className="p-3 bg-primary-500/5 dark:bg-primary-500/10 border border-primary-500/20 rounded-xl space-y-2">
-                                            <p className="text-xs text-slate-500 font-medium">Alternative Rewrite:</p>
-                                            <p className="text-sm">"Diseñada para optimizar el rendimiento y agilizar el flujo de trabajo de los profesionales."</p>
-                                            <button className="w-full py-1.5 mt-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-[10px] font-bold hover:bg-slate-50">Apply Rewrite</button>
+                                    {aiSuggestions.length > 0 && (
+                                        <div className="space-y-3 pt-4 border-t border-slate-200 dark:border-slate-800">
+                                            {aiSuggestions.map((suggestion, index) => (
+                                                <div key={index} className="p-3 bg-primary-500/5 dark:bg-primary-500/10 border border-primary-500/20 rounded-xl space-y-2">
+                                                    <div className="flex justify-between items-center">
+                                                        <p className="text-xs text-slate-500 font-medium">{suggestion.tone}:</p>
+                                                        <span className="text-[9px] text-slate-400">{suggestion.description}</span>
+                                                    </div>
+                                                    <p className="text-sm">{suggestion.text}</p>
+                                                    <button 
+                                                        onClick={() => handleSegmentChange(suggestion.text)}
+                                                        className="w-full py-1.5 mt-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-[10px] font-bold hover:bg-slate-50"
+                                                    >
+                                                        Apply This Version
+                                                    </button>
+                                                </div>
+                                            ))}
                                         </div>
-                                    </div>
+                                    )}
+
+                                    {aiSuggestions.length === 0 && !isTranslating && (
+                                        <div className="text-center py-8 text-slate-400 text-sm">
+                                            <svg className="w-12 h-12 mx-auto mb-3 opacity-50" fill="currentColor" viewBox="0 0 24 24">
+                                                <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"/>
+                                            </svg>
+                                            <p>Click "Generate Suggestions" to get AI-powered alternatives</p>
+                                        </div>
+                                    )}
                                 </div>
                             )}
                         </div>
