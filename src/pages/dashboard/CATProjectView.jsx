@@ -540,6 +540,20 @@ ${segments.map(seg => `      <trans-unit id="${seg.segment_number}">
                         </h1>
                     </div>
 
+                    {/* Progress Bar - Center of Header */}
+                    <div className="flex-1 max-w-md mx-8">
+                        <div className="flex justify-between items-center mb-1.5">
+                            <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500">Overall Progress</span>
+                            <span className="text-[10px] font-bold text-slate-600 dark:text-slate-400">
+                                {Math.round((progress.total / progress.totalSegments) * 100)}% ({project?.settings?.wordCount ? Math.round((progress.total / progress.totalSegments) * (project.settings.wordCount || 0)) : progress.total} / {project?.settings?.wordCount || progress.totalSegments} words)
+                            </span>
+                        </div>
+                        <div className="h-1 w-full bg-slate-200 dark:bg-slate-800 rounded-full overflow-hidden flex">
+                            <div className="h-full bg-accent transition-all duration-300" style={{ width: `${progress.confirmed}%` }}></div>
+                            <div className="h-full bg-yellow-500 transition-all duration-300" style={{ width: `${progress.draft}%` }}></div>
+                        </div>
+                    </div>
+
                     <div className="flex items-center gap-6">
                         <div className="hidden md:flex items-center gap-4 text-sm font-medium text-slate-500 dark:text-slate-400">
                             <span className="flex items-center gap-2">
@@ -592,22 +606,6 @@ ${segments.map(seg => `      <trans-unit id="${seg.segment_number}">
                         </div>
                     </div>
                 </header>
-
-                {/* Progress Bar - Top Center */}
-                <div className="bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 px-6 py-3">
-                    <div className="max-w-4xl mx-auto">
-                        <div className="flex justify-center items-center gap-3 mb-2">
-                            <span className="text-xs font-bold uppercase tracking-wider text-slate-500">Overall Progress</span>
-                            <span className="text-xs font-bold text-slate-600 dark:text-slate-400">
-                                {Math.round((progress.total / progress.totalSegments) * 100)}% ({progress.total}/{progress.totalSegments})
-                            </span>
-                        </div>
-                        <div className="h-1 w-full bg-slate-200 dark:bg-slate-800 rounded-full overflow-hidden flex">
-                            <div className="h-full bg-accent transition-all duration-300" style={{ width: `${progress.confirmed}%` }}></div>
-                            <div className="h-full bg-yellow-500 transition-all duration-300" style={{ width: `${progress.draft}%` }}></div>
-                        </div>
-                    </div>
-                </div>
 
                 <main className="flex-1 flex overflow-hidden">
                     
