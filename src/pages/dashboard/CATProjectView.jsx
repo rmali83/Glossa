@@ -410,11 +410,35 @@ const CATProjectView = () => {
         const confirmed = segments.filter(s => s.status === 'confirmed').length;
         const draft = segments.filter(s => s.status === 'draft').length;
         const total = segments.length;
+        
+        // Calculate actual word counts from segments
+        const totalWords = segments.reduce((sum, seg) => {
+            const wordCount = seg.source.trim().split(/\s+/).filter(w => w.length > 0).length;
+            return sum + wordCount;
+        }, 0);
+        
+        const completedWords = segments
+            .filter(s => s.status === 'confirmed')
+            .reduce((sum, seg) => {
+                const wordCount = seg.source.trim().split(/\s+/).filter(w => w.length > 0).length;
+                return sum + wordCount;
+            }, 0);
+        
+        const draftWords = segments
+            .filter(s => s.status === 'draft')
+            .reduce((sum, seg) => {
+                const wordCount = seg.source.trim().split(/\s+/).filter(w => w.length > 0).length;
+                return sum + wordCount;
+            }, 0);
+        
         return {
             confirmed: (confirmed / total) * 100,
             draft: (draft / total) * 100,
             total: confirmed + draft,
-            totalSegments: total
+            totalSegments: total,
+            totalWords,
+            completedWords,
+            draftWords
         };
     };
 
@@ -545,12 +569,12 @@ ${segments.map(seg => `      <trans-unit id="${seg.segment_number}">
                         <div className="flex justify-between items-center mb-1.5">
                             <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500">Overall Progress</span>
                             <span className="text-[10px] font-bold text-slate-600 dark:text-slate-400">
-                                {Math.round((progress.total / progress.totalSegments) * 100)}% ({project?.settings?.wordCount ? Math.round((progress.total / progress.totalSegments) * (project.settings.wordCount || 0)) : progress.total} / {project?.settings?.wordCount || progress.totalSegments} words)
+                                {Math.round((progress.completedWords / progress.totalWords) * 100)}% ({progress.completedWords} / {progress.totalWords} words)
                             </span>
                         </div>
                         <div className="h-1 w-full bg-slate-200 dark:bg-slate-800 rounded-full overflow-hidden flex">
-                            <div className="h-full bg-accent transition-all duration-300" style={{ width: `${progress.confirmed}%` }}></div>
-                            <div className="h-full bg-yellow-500 transition-all duration-300" style={{ width: `${progress.draft}%` }}></div>
+                            <div className="h-full bg-accent transition-all duration-300" style={{ width: `${(progress.completedWords / progress.totalWords) * 100}%` }}></div>
+                            <div className="h-full bg-yellow-500 transition-all duration-300" style={{ width: `${(progress.draftWords / progress.totalWords) * 100}%` }}></div>
                         </div>
                     </div>
 
