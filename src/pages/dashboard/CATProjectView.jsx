@@ -144,52 +144,7 @@ const CATProjectView = () => {
                 setProject(projData);
 
                 // Fetch segments for this project
-                const { data: segmentsData, error: segmentsError } = await supabase
-                    .from('segments')
-                    .select('*')
-                    .eq('project_id', projectId)
-                    .order('segment_number', { ascending: true });
-
-                if (segmentsError) {
-                    console.error('Error fetching segments:', segmentsError);
-                    // If no segments exist, create sample segments
-                    const sampleSegments = [
-                        { segment_number: 1, source_text: "This is the opening statement of the user manual for the Glossa CAT software system.", target_text: "", status: "Draft" },
-                        { segment_number: 2, source_text: "The interface is designed for maximum efficiency and speed for all professional translators.", target_text: "", status: "Draft" },
-                        { segment_number: 3, source_text: "To begin your first project, click on the New Project button in the dashboard view.", target_text: "", status: "Draft" }
-                    ];
-                    
-                    // Insert sample segments
-                    const { data: insertedSegments, error: insertError } = await supabase
-                        .from('segments')
-                        .insert(sampleSegments.map(seg => ({
-                            ...seg,
-                            project_id: projectId,
-                            created_by: user.id
-                        })))
-                        .select();
-
-                    if (!insertError && insertedSegments) {
-                        setSegments(insertedSegments.map(seg => ({
-                            id: seg.id,
-                            source: seg.source_text,
-                            target: seg.target_text || '',
-                            status: seg.status.toLowerCase().replace(' ', '_'),
-                            segment_number: seg.segment_number
-                        })));
-                    } else {
-                        setSegments([]);
-                    }
-                } else {
-                    // Map database segments to component format
-                    setSegments((segmentsData || []).map(seg => ({
-                        id: seg.id,
-                        source: seg.source_text,
-                        target: seg.target_text || '',
-                        status: seg.status.toLowerCase().replace(' ', '_'),
-                        segment_number: seg.segment_number
-                    })));
-                }
+                await fetchSegments();
 
             } catch (err) {
                 console.error("CAT Load Error:", err);
@@ -199,7 +154,100 @@ const CATProjectView = () => {
             }
         };
         fetchProjectDetails();
+
+        // Set up real-time subscription for segments
+        const segmentsSubscription = supabase
+            .channel(`segments-${projectId}`)
+            .on('postgres_changes', 
+                { 
+                    event: '*', 
+                    schema: 'public', 
+                    table: 'segments',
+                    filter: `project_id=eq.${projectId}`
+                }, 
+                (payload) => {
+                    console.log('Segment change detected:', payload);
+                    fetchSegments();
+                }
+            )
+            .subscribe();
+
+        // Set up real-time subscription for project updates
+        const projectSubscription = supabase
+            .channel(`project-${projectId}`)
+            .on('postgres_changes',
+                {
+                    event: 'UPDATE',
+                    schema: 'public',
+                    table: 'projects',
+                    filter: `id=eq.${projectId}`
+                },
+                (payload) => {
+                    console.log('Project updated:', payload);
+                    setProject(payload.new);
+                }
+            )
+            .subscribe();
+
+        // Cleanup subscriptions on unmount
+        return () => {
+            supabase.removeChannel(segmentsSubscription);
+            supabase.removeChannel(projectSubscription);
+        };
     }, [projectId, user]);
+
+    const fetchSegments = async () => {
+        try {
+            const { data: segmentsData, error: segmentsError } = await supabase
+                .from('segments')
+                .select('*')
+                .eq('project_id', projectId)
+                .order('segment_number', { ascending: true });
+
+            if (segmentsError) {
+                console.error('Error fetching segments:', segmentsError);
+                // If no segments exist, create sample segments
+                const sampleSegments = [
+                    { segment_number: 1, source_text: "This is the opening statement of the user manual for the Glossa CAT software system.", target_text: "", status: "Draft" },
+                    { segment_number: 2, source_text: "The interface is designed for maximum efficiency and speed for all professional translators.", target_text: "", status: "Draft" },
+                    { segment_number: 3, source_text: "To begin your first project, click on the New Project button in the dashboard view.", target_text: "", status: "Draft" }
+                ];
+                
+                // Insert sample segments
+                const { data: insertedSegments, error: insertError } = await supabase
+                    .from('segments')
+                    .insert(sampleSegments.map(seg => ({
+                        ...seg,
+                        project_id: projectId,
+                        created_by: user.id
+                    })))
+                    .select();
+
+                if (!insertError && insertedSegments) {
+                    setSegments(insertedSegments.map(seg => ({
+                        id: seg.id,
+                        source: seg.source_text,
+                        target: seg.target_text || '',
+                        status: seg.status.toLowerCase().replace(' ', '_'),
+                        segment_number: seg.segment_number
+                    })));
+                } else {
+                    setSegments([]);
+                }
+            } else {
+                // Map database segments to component format
+                setSegments((segmentsData || []).map(seg => ({
+                    id: seg.id,
+                    source: seg.source_text,
+                    target: seg.target_text || '',
+                    status: seg.status.toLowerCase().replace(' ', '_'),
+                    segment_number: seg.segment_number
+                })));
+            }
+        } catch (err) {
+            console.error('Error fetching segments:', err);
+        }
+    };
 
     const handleSegmentChange = (value) => {
         const newSegments = [...segments];
@@ -220,13 +268,15 @@ const CATProjectView = () => {
                 .from('segments')
                 .update({
                     target_text: segment.target,
-                    status: segment.status,
+                    status: segment.status.charAt(0).toUpperCase() + segment.status.slice(1).replace('_', ' '),
                     updated_at: new Date().toISOString()
                 })
                 .eq('id', segment.id);
 
             if (error) {
                 console.error('Error saving segment:', error);
+            } else {
+                console.log('Segment saved successfully');
             }
         } catch (err) {
             console.error('Save error:', err);
@@ -431,6 +481,16 @@ ${segments.map(seg => `      <trans-unit id="${seg.segment_number}">
                                 </svg>
                                 Auto-saved
                             </span>
+                            <button 
+                                onClick={() => fetchSegments()}
+                                className="flex items-center gap-1 text-xs hover:text-primary-500 transition-colors"
+                                title="Refresh segments"
+                            >
+                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                                </svg>
+                                Sync
+                            </button>
                         </div>
                         
                         <div className="flex items-center gap-2">

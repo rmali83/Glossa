@@ -43,6 +43,27 @@ const GlossaCAT = () => {
         };
 
         fetchProjects();
+
+        // Set up real-time subscription for projects
+        const projectsSubscription = supabase
+            .channel('projects-changes')
+            .on('postgres_changes',
+                {
+                    event: '*',
+                    schema: 'public',
+                    table: 'projects'
+                },
+                (payload) => {
+                    console.log('Project change detected:', payload);
+                    fetchProjects();
+                }
+            )
+            .subscribe();
+
+        // Cleanup subscription
+        return () => {
+            supabase.removeChannel(projectsSubscription);
+        };
     }, [user, isReviewer, isAdmin]);
 
     const [theme, setTheme] = useState(localStorage.getItem('glossa-cat-theme') || 'dark');
