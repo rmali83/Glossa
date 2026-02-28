@@ -198,19 +198,29 @@ const CATProjectView = () => {
 
     const fetchSegments = async () => {
         try {
+            console.log('Fetching segments for project:', projectId);
             const { data: segmentsData, error: segmentsError } = await supabase
                 .from('segments')
                 .select('*')
                 .eq('project_id', projectId)
                 .order('segment_number', { ascending: true });
 
+            console.log('Segments data:', segmentsData, 'Error:', segmentsError);
+
             if (segmentsError) {
                 console.error('Error fetching segments:', segmentsError);
+                setSegments([]);
+                return;
+            }
+
+            if (!segmentsData || segmentsData.length === 0) {
+                console.log('No segments found, creating sample segments...');
                 // If no segments exist, create sample segments
                 const sampleSegments = [
-                    { segment_number: 1, source_text: "This is the opening statement of the user manual for the Glossa CAT software system.", target_text: "", status: "Draft" },
+                    { segment_number: 1, source_text: "Welcome to this translation project. Please translate each segment carefully.", target_text: "", status: "Draft" },
                     { segment_number: 2, source_text: "The interface is designed for maximum efficiency and speed for all professional translators.", target_text: "", status: "Draft" },
-                    { segment_number: 3, source_text: "To begin your first project, click on the New Project button in the dashboard view.", target_text: "", status: "Draft" }
+                    { segment_number: 3, source_text: "To begin your first project, click on the New Project button in the dashboard view.", target_text: "", status: "Draft" },
+                    { segment_number: 4, source_text: "Use the CAT tool features to improve your translation workflow and productivity.", target_text: "", status: "Draft" }
                 ];
                 
                 // Insert sample segments
@@ -223,6 +233,8 @@ const CATProjectView = () => {
                     })))
                     .select();
 
+                console.log('Inserted segments:', insertedSegments, 'Error:', insertError);
+
                 if (!insertError && insertedSegments) {
                     setSegments(insertedSegments.map(seg => ({
                         id: seg.id,
@@ -232,20 +244,25 @@ const CATProjectView = () => {
                         segment_number: seg.segment_number
                     })));
                 } else {
+                    console.error('Failed to create sample segments:', insertError);
                     setSegments([]);
                 }
             } else {
                 // Map database segments to component format
-                setSegments((segmentsData || []).map(seg => ({
+                console.log('Mapping segments to component format...');
+                const mappedSegments = (segmentsData || []).map(seg => ({
                     id: seg.id,
                     source: seg.source_text,
                     target: seg.target_text || '',
                     status: seg.status.toLowerCase().replace(' ', '_'),
                     segment_number: seg.segment_number
-                })));
+                }));
+                console.log('Mapped segments:', mappedSegments);
+                setSegments(mappedSegments);
             }
         } catch (err) {
-            console.error('Error fetching segments:', err);
+            console.error('Error in fetchSegments:', err);
+            setSegments([]);
         }
     };
 
@@ -450,6 +467,30 @@ ${segments.map(seg => `      <trans-unit id="${seg.segment_number}">
     }, [activeSegmentIndex, segments]);
 
     if (loading) return <div className="flex items-center justify-center h-screen bg-slate-950 text-white">Initializing Glossa CAT...</div>;
+
+    if (!loading && segments.length === 0) {
+        return (
+            <div className="flex items-center justify-center h-screen bg-slate-950 text-white flex-col gap-4">
+                <svg className="w-16 h-16 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                </svg>
+                <h2 className="text-xl font-bold">No Segments Found</h2>
+                <p className="text-slate-400">This project doesn't have any segments yet.</p>
+                <button 
+                    onClick={() => fetchSegments()}
+                    className="px-6 py-3 bg-primary-600 hover:bg-primary-700 text-white rounded-xl font-bold transition-all"
+                >
+                    Create Sample Segments
+                </button>
+                <button 
+                    onClick={() => navigate('/dashboard/cat')}
+                    className="px-6 py-3 border border-slate-700 hover:bg-slate-800 text-white rounded-xl font-bold transition-all"
+                >
+                    Back to Projects
+                </button>
+            </div>
+        );
+    }
 
     const activeSegment = segments[activeSegmentIndex];
     const progress = getProgress();
