@@ -205,7 +205,7 @@ const CATProjectView = () => {
                 .from('segments')
                 .select('*')
                 .eq('project_id', projectId)
-                .order('segment_number', { ascending: true });
+                .order('id', { ascending: true }); // Changed from segment_number to id
 
             console.log('Segments response:', { data: segmentsData, error: segmentsError });
 
@@ -241,12 +241,12 @@ const CATProjectView = () => {
                     return;
                 }
                 
-                // Create sample segments
+                // Create sample segments - removed segment_number field
                 const sampleSegments = [
-                    { segment_number: 1, source_text: "Welcome to this translation project. Please translate each segment carefully.", target_text: "", status: "Draft" },
-                    { segment_number: 2, source_text: "The interface is designed for maximum efficiency and speed for all professional translators.", target_text: "", status: "Draft" },
-                    { segment_number: 3, source_text: "To begin your first project, click on the New Project button in the dashboard view.", target_text: "", status: "Draft" },
-                    { segment_number: 4, source_text: "Use the CAT tool features to improve your translation workflow and productivity.", target_text: "", status: "Draft" }
+                    { source_text: "Welcome to this translation project. Please translate each segment carefully.", target_text: "", status: "Draft" },
+                    { source_text: "The interface is designed for maximum efficiency and speed for all professional translators.", target_text: "", status: "Draft" },
+                    { source_text: "To begin your first project, click on the New Project button in the dashboard view.", target_text: "", status: "Draft" },
+                    { source_text: "Use the CAT tool features to improve your translation workflow and productivity.", target_text: "", status: "Draft" }
                 ];
                 
                 console.log('Attempting to insert segments...');
@@ -267,23 +267,23 @@ const CATProjectView = () => {
                     alert(`Failed to create segments: ${insertError.message}`);
                     setSegments([]);
                 } else if (insertedSegments) {
-                    setSegments(insertedSegments.map(seg => ({
+                    setSegments(insertedSegments.map((seg, index) => ({
                         id: seg.id,
                         source: seg.source_text,
                         target: seg.target_text || '',
                         status: seg.status.toLowerCase().replace(' ', '_'),
-                        segment_number: seg.segment_number
+                        segment_number: index + 1 // Generate segment number from index
                     })));
                 }
             } else {
                 // Map database segments to component format
                 console.log('Mapping', segmentsData.length, 'segments to component format...');
-                const mappedSegments = segmentsData.map(seg => ({
+                const mappedSegments = segmentsData.map((seg, index) => ({
                     id: seg.id,
                     source: seg.source_text,
                     target: seg.target_text || '',
                     status: seg.status.toLowerCase().replace(' ', '_'),
-                    segment_number: seg.segment_number
+                    segment_number: index + 1 // Generate segment number from index
                 }));
                 console.log('Mapped segments:', mappedSegments);
                 setSegments(mappedSegments);

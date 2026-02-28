@@ -75,9 +75,9 @@ const Admin = () => {
 
             // 2. Create sample segments for the project
             const sampleSegments = [
-                { segment_number: 1, source_text: "Welcome to this translation project.", target_text: "", status: "Draft" },
-                { segment_number: 2, source_text: "Please translate each segment carefully.", target_text: "", status: "Draft" },
-                { segment_number: 3, source_text: "Use the CAT tool features to improve efficiency.", target_text: "", status: "Draft" }
+                { source_text: "Welcome to this translation project.", target_text: "", status: "Draft" },
+                { source_text: "Please translate each segment carefully.", target_text: "", status: "Draft" },
+                { source_text: "Use the CAT tool features to improve efficiency.", target_text: "", status: "Draft" }
             ];
 
             await supabase.from('segments').insert(
