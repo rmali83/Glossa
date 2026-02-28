@@ -199,23 +199,49 @@ const CATProjectView = () => {
     const fetchSegments = async () => {
         try {
             console.log('Fetching segments for project:', projectId);
+            console.log('Current user:', user?.id);
+            
             const { data: segmentsData, error: segmentsError } = await supabase
                 .from('segments')
                 .select('*')
                 .eq('project_id', projectId)
                 .order('segment_number', { ascending: true });
 
-            console.log('Segments data:', segmentsData, 'Error:', segmentsError);
+            console.log('Segments response:', { data: segmentsData, error: segmentsError });
 
             if (segmentsError) {
                 console.error('Error fetching segments:', segmentsError);
+                console.error('Error details:', JSON.stringify(segmentsError, null, 2));
+                
+                // Check if it's an auth error
+                if (segmentsError.code === 'PGRST301' || segmentsError.message?.includes('JWT')) {
+                    alert('Authentication error. Please log out and log back in.');
+                    return;
+                }
+                
                 setSegments([]);
                 return;
             }
 
             if (!segmentsData || segmentsData.length === 0) {
                 console.log('No segments found, creating sample segments...');
-                // If no segments exist, create sample segments
+                
+                // First, verify the project exists and user has access
+                const { data: projectCheck, error: projectError } = await supabase
+                    .from('projects')
+                    .select('id, translator_id, reviewer_id, created_by')
+                    .eq('id', projectId)
+                    .single();
+                
+                console.log('Project check:', { project: projectCheck, error: projectError });
+                
+                if (projectError || !projectCheck) {
+                    alert('Cannot access this project. You may not have permission.');
+                    navigate('/dashboard/cat');
+                    return;
+                }
+                
+                // Create sample segments
                 const sampleSegments = [
                     { segment_number: 1, source_text: "Welcome to this translation project. Please translate each segment carefully.", target_text: "", status: "Draft" },
                     { segment_number: 2, source_text: "The interface is designed for maximum efficiency and speed for all professional translators.", target_text: "", status: "Draft" },
@@ -223,7 +249,7 @@ const CATProjectView = () => {
                     { segment_number: 4, source_text: "Use the CAT tool features to improve your translation workflow and productivity.", target_text: "", status: "Draft" }
                 ];
                 
-                // Insert sample segments
+                console.log('Attempting to insert segments...');
                 const { data: insertedSegments, error: insertError } = await supabase
                     .from('segments')
                     .insert(sampleSegments.map(seg => ({
@@ -233,9 +259,14 @@ const CATProjectView = () => {
                     })))
                     .select();
 
-                console.log('Inserted segments:', insertedSegments, 'Error:', insertError);
+                console.log('Insert result:', { data: insertedSegments, error: insertError });
 
-                if (!insertError && insertedSegments) {
+                if (insertError) {
+                    console.error('Failed to create sample segments:', insertError);
+                    console.error('Insert error details:', JSON.stringify(insertError, null, 2));
+                    alert(`Failed to create segments: ${insertError.message}`);
+                    setSegments([]);
+                } else if (insertedSegments) {
                     setSegments(insertedSegments.map(seg => ({
                         id: seg.id,
                         source: seg.source_text,
@@ -243,14 +274,11 @@ const CATProjectView = () => {
                         status: seg.status.toLowerCase().replace(' ', '_'),
                         segment_number: seg.segment_number
                     })));
-                } else {
-                    console.error('Failed to create sample segments:', insertError);
-                    setSegments([]);
                 }
             } else {
                 // Map database segments to component format
-                console.log('Mapping segments to component format...');
-                const mappedSegments = (segmentsData || []).map(seg => ({
+                console.log('Mapping', segmentsData.length, 'segments to component format...');
+                const mappedSegments = segmentsData.map(seg => ({
                     id: seg.id,
                     source: seg.source_text,
                     target: seg.target_text || '',
@@ -262,6 +290,7 @@ const CATProjectView = () => {
             }
         } catch (err) {
             console.error('Error in fetchSegments:', err);
+            console.error('Error stack:', err.stack);
             setSegments([]);
         }
     };
