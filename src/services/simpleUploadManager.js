@@ -238,16 +238,31 @@ class SimpleUploadManager {
       return { valid: false, error: 'File is empty' };
     }
 
-    // Allowed file types (start with text files)
+    // Allowed file types
     const allowedTypes = [
       'text/plain',
       'application/json',
       'text/csv',
       'application/vnd.openxmlformats-officedocument.wordprocessingml.document', // DOCX
-      'application/pdf'
+      'text/html',
+      'application/xml',
+      'text/xml',
+      'application/x-xliff+xml',
+      'application/x-tmx+xml',
+      'application/x-subrip', // SRT
+      'text/vtt',
+      'text/x-gettext-translation', // PO
+      'text/x-java-properties'
     ];
 
-    const allowedExtensions = ['.txt', '.json', '.csv', '.docx', '.pdf'];
+    const allowedExtensions = [
+      '.txt', '.json', '.csv', '.docx', 
+      '.html', '.htm', '.xml', 
+      '.xliff', '.xlf', '.tmx', 
+      '.srt', '.vtt', 
+      '.po', '.properties',
+      '.md', '.markdown'
+    ];
     const fileExtension = '.' + file.name.split('.').pop().toLowerCase();
 
     const isAllowedType = allowedTypes.includes(file.type) || 
@@ -256,7 +271,7 @@ class SimpleUploadManager {
     if (!isAllowedType) {
       return { 
         valid: false, 
-        error: `File type not supported. Allowed types: TXT, JSON, CSV, DOCX, PDF` 
+        error: `File type not supported. Allowed: TXT, JSON, CSV, DOCX, HTML, XML, XLIFF, TMX, SRT, VTT, PO, PROPERTIES, MARKDOWN` 
       };
     }
 
