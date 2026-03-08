@@ -481,10 +481,33 @@ const CATProjectView = () => {
         // Refresh uploaded files list
         await fetchUploadedFiles();
         
-        // Refresh segments to show newly uploaded content
-        await fetchSegments();
+        // Force refresh segments from database
+        console.log('Forcing segment refresh...');
+        try {
+            const { data: segmentsData, error: segmentsError } = await supabase
+                .from('segments')
+                .select('*')
+                .eq('project_id', projectId)
+                .order('id', { ascending: true });
+
+            if (segmentsError) {
+                console.error('Error fetching segments:', segmentsError);
+            } else if (segmentsData) {
+                console.log('Fetched segments:', segmentsData.length);
+                const mappedSegments = segmentsData.map((seg, index) => ({
+                    id: seg.id,
+                    source: seg.source_text,
+                    target: seg.target_text || '',
+                    status: seg.status.toLowerCase().replace(' ', '_'),
+                    segment_number: index + 1
+                }));
+                setSegments(mappedSegments);
+                console.log('Segments updated in UI');
+            }
+        } catch (err) {
+            console.error('Error refreshing segments:', err);
+        }
         
-        // Show success message
         console.log('Upload complete! Segments refreshed.');
     };
 
