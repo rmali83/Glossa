@@ -473,8 +473,13 @@ const CATProjectView = () => {
     };
 
     const handleUploadComplete = async () => {
+        console.log('Upload completed, refreshing data...');
         await fetchUploadedFiles();
-        await fetchSegments(); // Refresh segments in case files were parsed
+        await fetchSegments(); // Refresh segments to show newly uploaded content
+        
+        // Show success message
+        const segmentCount = segments.length;
+        console.log(`Segments refreshed. Total segments: ${segmentCount}`);
     };
 
     // Fetch uploaded files on mount

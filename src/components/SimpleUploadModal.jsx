@@ -185,10 +185,15 @@ const SimpleUploadModal = ({ projectId, projectName, onClose, onUploadComplete }
                       <span className={`font-semibold ${
                         progress.status === 'completed' ? 'text-green-600' :
                         progress.status === 'failed' ? 'text-red-600' :
+                        progress.status === 'parsing' ? 'text-blue-600' :
+                        progress.status === 'segmenting' ? 'text-purple-600' :
                         'text-primary-600'
                       }`}>
                         {progress.status === 'completed' ? '✓ Done' :
                          progress.status === 'failed' ? '✗ Failed' :
+                         progress.status === 'parsing' ? '📄 Parsing...' :
+                         progress.status === 'segmenting' ? '✂️ Segmenting...' :
+                         progress.status === 'uploading' ? '⬆️ Uploading...' :
                          `${progress.percentage}%`}
                       </span>
                     </div>

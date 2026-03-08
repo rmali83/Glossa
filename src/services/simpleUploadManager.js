@@ -6,6 +6,8 @@
  */
 
 import { supabase } from '../lib/supabase';
+import browserFileParser from './browserFileParser';
+import segmentationEngine from './segmentationEngine';
 
 class SimpleUploadManager {
   /**
@@ -40,7 +42,7 @@ class SimpleUploadManager {
 
       if (uploadError) throw uploadError;
 
-      if (onProgress) onProgress({ status: 'uploading', percentage: 50 });
+      if (onProgress) onProgress({ status: 'uploading', percentage: 30 });
 
       // Get public URL (for private bucket, this returns signed URL)
       const { data: urlData } = supabase.storage
@@ -65,12 +67,82 @@ class SimpleUploadManager {
 
       if (dbError) throw dbError;
 
+      if (onProgress) onProgress({ status: 'parsing', percentage: 50 });
+
+      // Parse the file
+      console.log('Parsing file:', file.name);
+      const parseResult = await browserFileParser.parseFile(file);
+      
+      if (!parseResult.success) {
+        console.warn('File parsing failed:', parseResult.error);
+        // Update file record with parse error
+        await supabase
+          .from('project_files')
+          .update({ 
+            upload_status: 'parse_failed',
+            error_message: parseResult.error 
+          })
+          .eq('id', fileRecord.id);
+
+        if (onProgress) onProgress({ status: 'completed', percentage: 100 });
+        
+        return {
+          success: true,
+          file: fileRecord,
+          message: `File uploaded but parsing failed: ${parseResult.error}`,
+          parsed: false
+        };
+      }
+
+      if (onProgress) onProgress({ status: 'segmenting', percentage: 70 });
+
+      // Segment the parsed content
+      console.log('Segmenting content from:', file.name);
+      const segmentResult = await segmentationEngine.processAndStore(
+        parseResult,
+        projectId,
+        fileRecord.id
+      );
+
+      if (!segmentResult.success) {
+        console.warn('Segmentation failed:', segmentResult.error);
+        // Update file record
+        await supabase
+          .from('project_files')
+          .update({ 
+            upload_status: 'segment_failed',
+            error_message: segmentResult.error 
+          })
+          .eq('id', fileRecord.id);
+
+        if (onProgress) onProgress({ status: 'completed', percentage: 100 });
+
+        return {
+          success: true,
+          file: fileRecord,
+          message: `File uploaded and parsed but segmentation failed: ${segmentResult.error}`,
+          parsed: true,
+          segmented: false
+        };
+      }
+
+      // Update file record to parsed status
+      await supabase
+        .from('project_files')
+        .update({ upload_status: 'parsed' })
+        .eq('id', fileRecord.id);
+
       if (onProgress) onProgress({ status: 'completed', percentage: 100 });
+
+      console.log(`Successfully processed file: ${file.name} - ${segmentResult.segmentCount} segments created`);
 
       return {
         success: true,
         file: fileRecord,
-        message: 'File uploaded successfully'
+        message: `File uploaded successfully - ${segmentResult.segmentCount} segments created`,
+        parsed: true,
+        segmented: true,
+        segmentCount: segmentResult.segmentCount
       };
 
     } catch (error) {

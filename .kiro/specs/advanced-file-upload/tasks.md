@@ -76,20 +76,20 @@ The implementation follows a bottom-up approach: core services first, then UI co
 - [x] 5. Checkpoint - Validate core infrastructure
   - Ensure all tests pass, verify database schema is created correctly, test storage bucket access with RLS policies. Ask the user if questions arise.
 
-- [x] 6. Implement file parser for document formats
-  - [x] 6.1 Create FileParser class in `src/services/fileParser.js`
-    - Implement `parseFile(file, fileType)` as main entry point
-    - Implement `parseDocument(file)` for DOCX using mammoth.js library
-    - Implement PDF parsing using pdf.js with multi-page support
-    - Implement TXT parsing with encoding detection (UTF-8, UTF-16, ISO-8859-1)
-    - Implement RTF parsing for text extraction
-    - Implement ODT parsing (extract content.xml from ZIP)
-    - Implement `parseWithStreaming(file, onChunk)` for files >10MB using 1MB chunks
-    - Preserve formatting metadata in ParseResult for reconstruction
-    - Handle parsing errors gracefully with descriptive error messages
+- [ ] 6. Implement file parser for document formats
+  - [x] 6.1 Create FileParser class in `src/services/fileParser.js` (PARTIAL - browserFileParser.js exists but NOT integrated)
+    - [x] Implement `parseFile(file, fileType)` as main entry point
+    - [ ] Implement `parseDocument(file)` for DOCX using mammoth.js library
+    - [ ] Implement PDF parsing using pdf.js with multi-page support
+    - [x] Implement TXT parsing with encoding detection (UTF-8, UTF-16, ISO-8859-1)
+    - [ ] Implement RTF parsing for text extraction
+    - [ ] Implement ODT parsing (extract content.xml from ZIP)
+    - [ ] Implement `parseWithStreaming(file, onChunk)` for files >10MB using 1MB chunks
+    - [ ] Preserve formatting metadata in ParseResult for reconstruction
+    - [x] Handle parsing errors gracefully with descriptive error messages
     - _Requirements: 6.1-6.8, 13.1, 13.2, 25.1-25.7, 28.5, 28.6_
 
-  - [x] 6.2 Write unit tests for document parsers
+  - [ ] 6.2 Write unit tests for document parsers
     - Test DOCX parsing with tables, headers, footers
     - Test PDF multi-page extraction
     - Test TXT encoding detection
@@ -97,7 +97,7 @@ The implementation follows a bottom-up approach: core services first, then UI co
     - Test error handling for corrupted files
     - _Requirements: 6.1-6.8_
 
-- [x] 7. Implement file parser for spreadsheet and presentation formats
+- [ ] 7. Implement file parser for spreadsheet and presentation formats
   - [x] 7.1 Extend FileParser with spreadsheet and presentation support
     - Implement XLSX parsing using xlsx (SheetJS) library for cell extraction
     - Implement CSV parsing using papaparse with delimiter detection
@@ -184,8 +184,8 @@ The implementation follows a bottom-up approach: core services first, then UI co
 - [x] 12. Checkpoint - Validate file parsing
   - Ensure all parser tests pass, test parsing for each supported format, verify error handling works correctly. Ask the user if questions arise.
 
-- [x] 13. Implement segmentation engine
-  - [x] 13.1 Create SegmentationEngine class in `src/services/segmentationEngine.js`
+- [ ] 13. Implement segmentation engine
+  - [ ] 13.1 Create SegmentationEngine class in `src/services/segmentationEngine.js` (NOT CREATED)
     - Implement `segmentText(text, language)` with sentence boundary detection
     - Implement punctuation-based splitting (., !, ? followed by whitespace and capital)
     - Implement abbreviation handling (Dr., Mr., etc.) to avoid false breaks
@@ -197,14 +197,14 @@ The implementation follows a bottom-up approach: core services first, then UI co
     - Preserve paragraph breaks and formatting markers
     - _Requirements: 7.1-7.8, 23.7, 24.4_
 
-  - [x] 13.2 Implement segment storage
+  - [ ] 13.2 Implement segment storage
     - Implement `storeSegments(segments, projectId, fileId)` inserting into segments table
     - Process segments in batches of 100 to optimize performance
     - Include file_id, segment_key (for localization), and metadata (for timing/formatting)
     - Set segment status to "pending" for untranslated segments
     - _Requirements: 7.6, 9.2, 13.3_
 
-  - [x] 13.3 Write unit tests for SegmentationEngine
+  - [ ] 13.3 Write unit tests for SegmentationEngine
     - Test sentence boundary detection for English text
     - Test abbreviation handling
     - Test localization content segmentation
@@ -231,23 +231,23 @@ The implementation follows a bottom-up approach: core services first, then UI co
     - Test error isolation (one failure doesn't stop others)
     - _Requirements: 12.1-12.7_
 
-- [x] 15. Implement upload manager orchestration
-  - [x] 15.1 Create UploadManager class in `src/services/uploadManager.js`
-    - Implement `uploadFiles(files, projectId, options)` as main orchestration method
-    - Validate file count (max 200 files) and display error if exceeded
-    - Validate each file using ValidationService
-    - Calculate and display total size of all selected files
-    - Check storage quota before upload using StorageService
-    - Use BatchProcessor for concurrent uploads (5 concurrent)
-    - For each file: upload to storage ΓåÆ create project_files record ΓåÆ parse ΓåÆ segment
-    - Update upload_status through states: "uploading" ΓåÆ "completed" ΓåÆ "parsed"
-    - Handle duplicate detection and display warning with option to proceed
-    - Implement `cancelUpload(uploadId)` aborting operation and cleaning up
-    - Implement `resumeUpload(uploadId)` for failed uploads
-    - Implement `getProgress(uploadId)` delegating to ProgressTracker
+- [ ] 15. Implement upload manager orchestration
+  - [x] 15.1 Create UploadManager class in `src/services/uploadManager.js` (PARTIAL - simpleUploadManager.js exists but MISSING parse + segment)
+    - [x] Implement `uploadFiles(files, projectId, options)` as main orchestration method
+    - [x] Validate file count (max 200 files) and display error if exceeded
+    - [x] Validate each file using ValidationService
+    - [x] Calculate and display total size of all selected files
+    - [ ] Check storage quota before upload using StorageService
+    - [x] Use BatchProcessor for concurrent uploads (5 concurrent)
+    - [ ] For each file: upload to storage ΓåÆ create project_files record ΓåÆ **parse ΓåÆ segment** (MISSING)
+    - [x] Update upload_status through states: "uploading" ΓåÆ "completed" ΓåÆ "parsed"
+    - [ ] Handle duplicate detection and display warning with option to proceed
+    - [x] Implement `cancelUpload(uploadId)` aborting operation and cleaning up
+    - [ ] Implement `resumeUpload(uploadId)` for failed uploads
+    - [x] Implement `getProgress(uploadId)` delegating to ProgressTracker
     - _Requirements: 1.1-1.6, 9.1-9.7, 15.1-15.7, 18.3-18.5, 21.1-21.7, 27.4-27.6, 30.1-30.7_
 
-  - [x] 15.2 Write integration tests for UploadManager
+  - [ ] 15.2 Write integration tests for UploadManager
     - Test full upload workflow (validation ΓåÆ upload ΓåÆ parse ΓåÆ segment)
     - Test file count limit enforcement
     - Test storage quota checking
@@ -420,21 +420,21 @@ The implementation follows a bottom-up approach: core services first, then UI co
     - Test quota warning display
     - _Requirements: 11.1, 27.4, 27.5_
 
-- [x] 26. Integrate upload system with CAT project view
-  - [x] 26.1 Add upload functionality to `src/pages/dashboard/CATProjectView.jsx`
-    - Import FileUploadZone, FilePreviewPanel, UploadProgressList, and UploadOptionsPanel components
-    - Add "Upload Files" button to project view
-    - Display upload modal/panel when button clicked
-    - Pass projectId to FileUploadZone component
-    - Handle onUploadComplete callback to refresh project data
-    - Update project status to "ready" when upload completes
-    - Display notification for assigned translator when files ready
-    - Show uploaded files list in project view
-    - Provide "Replace File" option for existing files
-    - Provide "Download" button for completed translations
+- [ ] 26. Integrate upload system with CAT project view
+  - [x] 26.1 Add upload functionality to `src/pages/dashboard/CATProjectView.jsx` (PARTIAL - button exists but segments don't refresh)
+    - [x] Import FileUploadZone, FilePreviewPanel, UploadProgressList, and UploadOptionsPanel components
+    - [x] Add "Upload Files" button to project view
+    - [x] Display upload modal/panel when button clicked
+    - [x] Pass projectId to FileUploadZone component
+    - [ ] Handle onUploadComplete callback to refresh project data (MISSING - segments don't appear)
+    - [ ] Update project status to "ready" when upload completes
+    - [ ] Display notification for assigned translator when files ready
+    - [x] Show uploaded files list in project view
+    - [ ] Provide "Replace File" option for existing files
+    - [ ] Provide "Download" button for completed translations
     - _Requirements: 20.1-20.7_
 
-  - [x] 26.2 Write integration tests for CAT project upload
+  - [ ] 26.2 Write integration tests for CAT project upload
     - Test upload button display
     - Test modal/panel opening
     - Test project status update after upload
