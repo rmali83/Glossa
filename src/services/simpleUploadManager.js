@@ -49,6 +49,10 @@ class SimpleUploadManager {
         .from('project-files')
         .getPublicUrl(storagePath);
 
+      // Get current user from session
+      const { data: { session } } = await supabase.auth.getSession();
+      const userId = session?.user?.id || null;
+
       // Create database record
       const { data: fileRecord, error: dbError } = await supabase
         .from('project_files')
@@ -60,7 +64,7 @@ class SimpleUploadManager {
           storage_path: storagePath,
           storage_url: urlData.publicUrl,
           upload_status: 'completed',
-          uploaded_by: (await supabase.auth.getUser()).data.user?.id
+          uploaded_by: userId
         })
         .select()
         .single();
