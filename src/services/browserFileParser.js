@@ -6,6 +6,7 @@
  */
 
 import Papa from 'papaparse';
+import mammoth from 'mammoth';
 
 class BrowserFileParser {
   /**
@@ -24,10 +25,12 @@ class BrowserFileParser {
           return await this.parseJSON(file);
         case 'csv':
           return await this.parseCSV(file);
+        case 'docx':
+          return await this.parseDOCX(file);
         default:
           return {
             success: false,
-            error: `File type .${extension} parsing not yet implemented. File uploaded but not parsed.`
+            error: `File type .${extension} parsing not yet implemented. Supported: TXT, JSON, CSV, DOCX`
           };
       }
     } catch (error) {
@@ -138,6 +141,51 @@ class BrowserFileParser {
         }
       });
     });
+  }
+
+  /**
+   * Parse DOCX file using mammoth
+   */
+  async parseDOCX(file) {
+    try {
+      // Convert File to ArrayBuffer
+      const arrayBuffer = await file.arrayBuffer();
+      
+      // Extract text using mammoth
+      const result = await mammoth.extractRawText({ arrayBuffer });
+      
+      const text = result.value;
+      
+      if (!text || text.trim().length === 0) {
+        return {
+          success: false,
+          error: 'DOCX file appears to be empty'
+        };
+      }
+
+      // Split into paragraphs (segments)
+      const segments = text
+        .split(/\n\n+/) // Split on double newlines
+        .map(para => para.trim())
+        .filter(para => para.length > 0);
+
+      return {
+        success: true,
+        content: text,
+        segments: segments,
+        metadata: {
+          format: 'docx',
+          segmentCount: segments.length,
+          wordCount: text.split(/\s+/).filter(w => w.length > 0).length
+        }
+      };
+    } catch (error) {
+      console.error('DOCX parse error:', error);
+      return {
+        success: false,
+        error: `Failed to parse DOCX: ${error.message}`
+      };
+    }
   }
 
   /**
