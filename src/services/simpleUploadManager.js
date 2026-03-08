@@ -19,6 +19,8 @@ class SimpleUploadManager {
    */
   async uploadFile(file, projectId, onProgress = null) {
     try {
+      console.log('[Upload] Starting upload for:', file.name);
+      
       // Validate file
       const validation = this.validateFile(file);
       if (!validation.valid) {
@@ -33,6 +35,7 @@ class SimpleUploadManager {
       // Upload to Supabase Storage
       if (onProgress) onProgress({ status: 'uploading', percentage: 0 });
 
+      console.log('[Upload] Uploading to storage...');
       const { data: uploadData, error: uploadError } = await supabase.storage
         .from('project-files')
         .upload(storagePath, file, {
@@ -40,7 +43,10 @@ class SimpleUploadManager {
           upsert: false
         });
 
-      if (uploadError) throw uploadError;
+      if (uploadError) {
+        console.error('[Upload] Storage upload error:', uploadError);
+        throw uploadError;
+      }
 
       if (onProgress) onProgress({ status: 'uploading', percentage: 30 });
 
@@ -50,10 +56,18 @@ class SimpleUploadManager {
         .getPublicUrl(storagePath);
 
       // Get current user from session
-      const { data: { session } } = await supabase.auth.getSession();
+      console.log('[Upload] Getting user session...');
+      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+      
+      if (sessionError) {
+        console.error('[Upload] Session error:', sessionError);
+      }
+      
       const userId = session?.user?.id || null;
+      console.log('[Upload] User ID:', userId);
 
       // Create database record
+      console.log('[Upload] Creating file record in database...');
       const { data: fileRecord, error: dbError } = await supabase
         .from('project_files')
         .insert({
@@ -69,16 +83,20 @@ class SimpleUploadManager {
         .select()
         .single();
 
-      if (dbError) throw dbError;
+      if (dbError) {
+        console.error('[Upload] Database error:', dbError);
+        throw dbError;
+      }
 
+      console.log('[Upload] File record created:', fileRecord.id);
       if (onProgress) onProgress({ status: 'parsing', percentage: 50 });
 
       // Parse the file
-      console.log('Parsing file:', file.name);
+      console.log('[Upload] Parsing file:', file.name);
       const parseResult = await browserFileParser.parseFile(file);
       
       if (!parseResult.success) {
-        console.warn('File parsing failed:', parseResult.error);
+        console.warn('[Upload] File parsing failed:', parseResult.error);
         // Update file record with parse error
         await supabase
           .from('project_files')
@@ -98,10 +116,11 @@ class SimpleUploadManager {
         };
       }
 
+      console.log('[Upload] Parse successful, segments found:', parseResult.segments?.length || 0);
       if (onProgress) onProgress({ status: 'segmenting', percentage: 70 });
 
       // Segment the parsed content
-      console.log('Segmenting content from:', file.name);
+      console.log('[Upload] Segmenting content from:', file.name);
       const segmentResult = await segmentationEngine.processAndStore(
         parseResult,
         projectId,
@@ -109,7 +128,7 @@ class SimpleUploadManager {
       );
 
       if (!segmentResult.success) {
-        console.warn('Segmentation failed:', segmentResult.error);
+        console.warn('[Upload] Segmentation failed:', segmentResult.error);
         // Update file record
         await supabase
           .from('project_files')
@@ -138,7 +157,7 @@ class SimpleUploadManager {
 
       if (onProgress) onProgress({ status: 'completed', percentage: 100 });
 
-      console.log(`Successfully processed file: ${file.name} - ${segmentResult.segmentCount} segments created`);
+      console.log(`[Upload] Successfully processed file: ${file.name} - ${segmentResult.segmentCount} segments created`);
 
       return {
         success: true,
@@ -150,7 +169,8 @@ class SimpleUploadManager {
       };
 
     } catch (error) {
-      console.error('Upload error:', error);
+      console.error('[Upload] Upload error:', error);
+      console.error('[Upload] Error stack:', error.stack);
       if (onProgress) onProgress({ status: 'failed', percentage: 0, error: error.message });
       
       return {
