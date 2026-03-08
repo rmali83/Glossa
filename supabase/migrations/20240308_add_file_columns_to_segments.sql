@@ -20,10 +20,6 @@ ADD COLUMN IF NOT EXISTS original_format VARCHAR(50);
 -- Create index for fast file-based queries
 CREATE INDEX IF NOT EXISTS idx_segments_file_id ON public.segments(file_id);
 
--- Make segment_number nullable since it's auto-generated from index
-ALTER TABLE public.segments 
-ALTER COLUMN segment_number DROP NOT NULL;
-
 COMMENT ON COLUMN public.segments.file_id IS 'Links segment to uploaded file';
 COMMENT ON COLUMN public.segments.segment_key IS 'Key for localization formats (e.g., "app.title")';
 COMMENT ON COLUMN public.segments.metadata IS 'JSON metadata for timing, formatting, etc.';

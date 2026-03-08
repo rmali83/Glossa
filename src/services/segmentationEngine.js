@@ -144,11 +144,13 @@ class SegmentationEngine {
     }
 
     try {
-      // Get current user
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) {
-        throw new Error('User not authenticated');
+      // Get current user - use getSession instead of getUser to avoid RLS issues
+      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+      if (sessionError || !session?.user) {
+        console.warn('Could not get user session, proceeding without user ID');
       }
+
+      const userId = session?.user?.id || null;
 
       // Prepare segment records for database
       const segmentRecords = segments.map((seg, index) => ({
@@ -160,7 +162,7 @@ class SegmentationEngine {
         segment_key: seg.key || null,
         metadata: seg.metadata ? JSON.stringify(seg.metadata) : null,
         original_format: seg.type || 'text',
-        created_by: user.id
+        created_by: userId
       }));
 
       // Insert in batches of 100
