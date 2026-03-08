@@ -474,12 +474,18 @@ const CATProjectView = () => {
 
     const handleUploadComplete = async () => {
         console.log('Upload completed, refreshing data...');
+        
+        // Close the modal first
+        setShowUploadModal(false);
+        
+        // Refresh uploaded files list
         await fetchUploadedFiles();
-        await fetchSegments(); // Refresh segments to show newly uploaded content
+        
+        // Refresh segments to show newly uploaded content
+        await fetchSegments();
         
         // Show success message
-        const segmentCount = segments.length;
-        console.log(`Segments refreshed. Total segments: ${segmentCount}`);
+        console.log('Upload complete! Segments refreshed.');
     };
 
     // Fetch uploaded files on mount

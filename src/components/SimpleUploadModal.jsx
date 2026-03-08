@@ -31,7 +31,7 @@ const SimpleUploadModal = ({ projectId, projectName, onClose, onUploadComplete }
     setSelectedFiles(files);
   };
 
-  const handleUpload = async () => {
+    const handleUpload = async () => {
     if (selectedFiles.length === 0) {
       alert('Please select files to upload');
       return;
@@ -57,12 +57,18 @@ const SimpleUploadModal = ({ projectId, projectName, onClose, onUploadComplete }
     const successCount = results.filter(r => r.success).length;
     const failCount = results.filter(r => !r.success).length;
 
-    if (failCount === 0) {
-      alert(`Successfully uploaded ${successCount} file(s)!`);
+    if (successCount > 0) {
+      // Call onUploadComplete to refresh segments
       if (onUploadComplete) onUploadComplete();
-      onClose();
+      
+      if (failCount === 0) {
+        // All succeeded - modal will close via onUploadComplete
+        console.log(`Successfully uploaded ${successCount} file(s)!`);
+      } else {
+        alert(`Upload completed: ${successCount} succeeded, ${failCount} failed`);
+      }
     } else {
-      alert(`Upload completed: ${successCount} succeeded, ${failCount} failed`);
+      alert(`All uploads failed`);
     }
   };
 
