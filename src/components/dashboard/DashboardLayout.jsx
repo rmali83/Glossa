@@ -32,6 +32,7 @@ const DashboardLayout = ({ children }) => {
 
     if (isAdmin) {
         menuItems.push({ name: 'Admin Control', path: '/dashboard/admin', icon: '🛡️' });
+        menuItems.push({ name: 'Job Management', path: '/dashboard/job-management', icon: '📊' });
     }
 
     const handleLogout = async () => {
