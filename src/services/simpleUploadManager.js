@@ -78,12 +78,17 @@ class SimpleUploadManager {
 
       // Create database record
       console.log('[Upload] Creating file record in database...');
+      
+      // Get file extension for file_type
+      const fileExtension = sanitizedFilename.split('.').pop().toLowerCase();
+      
       const { data: fileRecord, error: dbError } = await supabase
         .from('project_files')
         .insert({
           project_id: projectId,
           filename: file.name,
           file_size: file.size,
+          file_type: fileExtension,
           mime_type: file.type || 'application/octet-stream',
           storage_path: storagePath,
           storage_url: urlData.publicUrl,
@@ -254,6 +259,12 @@ class SimpleUploadManager {
       'application/json',
       'text/csv',
       'application/vnd.openxmlformats-officedocument.wordprocessingml.document', // DOCX
+      'application/pdf',
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', // XLSX
+      'application/vnd.ms-excel', // XLS
+      'application/vnd.openxmlformats-officedocument.presentationml.presentation', // PPTX
+      'application/vnd.oasis.opendocument.text', // ODT
+      'application/rtf',
       'text/html',
       'application/xml',
       'text/xml',
@@ -262,15 +273,19 @@ class SimpleUploadManager {
       'application/x-subrip', // SRT
       'text/vtt',
       'text/x-gettext-translation', // PO
-      'text/x-java-properties'
+      'text/x-java-properties',
+      'application/x-yaml',
+      'text/yaml'
     ];
 
     const allowedExtensions = [
-      '.txt', '.json', '.csv', '.docx', 
+      '.txt', '.json', '.csv', '.docx', '.pdf',
+      '.xlsx', '.xls', '.pptx', '.odt', '.rtf',
       '.html', '.htm', '.xml', 
-      '.xliff', '.xlf', '.tmx', 
+      '.xliff', '.xlf', '.sdlxliff', '.tmx', '.mxf',
       '.srt', '.vtt', 
-      '.po', '.properties',
+      '.po', '.properties', '.resx', '.strings',
+      '.yaml', '.yml', '.ini',
       '.md', '.markdown'
     ];
     const fileExtension = '.' + file.name.split('.').pop().toLowerCase();

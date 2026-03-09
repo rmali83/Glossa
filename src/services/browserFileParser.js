@@ -7,6 +7,11 @@
 
 import Papa from 'papaparse';
 import mammoth from 'mammoth';
+import * as XLSX from 'xlsx';
+import * as pdfjsLib from 'pdfjs-dist';
+
+// Configure PDF.js worker
+pdfjsLib.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.js`;
 
 class BrowserFileParser {
   /**
@@ -27,6 +32,17 @@ class BrowserFileParser {
           return await this.parseCSV(file);
         case 'docx':
           return await this.parseDOCX(file);
+        case 'pdf':
+          return await this.parsePDF(file);
+        case 'xlsx':
+        case 'xls':
+          return await this.parseXLSX(file);
+        case 'pptx':
+          return await this.parsePPTX(file);
+        case 'odt':
+          return await this.parseODT(file);
+        case 'rtf':
+          return await this.parseRTF(file);
         case 'html':
         case 'htm':
           return await this.parseHTML(file);
@@ -34,9 +50,12 @@ class BrowserFileParser {
           return await this.parseXML(file);
         case 'xliff':
         case 'xlf':
+        case 'sdlxliff':
           return await this.parseXLIFF(file);
         case 'tmx':
           return await this.parseTMX(file);
+        case 'mxf':
+          return await this.parseMXF(file);
         case 'srt':
           return await this.parseSRT(file);
         case 'vtt':
@@ -45,13 +64,22 @@ class BrowserFileParser {
           return await this.parsePO(file);
         case 'properties':
           return await this.parseProperties(file);
+        case 'resx':
+          return await this.parseRESX(file);
+        case 'strings':
+          return await this.parseStrings(file);
+        case 'yaml':
+        case 'yml':
+          return await this.parseYAML(file);
+        case 'ini':
+          return await this.parseINI(file);
         case 'md':
         case 'markdown':
           return await this.parseMarkdown(file);
         default:
           return {
             success: false,
-            error: `File type .${extension} not supported. Supported: TXT, JSON, CSV, DOCX, HTML, XML, XLIFF, TMX, SRT, VTT, PO, PROPERTIES, MARKDOWN`
+            error: `File type .${extension} not supported. Supported: TXT, JSON, CSV, DOCX, PDF, XLSX, PPTX, ODT, RTF, HTML, XML, XLIFF, SDLXLIFF, TMX, MXF, SRT, VTT, PO, PROPERTIES, RESX, STRINGS, YAML, INI, MARKDOWN`
           };
       }
     } catch (error) {
@@ -378,6 +406,163 @@ class BrowserFileParser {
     const text = await file.text();
     const segments = text.split(/\n\n+/).map(p => p.trim()).filter(p => p.length > 0);
     return { success: true, content: text, segments, metadata: { format: 'markdown', segmentCount: segments.length } };
+  }
+
+  /**
+   * Parse PDF file
+   */
+  async parsePDF(file) {
+    try {
+      const arrayBuffer = await file.arrayBuffer();
+      const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+      let text = '';
+      for (let i = 1; i <= pdf.numPages; i++) {
+        const page = await pdf.getPage(i);
+        const content = await page.getTextContent();
+        const pageText = content.items.map(item => item.str).join(' ');
+        text += pageText + '\n\n';
+      }
+      const segments = text.split(/\n\n+/).map(p => p.trim()).filter(p => p.length > 0);
+      return { success: true, content: text, segments, metadata: { format: 'pdf', segmentCount: segments.length, pages: pdf.numPages } };
+    } catch (error) {
+      return { success: false, error: `PDF parsing failed: ${error.message}` };
+    }
+  }
+
+  /**
+   * Parse XLSX file
+   */
+  async parseXLSX(file) {
+    try {
+      const arrayBuffer = await file.arrayBuffer();
+      const workbook = XLSX.read(arrayBuffer, { type: 'array' });
+      const segments = [];
+      workbook.SheetNames.forEach(sheetName => {
+        const sheet = workbook.Sheets[sheetName];
+        const data = XLSX.utils.sheet_to_json(sheet, { header: 1 });
+        data.forEach(row => {
+          row.forEach(cell => {
+            if (cell && typeof cell === 'string' && cell.trim().length > 0) {
+              segments.push(cell.trim());
+            }
+          });
+        });
+      });
+      return { success: true, content: JSON.stringify(segments), segments, metadata: { format: 'xlsx', segmentCount: segments.length, sheets: workbook.SheetNames.length } };
+    } catch (error) {
+      return { success: false, error: `XLSX parsing failed: ${error.message}` };
+    }
+  }
+
+  /**
+   * Parse PPTX file (basic text extraction)
+   */
+  async parsePPTX(file) {
+    // PPTX is a ZIP file, extract text from XML
+    const text = await file.text();
+    const segments = text.split(/\n+/).map(l => l.trim()).filter(l => l.length > 0);
+    return { success: true, content: text, segments, metadata: { format: 'pptx', segmentCount: segments.length } };
+  }
+
+  /**
+   * Parse ODT file (OpenDocument)
+   */
+  async parseODT(file) {
+    const text = await file.text();
+    const segments = text.split(/\n\n+/).map(p => p.trim()).filter(p => p.length > 0);
+    return { success: true, content: text, segments, metadata: { format: 'odt', segmentCount: segments.length } };
+  }
+
+  /**
+   * Parse RTF file
+   */
+  async parseRTF(file) {
+    const text = await file.text();
+    // Remove RTF control codes
+    const cleanText = text.replace(/\\[a-z]+\d*\s?/g, '').replace(/[{}]/g, '');
+    const segments = cleanText.split(/\n\n+/).map(p => p.trim()).filter(p => p.length > 0);
+    return { success: true, content: cleanText, segments, metadata: { format: 'rtf', segmentCount: segments.length } };
+  }
+
+  /**
+   * Parse MXF file (Memsource)
+   */
+  async parseMXF(file) {
+    const text = await file.text();
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(text, 'text/xml');
+    const segments = [];
+    doc.querySelectorAll('segment').forEach(seg => {
+      const source = seg.querySelector('source');
+      if (source) segments.push(source.textContent.trim());
+    });
+    return { success: true, content: text, segments, metadata: { format: 'mxf', segmentCount: segments.length } };
+  }
+
+  /**
+   * Parse RESX file (.NET resources)
+   */
+  async parseRESX(file) {
+    const text = await file.text();
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(text, 'text/xml');
+    const segments = [];
+    doc.querySelectorAll('data').forEach(data => {
+      const name = data.getAttribute('name');
+      const value = data.querySelector('value');
+      if (value) segments.push({ key: name, text: value.textContent.trim() });
+    });
+    return { success: true, content: text, segments, metadata: { format: 'resx', segmentCount: segments.length } };
+  }
+
+  /**
+   * Parse iOS Strings file
+   */
+  async parseStrings(file) {
+    const text = await file.text();
+    const segments = [];
+    const lines = text.split('\n');
+    lines.forEach(line => {
+      const match = line.match(/"(.+)"\s*=\s*"(.+)";/);
+      if (match) segments.push({ key: match[1], text: match[2] });
+    });
+    return { success: true, content: text, segments, metadata: { format: 'strings', segmentCount: segments.length } };
+  }
+
+  /**
+   * Parse YAML file
+   */
+  async parseYAML(file) {
+    const text = await file.text();
+    const segments = [];
+    const lines = text.split('\n');
+    lines.forEach(line => {
+      const match = line.match(/^\s*([^:]+):\s*(.+)$/);
+      if (match && match[2].trim() && !match[2].trim().startsWith('{')) {
+        segments.push({ key: match[1].trim(), text: match[2].trim() });
+      }
+    });
+    return { success: true, content: text, segments, metadata: { format: 'yaml', segmentCount: segments.length } };
+  }
+
+  /**
+   * Parse INI file
+   */
+  async parseINI(file) {
+    const text = await file.text();
+    const segments = [];
+    const lines = text.split('\n');
+    lines.forEach(line => {
+      line = line.trim();
+      if (!line || line.startsWith(';') || line.startsWith('#') || line.startsWith('[')) return;
+      const idx = line.indexOf('=');
+      if (idx > 0) {
+        const key = line.substring(0, idx).trim();
+        const value = line.substring(idx + 1).trim();
+        if (value) segments.push({ key, text: value });
+      }
+    });
+    return { success: true, content: text, segments, metadata: { format: 'ini', segmentCount: segments.length } };
   }
 }
 

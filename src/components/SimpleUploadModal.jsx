@@ -121,7 +121,7 @@ const SimpleUploadModal = ({ projectId, projectName, onClose, onUploadComplete }
               Drop files here or click to browse
             </p>
             <p className="text-sm text-slate-500 mb-4">
-              Supported: TXT, JSON, CSV, DOCX, HTML, XML, XLIFF, TMX, SRT, VTT, PO, PROPERTIES, MARKDOWN (max 50 MB)
+              Supported: TXT, JSON, CSV, DOCX, PDF, XLSX, PPTX, ODT, RTF, HTML, XML, XLIFF, SDLXLIFF, TMX, MXF, SRT, VTT, PO, PROPERTIES, RESX, STRINGS, YAML, INI, MARKDOWN (max 50 MB)
             </p>
             <input
               type="file"
@@ -129,7 +129,7 @@ const SimpleUploadModal = ({ projectId, projectName, onClose, onUploadComplete }
               onChange={handleFileSelect}
               className="hidden"
               id="file-input"
-              accept=".txt,.json,.csv,.docx,.html,.htm,.xml,.xliff,.xlf,.tmx,.srt,.vtt,.po,.properties,.md,.markdown"
+              accept=".txt,.json,.csv,.docx,.pdf,.xlsx,.xls,.pptx,.odt,.rtf,.html,.htm,.xml,.xliff,.xlf,.sdlxliff,.tmx,.mxf,.srt,.vtt,.po,.properties,.resx,.strings,.yaml,.yml,.ini,.md,.markdown"
             />
             <label
               htmlFor="file-input"
