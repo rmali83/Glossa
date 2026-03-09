@@ -5,6 +5,7 @@ import { useAuth } from '../../context/AuthContext';
 import { translateText, generateAISuggestions, checkTranslationQuality } from '../../services/aiTranslation';
 import SimpleUploadModal from '../../components/SimpleUploadModal';
 import simpleUploadManager from '../../services/simpleUploadManager';
+import { getTextDirection, getTextAlign, isRTL } from '../../data/languageDirections';
 import './CATProjectWorkspace.css';
 
 const CATProjectView = () => {
@@ -763,7 +764,11 @@ ${segments.map(seg => `      <trans-unit id="${seg.segment_number}">
                                             title={seg.status}
                                         ></span>
                                     </div>
-                                    <p className="text-sm text-slate-600 dark:text-slate-400 line-clamp-2">{seg.source}</p>
+                                    <p className="text-sm text-slate-600 dark:text-slate-400 line-clamp-2" 
+                                       dir={getTextDirection(project?.source_language)}
+                                       style={{ textAlign: getTextAlign(project?.source_language) }}>
+                                        {seg.source}
+                                    </p>
                                 </div>
                             ))}
                         </div>
@@ -778,7 +783,11 @@ ${segments.map(seg => `      <trans-unit id="${seg.segment_number}">
                                 <label className="text-[11px] font-bold text-slate-400 uppercase tracking-widest">
                                     Source Language ({project?.source_language || 'English'})
                                 </label>
-                                <div className="p-6 rounded-2xl bg-slate-100 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-800 text-lg leading-relaxed shadow-sm">
+                                <div 
+                                    className="p-6 rounded-2xl bg-slate-100 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-800 text-lg leading-relaxed shadow-sm"
+                                    dir={getTextDirection(project?.source_language)}
+                                    style={{ textAlign: getTextAlign(project?.source_language) }}
+                                >
                                     <div dangerouslySetInnerHTML={{ __html: activeSegment?.source.replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/&lt;b&gt;/g, '<span class="tag-pill">&lt;b&gt;</span>').replace(/&lt;\/b&gt;/g, '<span class="tag-pill">&lt;/b&gt;</span>') }} />
                                 </div>
                             </div>
@@ -799,6 +808,8 @@ ${segments.map(seg => `      <trans-unit id="${seg.segment_number}">
                                         onChange={(e) => handleSegmentChange(e.target.value)}
                                         className="w-full h-full min-h-[200px] p-6 rounded-2xl bg-white dark:bg-slate-900 border-2 border-primary-500/30 focus:border-primary-500 transition-all outline-none text-lg leading-relaxed shadow-xl resize-none font-medium" 
                                         placeholder="Start translating..."
+                                        dir={getTextDirection(project?.target_language)}
+                                        style={{ textAlign: getTextAlign(project?.target_language) }}
                                     />
                                     
                                     {activeSegment?.status === 'confirmed' && (
