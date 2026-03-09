@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import './DashboardPages.css';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../context/AuthContext';
 
 const Admin = () => {
     const { user } = useAuth();
+    const navigate = useNavigate();
     const [translators, setTranslators] = useState([]);
     const [stats, setStats] = useState({ translators: 0, projects: 0, revenue: 0 });
     const [loading, setLoading] = useState(true);
@@ -125,6 +127,30 @@ const Admin = () => {
 
     return (
         <div className="dashboard-page fade-in">
+            {/* Header with Create Job Button */}
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
+                <h1 style={{ fontSize: '2rem', fontWeight: 'bold', color: '#fff' }}>Admin Dashboard</h1>
+                <button
+                    onClick={() => navigate('/dashboard/admin/create-job')}
+                    style={{
+                        padding: '12px 24px',
+                        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                        color: '#fff',
+                        border: 'none',
+                        borderRadius: '12px',
+                        fontSize: '1rem',
+                        fontWeight: '600',
+                        cursor: 'pointer',
+                        boxShadow: '0 4px 15px rgba(102, 126, 234, 0.4)',
+                        transition: 'all 0.3s ease'
+                    }}
+                    onMouseOver={(e) => e.target.style.transform = 'translateY(-2px)'}
+                    onMouseOut={(e) => e.target.style.transform = 'translateY(0)'}
+                >
+                    + Create New Job
+                </button>
+            </div>
+
             <div className="admin-stats" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '25px', marginBottom: '3rem' }}>
                 <div className="payment-stat-card" style={{ boxShadow: '0 0 20px rgba(255,255,255,0.02)' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between' }}>

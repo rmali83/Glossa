@@ -668,17 +668,19 @@ ${segments.map(seg => `      <trans-unit id="${seg.segment_number}">
                         </div>
                         
                         <div className="flex items-center gap-2">
-                            {/* Upload Button */}
-                            <button 
-                                onClick={handleOpenUploadModal}
-                                className="flex items-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-xl font-semibold transition-all shadow-lg shadow-green-500/20"
-                                title="Upload files"
-                            >
-                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
-                                </svg>
-                                <span>Upload</span>
-                            </button>
+                            {/* Upload Button - Only for Admins */}
+                            {isAdmin && (
+                                <button 
+                                    onClick={handleOpenUploadModal}
+                                    className="flex items-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-xl font-semibold transition-all shadow-lg shadow-green-500/20"
+                                    title="Upload files"
+                                >
+                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                                    </svg>
+                                    <span>Upload</span>
+                                </button>
+                            )}
 
                             <button onClick={toggleTheme} className="p-2 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
                                 {theme === 'dark' ? (
