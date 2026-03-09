@@ -159,10 +159,24 @@ const CreateJob = () => {
             message: `You have been assigned to "${formData.name}". ${totalWords} words, ${formData.source_language} → ${formData.target_language}. Payment: $${totalPayment.toFixed(2)}`,
             type: 'job_assigned',
             link: `/dashboard/cat/${projectId}`
+          }).select().single().then(({ data: notificationData, error: notifError }) => {
+            if (notifError) {
+              console.error('Error creating notification:', notifError);
+            } else if (notificationData) {
+              // Send email via Edge Function
+              supabase.functions.invoke('send-email', {
+                body: { notificationId: notificationData.id }
+              }).then(({ data: emailData, error: emailError }) => {
+                if (emailError) {
+                  console.error('Error sending email:', emailError);
+                } else {
+                  console.log('Email sent successfully:', emailData);
+                }
+              }).catch(emailError => {
+                console.error('Failed to send email:', emailError);
+              });
+            }
           });
-
-          // TODO: Send actual email via Supabase Edge Function or email service
-          console.log('Email notification sent to:', translator.email);
         } catch (notifError) {
           console.error('Error sending notification:', notifError);
         }
