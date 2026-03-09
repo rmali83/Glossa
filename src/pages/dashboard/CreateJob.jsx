@@ -1,9 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../context/AuthContext';
 import SimpleUploadModal from '../../components/SimpleUploadModal';
 import simpleUploadManager from '../../services/simpleUploadManager';
+import LANGUAGES from '../../data/languages';
 
 const CreateJob = () => {
   const { user } = useAuth();
@@ -17,7 +18,9 @@ const CreateJob = () => {
     deadline: '',
     job_description: '',
     specialization: 'General',
-    difficulty_level: 'standard'
+    difficulty_level: 'standard',
+    translator_id: '',
+    reviewer_id: ''
   });
 
   const [uploadedFiles, setUploadedFiles] = useState([]);
@@ -25,6 +28,30 @@ const CreateJob = () => {
   const [showUploadModal, setShowUploadModal] = useState(false);
   const [creating, setCreating] = useState(false);
   const [projectId, setProjectId] = useState(null);
+  const [translators, setTranslators] = useState([]);
+  const [reviewers, setReviewers] = useState([]);
+
+  // Fetch translators and reviewers
+  useEffect(() => {
+    const fetchUsers = async () => {
+      try {
+        const { data: profiles } = await supabase
+          .from('profiles')
+          .select('id, full_name, user_type, email');
+        
+        if (profiles) {
+          setTranslators(profiles.filter(p => 
+            p.user_type === 'Translator' || 
+            p.user_type === 'Freelance Translator'
+          ));
+          setReviewers(profiles.filter(p => p.user_type === 'Reviewer'));
+        }
+      } catch (error) {
+        console.error('Error fetching users:', error);
+      }
+    };
+    fetchUsers();
+  }, []);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -96,25 +123,66 @@ const CreateJob = () => {
       return;
     }
 
+    if (!formData.translator_id) {
+      alert('Please assign a translator');
+      return;
+    }
+
     setCreating(true);
 
     try {
       const totalPayment = totalWords * parseFloat(formData.pay_rate_per_word);
 
-      // Update project to posted status
+      // Update project to posted status with translator and reviewer
       const { error } = await supabase
         .from('projects')
         .update({
           total_words: totalWords,
           total_payment: totalPayment,
           job_status: 'posted',
-          status: 'pending'
+          status: 'pending',
+          translator_id: formData.translator_id,
+          reviewer_id: formData.reviewer_id || null
         })
         .eq('id', projectId);
 
       if (error) throw error;
 
-      alert('Job posted successfully!');
+      // Send email notification to translator
+      const translator = translators.find(t => t.id === formData.translator_id);
+      if (translator && translator.email) {
+        try {
+          // Create notification in database
+          await supabase.from('notifications').insert({
+            user_id: formData.translator_id,
+            title: 'New Translation Job Assigned',
+            message: `You have been assigned to "${formData.name}". ${totalWords} words, ${formData.source_language} → ${formData.target_language}. Payment: $${totalPayment.toFixed(2)}`,
+            type: 'job_assigned',
+            link: `/dashboard/cat/${projectId}`
+          });
+
+          // TODO: Send actual email via Supabase Edge Function or email service
+          console.log('Email notification sent to:', translator.email);
+        } catch (notifError) {
+          console.error('Error sending notification:', notifError);
+        }
+      }
+
+      // Send notification to reviewer if assigned
+      if (formData.reviewer_id) {
+        const reviewer = reviewers.find(r => r.id === formData.reviewer_id);
+        if (reviewer) {
+          await supabase.from('notifications').insert({
+            user_id: formData.reviewer_id,
+            title: 'New Review Job Assigned',
+            message: `You have been assigned to review "${formData.name}". ${totalWords} words, ${formData.source_language} → ${formData.target_language}.`,
+            type: 'review_assigned',
+            link: `/dashboard/cat/${projectId}`
+          });
+        }
+      }
+
+      alert('Job posted successfully! Translator has been notified.');
       navigate('/dashboard/admin');
     } catch (error) {
       console.error('Error posting job:', error);
@@ -167,13 +235,9 @@ const CreateJob = () => {
                   onChange={handleChange}
                   className="w-full px-4 py-3 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100"
                 >
-                  <option>English</option>
-                  <option>Spanish</option>
-                  <option>French</option>
-                  <option>German</option>
-                  <option>Chinese</option>
-                  <option>Japanese</option>
-                  <option>Arabic</option>
+                  {LANGUAGES.map(lang => (
+                    <option key={lang} value={lang}>{lang}</option>
+                  ))}
                 </select>
               </div>
 
@@ -187,13 +251,9 @@ const CreateJob = () => {
                   onChange={handleChange}
                   className="w-full px-4 py-3 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100"
                 >
-                  <option>Spanish</option>
-                  <option>English</option>
-                  <option>French</option>
-                  <option>German</option>
-                  <option>Chinese</option>
-                  <option>Japanese</option>
-                  <option>Arabic</option>
+                  {LANGUAGES.map(lang => (
+                    <option key={lang} value={lang}>{lang}</option>
+                  ))}
                 </select>
               </div>
             </div>
@@ -279,6 +339,53 @@ const CreateJob = () => {
                 className="w-full px-4 py-3 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 resize-none"
                 placeholder="Provide any special instructions or context for translators..."
               />
+            </div>
+
+            {/* Translator and Reviewer Assignment */}
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">
+                  Assign Translator *
+                </label>
+                <select
+                  name="translator_id"
+                  value={formData.translator_id}
+                  onChange={handleChange}
+                  className="w-full px-4 py-3 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100"
+                >
+                  <option value="">Select Translator</option>
+                  {translators.map(t => (
+                    <option key={t.id} value={t.id}>
+                      {t.full_name} ({t.email})
+                    </option>
+                  ))}
+                </select>
+                <p className="text-xs text-slate-500 mt-1">
+                  Translator will receive email notification
+                </p>
+              </div>
+
+              <div>
+                <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">
+                  Assign Reviewer (Optional)
+                </label>
+                <select
+                  name="reviewer_id"
+                  value={formData.reviewer_id}
+                  onChange={handleChange}
+                  className="w-full px-4 py-3 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100"
+                >
+                  <option value="">Select Reviewer</option>
+                  {reviewers.map(r => (
+                    <option key={r.id} value={r.id}>
+                      {r.full_name} ({r.email})
+                    </option>
+                  ))}
+                </select>
+                <p className="text-xs text-slate-500 mt-1">
+                  Reviewer will be notified after translation
+                </p>
+              </div>
             </div>
           </div>
 

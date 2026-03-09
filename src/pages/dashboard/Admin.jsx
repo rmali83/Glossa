@@ -8,6 +8,7 @@ const Admin = () => {
     const { user } = useAuth();
     const navigate = useNavigate();
     const [translators, setTranslators] = useState([]);
+    const [projects, setProjects] = useState([]);
     const [stats, setStats] = useState({ translators: 0, projects: 0, revenue: 0 });
     const [loading, setLoading] = useState(true);
 
@@ -29,11 +30,20 @@ const Admin = () => {
                 const { data: profiles } = await supabase.from('profiles').select('*');
                 setTranslators(profiles || []);
 
-                const { data: projects } = await supabase.from('projects').select('id');
+                const { data: projectsData } = await supabase
+                    .from('projects')
+                    .select(`
+                        *,
+                        translator:translator_id(full_name, email),
+                        reviewer:reviewer_id(full_name, email)
+                    `)
+                    .order('created_at', { ascending: false });
+
+                setProjects(projectsData || []);
 
                 setStats({
                     translators: profiles?.length || 0,
-                    projects: projects?.length || 0,
+                    projects: projectsData?.length || 0,
                     revenue: 12500
                 });
             } catch (err) {
@@ -329,6 +339,74 @@ const Admin = () => {
                         </div>
                         <button type="submit" className="primary-btn" style={{ marginTop: '10px' }}>Dispatch Job 🚀</button>
                     </form>
+                </div>
+            </div>
+
+            {/* Posted Jobs List */}
+            <div className="dashboard-card" style={{ marginTop: '30px' }}>
+                <div className="card-header">
+                    <h3>Posted Jobs</h3>
+                </div>
+                <div className="table-container">
+                    <table className="payment-table">
+                        <thead>
+                            <tr>
+                                <th>Job Name</th>
+                                <th>Languages</th>
+                                <th>Words</th>
+                                <th>Payment</th>
+                                <th>Translator</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {projects.length === 0 ? (
+                                <tr>
+                                    <td colSpan="7" style={{ textAlign: 'center', padding: '2rem', color: '#666' }}>
+                                        No jobs posted yet. Create a new job to get started.
+                                    </td>
+                                </tr>
+                            ) : (
+                                projects.map(project => (
+                                    <tr key={project.id}>
+                                        <td><strong>{project.name}</strong></td>
+                                        <td style={{ fontSize: '0.8rem' }}>
+                                            {project.source_language} → {project.target_language}
+                                        </td>
+                                        <td>{project.total_words?.toLocaleString() || 0}</td>
+                                        <td>${project.total_payment?.toFixed(2) || '0.00'}</td>
+                                        <td style={{ fontSize: '0.8rem' }}>
+                                            {project.translator?.full_name || 'Unassigned'}
+                                        </td>
+                                        <td>
+                                            <span className={`status-pill ${
+                                                project.job_status === 'posted' ? 'pending' :
+                                                project.job_status === 'in_progress' ? 'in-progress' :
+                                                project.job_status === 'completed' ? 'completed' :
+                                                'draft'
+                                            }`}>
+                                                {project.job_status || 'draft'}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <button
+                                                onClick={() => navigate(`/dashboard/cat/${project.id}`)}
+                                                className="primary-btn"
+                                                style={{ 
+                                                    padding: '6px 12px', 
+                                                    fontSize: '0.85rem',
+                                                    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
+                                                }}
+                                            >
+                                                Open Workspace
+                                            </button>
+                                        </td>
+                                    </tr>
+                                ))
+                            )}
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </div>
