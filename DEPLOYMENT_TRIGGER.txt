@@ -1,0 +1,5 @@
+Deployment trigger for extended file format support
+Timestamp: 2026-03-08 23:05:00
+Commit: 8ee0d46 - Added 24 file format support including PDF, XLSX, PPTX, ODT, RTF, SDLXLIFF, MXF, RESX, STRINGS, YAML, INI
+
+This file triggers a new Vercel deployment to ensure the latest code changes are live.
