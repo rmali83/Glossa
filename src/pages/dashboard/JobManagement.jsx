@@ -305,32 +305,37 @@ const JobManagement = () => {
             </div>
 
             {/* Stats Summary */}
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '15px', marginBottom: '2rem' }}>
+            <div style={{ 
+                display: 'grid', 
+                gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', 
+                gap: '15px', 
+                marginBottom: '2rem' 
+            }}>
                 <div className="payment-stat-card">
-                    <label>Total Jobs</label>
-                    <h2 className="stat-value">{jobs.length}</h2>
+                    <label style={{ fontSize: '0.85rem' }}>Total Jobs</label>
+                    <h2 className="stat-value" style={{ fontSize: '2rem' }}>{jobs.length}</h2>
                 </div>
                 <div className="payment-stat-card">
-                    <label>Completed</label>
-                    <h2 className="stat-value" style={{ color: '#10b981' }}>
+                    <label style={{ fontSize: '0.85rem' }}>Completed</label>
+                    <h2 className="stat-value" style={{ color: '#10b981', fontSize: '2rem' }}>
                         {jobs.filter(j => j.status === 'completed').length}
                     </h2>
                 </div>
                 <div className="payment-stat-card">
-                    <label>In Progress</label>
-                    <h2 className="stat-value" style={{ color: '#3b82f6' }}>
+                    <label style={{ fontSize: '0.85rem' }}>In Progress</label>
+                    <h2 className="stat-value" style={{ color: '#3b82f6', fontSize: '2rem' }}>
                         {jobs.filter(j => j.status === 'in_progress' || j.status === 'pending').length}
                     </h2>
                 </div>
                 <div className="payment-stat-card">
-                    <label>Draft</label>
-                    <h2 className="stat-value" style={{ color: '#6b7280' }}>
+                    <label style={{ fontSize: '0.85rem' }}>Draft</label>
+                    <h2 className="stat-value" style={{ color: '#6b7280', fontSize: '2rem' }}>
                         {jobs.filter(j => j.status === 'draft').length}
                     </h2>
                 </div>
                 <div className="payment-stat-card">
-                    <label>Selected</label>
-                    <h2 className="stat-value" style={{ color: '#f59e0b' }}>
+                    <label style={{ fontSize: '0.85rem' }}>Selected</label>
+                    <h2 className="stat-value" style={{ color: '#f59e0b', fontSize: '2rem' }}>
                         {selectedJobs.length}
                     </h2>
                 </div>
@@ -355,7 +360,12 @@ const JobManagement = () => {
                         Reset
                     </button>
                 </div>
-                <div style={{ padding: '1.5rem', display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '15px' }}>
+                <div style={{ 
+                    padding: '1.5rem', 
+                    display: 'grid', 
+                    gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', 
+                    gap: '15px' 
+                }}>
                     {/* Search */}
                     <input
                         type="text"
