@@ -9,10 +9,24 @@
 - 6 storage policies active
 - Local build succeeds (`npm run build`)
 - Local dev server runs successfully
+- **24 file formats now supported** (up from 13)
+- File upload system fully functional
+- Admin job creation page implemented
 
-### ❌ Current Issue
-- Vercel deployment shows blank page
-- Upload button not visible on production
+### 🚀 Latest Updates (Just Deployed)
+- Added support for 11 new file formats:
+  - PDF (using pdfjs-dist)
+  - XLSX, XLS (using xlsx library)
+  - PPTX (PowerPoint presentations)
+  - ODT (OpenDocument Text)
+  - RTF (Rich Text Format)
+  - SDLXLIFF (SDL Trados Studio)
+  - MXF (Memsource)
+  - RESX (.NET resources)
+  - STRINGS (iOS localization)
+  - YAML, INI (configuration files)
+- Build successful with no errors
+- Code committed and pushed to GitHub
 
 ## Recent Changes
 
@@ -137,6 +151,8 @@ If it works locally but not on Vercel, the issue is deployment-specific.
 ## Commit History
 
 ```
+8ee0d46 - feat: Add support for 24 file formats including PDF, XLSX, PPTX, ODT, RTF, SDLXLIFF, MXF, RESX, STRINGS, YAML, INI
+da74abc - Previous commits...
 9f85e01 - Fix build error: Replace jsdom with browser DOMParser
 21a04c2 - Make Upload button more visible with explicit styling
 7a4e3e3 - Trigger Vercel deployment with Supabase env vars
