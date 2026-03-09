@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Edge Function</title>
+</head>
+<body>
+    <h1>Test Send Email Edge Function</h1>
+    <button onclick="testFunction()">Test Edge Function</button>
+    <pre id="result"></pre>
+
+    <script type="module">
+        import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm'
+
+        const supabase = createClient(
+            'https://yizsijfuwqiwbxncmrga.supabase.co',
+            'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inlpenppamz1d3Fpd2J4bmNtcmdhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MDc4MTY4NTQsImV4cCI6MjAyMzM5Mjg1NH0.index-BXAzQcWa.js:412'
+        )
+
+        window.testFunction = async function() {
+            const resultEl = document.getElementById('result')
+            resultEl.textContent = 'Testing...'
+
+            try {
+                // First, get the latest notification
+                const { data: notifications } = await supabase
+                    .from('notifications')
+                    .select('*')
+                    .order('created_at', { ascending: false })
+                    .limit(1)
+
+                if (!notifications || notifications.length === 0) {
+                    resultEl.textContent = 'No notifications found'
+                    return
+                }
+
+                const notification = notifications[0]
+                resultEl.textContent = `Found notification: ${notification.id}\nCalling Edge Function...`
+
+                // Call Edge Function
+                const { data, error } = await supabase.functions.invoke('send-email', {
+                    body: { notificationId: notification.id }
+                })
+
+                if (error) {
+                    resultEl.textContent = `Error: ${JSON.stringify(error, null, 2)}`
+                } else {
+                    resultEl.textContent = `Success!\n${JSON.stringify(data, null, 2)}`
+                }
+            } catch (err) {
+                resultEl.textContent = `Exception: ${err.message}\n${err.stack}`
+            }
+        }
+    </script>
+</body>
+</html>
