@@ -249,6 +249,15 @@ select:focus {
   select option {
     background-color: #1a1a2e;
     color: #e0e0e0;
+    padding: 0.5rem;
+    border-radius: 8px;
+  }
+  
+  select option:hover,
+  select option:focus,
+  select option:checked {
+    background-color: rgba(0, 255, 255, 0.2);
+    border-radius: 8px;
   }
 }
 
@@ -263,5 +272,33 @@ select:focus {
   select option {
     background-color: #ffffff;
     color: #1a1a2e;
+    padding: 0.5rem;
+    border-radius: 8px;
   }
+  
+  select option:hover,
+  select option:focus,
+  select option:checked {
+    background-color: rgba(0, 255, 255, 0.2);
+    border-radius: 8px;
+  }
+}
+
+/* Additional styling for dropdown menu itself */
+select::-webkit-scrollbar {
+  width: 8px;
+}
+
+select::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
+}
+
+select::-webkit-scrollbar-thumb {
+  background: rgba(0, 255, 255, 0.3);
+  border-radius: 8px;
+}
+
+select::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 255, 255, 0.5);
 }
