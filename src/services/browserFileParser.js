@@ -9,6 +9,7 @@ import Papa from 'papaparse';
 import mammoth from 'mammoth';
 import * as XLSX from 'xlsx';
 import * as pdfjsLib from 'pdfjs-dist';
+import JSZip from 'jszip';
 
 // Configure PDF.js worker
 pdfjsLib.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.js`;
@@ -52,6 +53,12 @@ class BrowserFileParser {
         case 'xlf':
         case 'sdlxliff':
           return await this.parseXLIFF(file);
+        case 'ttx':
+          return await this.parseTTX(file);
+        case 'itd':
+        case 'sdlppx':
+        case 'sdlrpx':
+          return await this.parseITD(file);
         case 'tmx':
           return await this.parseTMX(file);
         case 'mxf':
@@ -92,7 +99,7 @@ class BrowserFileParser {
         default:
           return {
             success: false,
-            error: `File type .${extension} not supported. Supported: TXT, JSON, CSV, DOCX, PDF, XLSX, PPTX, ODT, RTF, HTML, XML, XLIFF, SDLXLIFF, TMX, MXF, SRT, VTT, PO, PROPERTIES, RESX, STRINGS, YAML, INI, MARKDOWN, JS, JSX, TS, TSX, VUE, PHP, TOML, ARB`
+            error: `File type .${extension} not supported. Supported: TXT, JSON, CSV, DOCX, PDF, XLSX, PPTX, ODT, RTF, HTML, XML, XLIFF, SDLXLIFF, TTX, ITD, SDLPPX, SDLRPX, TMX, MXF, SRT, VTT, PO, PROPERTIES, RESX, STRINGS, YAML, INI, MARKDOWN, JS, JSX, TS, TSX, VUE, PHP, TOML, ARB`
           };
       }
     } catch (error) {
@@ -699,6 +706,117 @@ class BrowserFileParser {
     }
     
     return { success: true, content: text, segments, metadata: { format: 'arb', segmentCount: segments.length } };
+  }
+
+  /**
+   * Parse TTX files (Trados TagEditor format)
+   */
+  async parseTTX(file) {
+    const text = await file.text();
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(text, 'text/xml');
+    
+    if (doc.querySelector('parsererror')) {
+      return { success: false, error: 'Invalid TTX XML' };
+    }
+    
+    const segments = [];
+    
+    // Extract translation units
+    const tus = doc.querySelectorAll('Tu');
+    tus.forEach((tu, index) => {
+      // Find source language segment (usually EN-US or first Tuv)
+      const tuvs = tu.querySelectorAll('Tuv');
+      if (tuvs.length > 0) {
+        const sourceTuv = tuvs[0]; // First Tuv is usually source
+        const seg = sourceTuv.querySelector('Seg');
+        if (seg) {
+          const text = seg.textContent.trim();
+          if (text.length > 0) {
+            segments.push({
+              key: `tu_${index + 1}`,
+              text: text
+            });
+          }
+        }
+      }
+    });
+    
+    return {
+      success: true,
+      content: text,
+      segments,
+      metadata: {
+        format: 'ttx',
+        segmentCount: segments.length
+      }
+    };
+  }
+
+  /**
+   * Parse ITD/SDLPPX/SDLRPX files (Trados Studio packages - ZIP archives)
+   */
+  async parseITD(file) {
+    try {
+      const arrayBuffer = await file.arrayBuffer();
+      const zip = await JSZip.loadAsync(arrayBuffer);
+      
+      const segments = [];
+      let fileCount = 0;
+      
+      // Find all SDLXLIFF files in the archive
+      for (const [filename, zipEntry] of Object.entries(zip.files)) {
+        if (zipEntry.dir) continue; // Skip directories
+        
+        if (filename.endsWith('.sdlxliff') || filename.endsWith('.xliff') || filename.endsWith('.xlf')) {
+          fileCount++;
+          try {
+            const content = await zipEntry.async('text');
+            
+            // Create a temporary File object for parsing
+            const tempFile = new File([content], filename, { type: 'application/xml' });
+            const result = await this.parseXLIFF(tempFile);
+            
+            if (result.success && result.segments) {
+              // Add filename context to segments
+              result.segments.forEach(seg => {
+                segments.push({
+                  ...seg,
+                  sourceFile: filename
+                });
+              });
+            }
+          } catch (error) {
+            console.warn(`Failed to parse ${filename}:`, error);
+          }
+        }
+      }
+      
+      if (segments.length === 0) {
+        return {
+          success: false,
+          error: 'No translatable content found in package. Expected SDLXLIFF files.'
+        };
+      }
+      
+      return {
+        success: true,
+        content: `Package contains ${fileCount} file(s)`,
+        segments,
+        metadata: {
+          format: file.name.endsWith('.itd') ? 'itd' : file.name.endsWith('.sdlppx') ? 'sdlppx' : 'sdlrpx',
+          segmentCount: segments.length,
+          fileCount: fileCount,
+          packageType: 'trados_studio_package'
+        }
+      };
+    } catch (error) {
+      console.error('ITD/Package parse error:', error);
+      return {
+        success: false,
+        error: `Failed to parse Trados package: ${error.message}`
+      };
+    }
   }
 }
 
