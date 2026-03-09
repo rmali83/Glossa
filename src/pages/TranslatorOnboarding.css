@@ -101,7 +101,7 @@
     background: #1a1a3a;
     /* Solid dark color for best reliability */
     border: 1px solid rgba(255, 255, 255, 0.2);
-    border-radius: 8px;
+    border-radius: 12px;
     padding: 0.8rem 1rem;
     color: #ffffff;
     /* Pure white text for best contrast */
