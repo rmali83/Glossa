@@ -130,25 +130,88 @@ const Admin = () => {
             {/* Header with Create Job Button */}
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
                 <h1 style={{ fontSize: '2rem', fontWeight: 'bold', color: '#fff' }}>Admin Dashboard</h1>
-                <button
-                    onClick={() => navigate('/dashboard/admin/create-job')}
-                    style={{
-                        padding: '12px 24px',
-                        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                        color: '#fff',
-                        border: 'none',
-                        borderRadius: '12px',
-                        fontSize: '1rem',
-                        fontWeight: '600',
-                        cursor: 'pointer',
-                        boxShadow: '0 4px 15px rgba(102, 126, 234, 0.4)',
-                        transition: 'all 0.3s ease'
-                    }}
-                    onMouseOver={(e) => e.target.style.transform = 'translateY(-2px)'}
-                    onMouseOut={(e) => e.target.style.transform = 'translateY(0)'}
-                >
-                    + Create New Job
-                </button>
+                <div style={{ display: 'flex', gap: '1rem' }}>
+                    <button
+                        onClick={async () => {
+                            if (window.confirm('⚠️ WARNING: This will permanently delete ALL projects, segments, and files. This action cannot be undone. Are you absolutely sure?')) {
+                                if (window.confirm('🚨 FINAL CONFIRMATION: Delete all projects and data?')) {
+                                    try {
+                                        setLoading(true);
+                                        
+                                        // Delete all segments first (foreign key constraint)
+                                        const { error: segError } = await supabase
+                                            .from('segments')
+                                            .delete()
+                                            .neq('id', '00000000-0000-0000-0000-000000000000'); // Delete all
+                                        
+                                        if (segError) throw segError;
+                                        
+                                        // Delete all project files
+                                        const { error: filesError } = await supabase
+                                            .from('project_files')
+                                            .delete()
+                                            .neq('id', '00000000-0000-0000-0000-000000000000'); // Delete all
+                                        
+                                        if (filesError) throw filesError;
+                                        
+                                        // Delete all projects
+                                        const { error: projError } = await supabase
+                                            .from('projects')
+                                            .delete()
+                                            .neq('id', '00000000-0000-0000-0000-000000000000'); // Delete all
+                                        
+                                        if (projError) throw projError;
+                                        
+                                        // Update stats
+                                        setStats(prev => ({ ...prev, projects: 0 }));
+                                        
+                                        alert('✅ All projects deleted successfully!');
+                                    } catch (err) {
+                                        console.error('Delete error:', err);
+                                        alert('❌ Error deleting projects: ' + err.message);
+                                    } finally {
+                                        setLoading(false);
+                                    }
+                                }
+                            }
+                        }}
+                        style={{
+                            padding: '12px 24px',
+                            background: 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)',
+                            color: '#fff',
+                            border: 'none',
+                            borderRadius: '12px',
+                            fontSize: '1rem',
+                            fontWeight: '600',
+                            cursor: 'pointer',
+                            boxShadow: '0 4px 15px rgba(239, 68, 68, 0.4)',
+                            transition: 'all 0.3s ease'
+                        }}
+                        onMouseOver={(e) => e.target.style.transform = 'translateY(-2px)'}
+                        onMouseOut={(e) => e.target.style.transform = 'translateY(0)'}
+                    >
+                        🗑️ Delete All Projects
+                    </button>
+                    <button
+                        onClick={() => navigate('/dashboard/admin/create-job')}
+                        style={{
+                            padding: '12px 24px',
+                            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                            color: '#fff',
+                            border: 'none',
+                            borderRadius: '12px',
+                            fontSize: '1rem',
+                            fontWeight: '600',
+                            cursor: 'pointer',
+                            boxShadow: '0 4px 15px rgba(102, 126, 234, 0.4)',
+                            transition: 'all 0.3s ease'
+                        }}
+                        onMouseOver={(e) => e.target.style.transform = 'translateY(-2px)'}
+                        onMouseOut={(e) => e.target.style.transform = 'translateY(0)'}
+                    >
+                        + Create New Job
+                    </button>
+                </div>
             </div>
 
             <div className="admin-stats" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '25px', marginBottom: '3rem' }}>
