@@ -76,10 +76,23 @@ class BrowserFileParser {
         case 'md':
         case 'markdown':
           return await this.parseMarkdown(file);
+        case 'js':
+        case 'jsx':
+        case 'ts':
+        case 'tsx':
+          return await this.parseJavaScript(file);
+        case 'vue':
+          return await this.parseVUE(file);
+        case 'php':
+          return await this.parsePHP(file);
+        case 'toml':
+          return await this.parseTOML(file);
+        case 'arb':
+          return await this.parseARB(file);
         default:
           return {
             success: false,
-            error: `File type .${extension} not supported. Supported: TXT, JSON, CSV, DOCX, PDF, XLSX, PPTX, ODT, RTF, HTML, XML, XLIFF, SDLXLIFF, TMX, MXF, SRT, VTT, PO, PROPERTIES, RESX, STRINGS, YAML, INI, MARKDOWN`
+            error: `File type .${extension} not supported. Supported: TXT, JSON, CSV, DOCX, PDF, XLSX, PPTX, ODT, RTF, HTML, XML, XLIFF, SDLXLIFF, TMX, MXF, SRT, VTT, PO, PROPERTIES, RESX, STRINGS, YAML, INI, MARKDOWN, JS, JSX, TS, TSX, VUE, PHP, TOML, ARB`
           };
       }
     } catch (error) {
@@ -563,6 +576,129 @@ class BrowserFileParser {
       }
     });
     return { success: true, content: text, segments, metadata: { format: 'ini', segmentCount: segments.length } };
+  }
+
+  /**
+   * Parse JavaScript/TypeScript files (JS, JSX, TS, TSX)
+   */
+  async parseJavaScript(file) {
+    const text = await file.text();
+    const segments = [];
+    
+    // Extract i18n strings from common patterns
+    // Pattern 1: t('key') or t("key")
+    const tPattern = /\bt\s*\(\s*['"`]([^'"`]+)['"`]\s*\)/g;
+    let match;
+    while ((match = tPattern.exec(text)) !== null) {
+      segments.push({ key: match[1], text: match[1] });
+    }
+    
+    // Pattern 2: i18n.t('key') or $t('key')
+    const i18nPattern = /(?:i18n\.|this\.\$t|\$t)\s*\(\s*['"`]([^'"`]+)['"`]\s*\)/g;
+    while ((match = i18nPattern.exec(text)) !== null) {
+      segments.push({ key: match[1], text: match[1] });
+    }
+    
+    // Pattern 3: Object literals { "key": "value" }
+    const objPattern = /['"`]([^'"`]+)['"`]\s*:\s*['"`]([^'"`]+)['"`]/g;
+    while ((match = objPattern.exec(text)) !== null) {
+      if (match[2].length > 0 && !match[1].startsWith('_')) {
+        segments.push({ key: match[1], text: match[2] });
+      }
+    }
+    
+    return { success: true, content: text, segments, metadata: { format: 'javascript', segmentCount: segments.length } };
+  }
+
+  /**
+   * Parse Vue single-file components
+   */
+  async parseVUE(file) {
+    const text = await file.text();
+    const segments = [];
+    
+    // Extract from <i18n> section
+    const i18nMatch = text.match(/<i18n[^>]*>([\s\S]*?)<\/i18n>/);
+    if (i18nMatch) {
+      try {
+        const i18nContent = i18nMatch[1].trim();
+        if (i18nContent.startsWith('{')) {
+          const data = JSON.parse(i18nContent);
+          this.extractJSONStrings(data).forEach(seg => segments.push(seg));
+        }
+      } catch (e) {
+        console.warn('Failed to parse Vue i18n section:', e);
+      }
+    }
+    
+    // Extract $t() calls from template and script
+    const tPattern = /\$t\s*\(\s*['"`]([^'"`]+)['"`]\s*\)/g;
+    let match;
+    while ((match = tPattern.exec(text)) !== null) {
+      segments.push({ key: match[1], text: match[1] });
+    }
+    
+    return { success: true, content: text, segments, metadata: { format: 'vue', segmentCount: segments.length } };
+  }
+
+  /**
+   * Parse PHP localization files
+   */
+  async parsePHP(file) {
+    const text = await file.text();
+    const segments = [];
+    
+    // Extract from array syntax: 'key' => 'value'
+    const arrayPattern = /['"`]([^'"`]+)['"`]\s*=>\s*['"`]([^'"`]+)['"`]/g;
+    let match;
+    while ((match = arrayPattern.exec(text)) !== null) {
+      segments.push({ key: match[1], text: match[2] });
+    }
+    
+    return { success: true, content: text, segments, metadata: { format: 'php', segmentCount: segments.length } };
+  }
+
+  /**
+   * Parse TOML files
+   */
+  async parseTOML(file) {
+    const text = await file.text();
+    const segments = [];
+    const lines = text.split('\n');
+    
+    lines.forEach(line => {
+      line = line.trim();
+      if (!line || line.startsWith('#')) return;
+      const idx = line.indexOf('=');
+      if (idx > 0) {
+        const key = line.substring(0, idx).trim();
+        let value = line.substring(idx + 1).trim();
+        // Remove quotes
+        value = value.replace(/^["']|["']$/g, '');
+        if (value) segments.push({ key, text: value });
+      }
+    });
+    
+    return { success: true, content: text, segments, metadata: { format: 'toml', segmentCount: segments.length } };
+  }
+
+  /**
+   * Parse ARB files (Flutter localization)
+   */
+  async parseARB(file) {
+    const text = await file.text();
+    const data = JSON.parse(text);
+    const segments = [];
+    
+    // ARB format: { "key": "value", "@key": { "description": "..." } }
+    for (const [key, value] of Object.entries(data)) {
+      if (!key.startsWith('@') && typeof value === 'string') {
+        const description = data[`@${key}`]?.description || '';
+        segments.push({ key, text: value, description });
+      }
+    }
+    
+    return { success: true, content: text, segments, metadata: { format: 'arb', segmentCount: segments.length } };
   }
 }
 

@@ -286,7 +286,9 @@ class SimpleUploadManager {
       '.srt', '.vtt', 
       '.po', '.properties', '.resx', '.strings',
       '.yaml', '.yml', '.ini',
-      '.md', '.markdown'
+      '.md', '.markdown',
+      '.js', '.jsx', '.ts', '.tsx',
+      '.vue', '.php', '.toml', '.arb'
     ];
     const fileExtension = '.' + file.name.split('.').pop().toLowerCase();
 
