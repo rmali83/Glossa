@@ -27,10 +27,20 @@ class SimpleUploadManager {
         throw new Error(validation.error);
       }
 
+      // Sanitize filename - remove special characters that cause issues in storage
+      const sanitizedFilename = file.name
+        .replace(/[[\]{}()|<>]/g, '') // Remove brackets and special chars
+        .replace(/[^\w\s.-]/g, '_') // Replace other special chars with underscore
+        .replace(/\s+/g, '_') // Replace spaces with underscore
+        .replace(/_+/g, '_'); // Replace multiple underscores with single
+
       // Generate unique file path
       const timestamp = Date.now();
       const fileId = `${timestamp}_${Math.random().toString(36).substr(2, 9)}`;
-      const storagePath = `${projectId}/${fileId}/${file.name}`;
+      const storagePath = `${projectId}/${fileId}/${sanitizedFilename}`;
+
+      console.log('[Upload] Sanitized filename:', sanitizedFilename);
+      console.log('[Upload] Storage path:', storagePath);
 
       // Upload to Supabase Storage
       if (onProgress) onProgress({ status: 'uploading', percentage: 0 });
