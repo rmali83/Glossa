@@ -121,7 +121,7 @@ const SimpleUploadModal = ({ projectId, projectName, onClose, onUploadComplete }
               Drop files here or click to browse
             </p>
             <p className="text-sm text-slate-500 mb-4">
-              Supported: TXT, JSON, CSV, DOCX, PDF, XLSX, PPTX, ODT, RTF, HTML, XML, XLIFF, SDLXLIFF, TTX, ITD, SDLPPX, SDLRPX, TMX, MXF, SRT, VTT, PO, PROPERTIES, RESX, STRINGS, YAML, INI, MARKDOWN, JS, JSX, TS, TSX, VUE, PHP, TOML, ARB (max 50 MB)
+              Supported: 80+ formats including Documents (TXT, DOCX, PDF, ODT, RTF, MD), Spreadsheets (XLSX, XLS, CSV, ODS, TSV), Presentations (PPTX, ODP), CAT Tools (XLIFF, SDLXLIFF, TTX, ITD, TMX, MXF, MQXLIFF, TXLF, IDML), Subtitles (SRT, VTT, SUB, SSA, ASS, SBV, TTML), Localization (PO, PROPERTIES, RESX, STRINGS, YAML, INI, JSON, ARB, PLIST, RC, RESW, RESJSON, QT_TS), Programming (JS, TS, JSX, TSX, VUE, PHP, PY, RB, GO, JAVA, CS, CPP, SWIFT, KT, RS), Templates (EJS, HBS, PUG, TWIG, LIQUID), Markup (HTML, XML, RST, ADOC, TEX, ORG, WIKI, TEXTILE, BBCODE, CREOLE), Technical Docs (DITA, DOCBOOK), E-books (EPUB), Apple iWork (PAGES, NUMBERS, KEY), Scripts (SH, BAT, PS1), Data (SQL, GRAPHQL), and more (max 50 MB)
             </p>
             <input
               type="file"
@@ -129,7 +129,7 @@ const SimpleUploadModal = ({ projectId, projectName, onClose, onUploadComplete }
               onChange={handleFileSelect}
               className="hidden"
               id="file-input"
-              accept=".txt,.json,.csv,.docx,.pdf,.xlsx,.xls,.pptx,.odt,.rtf,.html,.htm,.xml,.xliff,.xlf,.sdlxliff,.ttx,.itd,.sdlppx,.sdlrpx,.tmx,.mxf,.srt,.vtt,.po,.properties,.resx,.strings,.yaml,.yml,.ini,.md,.markdown,.js,.jsx,.ts,.tsx,.vue,.php,.toml,.arb"
+              accept=".txt,.json,.csv,.docx,.pdf,.xlsx,.xls,.pptx,.odt,.rtf,.html,.htm,.xml,.xliff,.xlf,.sdlxliff,.ttx,.itd,.sdlppx,.sdlrpx,.tmx,.mxf,.srt,.vtt,.sub,.ssa,.ass,.sbv,.ttml,.dfxp,.po,.properties,.resx,.strings,.yaml,.yml,.ini,.md,.markdown,.js,.jsx,.ts,.tsx,.vue,.php,.toml,.arb,.py,.python,.rb,.ruby,.go,.java,.cs,.csharp,.cpp,.cc,.cxx,.swift,.kt,.kotlin,.rs,.rust,.rst,.adoc,.asciidoc,.tex,.latex,.org,.conf,.config,.env,.editorconfig,.json5,.hjson,.rc,.resw,.resjson,.plist,.ejs,.hbs,.handlebars,.pug,.jade,.twig,.liquid,.sql,.graphql,.gql,.mqxliff,.mqxlz,.txlf,.idml,.epub,.pages,.numbers,.key,.wiki,.mediawiki,.textile,.bbcode,.creole,.dita,.docbook,.tsv,.ods,.odp,.odf,.stringsdict,.log,.bat,.cmd,.sh,.bash,.zsh,.ps1,.psm1"
             />
             <label
               htmlFor="file-input"

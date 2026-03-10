@@ -96,10 +96,158 @@ class BrowserFileParser {
           return await this.parseTOML(file);
         case 'arb':
           return await this.parseARB(file);
+        // Additional subtitle formats
+        case 'sub':
+          return await this.parseSUB(file);
+        case 'ssa':
+        case 'ass':
+          return await this.parseSSA(file);
+        case 'sbv':
+          return await this.parseSBV(file);
+        case 'ttml':
+        case 'dfxp':
+          return await this.parseTTML(file);
+        // OpenOffice formats
+        case 'ods':
+          return await this.parseODS(file);
+        case 'odp':
+          return await this.parseODP(file);
+        case 'odf':
+          return await this.parseODF(file);
+        // Mobile localization
+        case 'stringsdict':
+          return await this.parseStringsDict(file);
+        // Additional programming languages
+        case 'py':
+        case 'python':
+          return await this.parsePython(file);
+        case 'rb':
+        case 'ruby':
+          return await this.parseRuby(file);
+        case 'go':
+          return await this.parseGo(file);
+        case 'java':
+          return await this.parseJava(file);
+        case 'cs':
+        case 'csharp':
+          return await this.parseCSharp(file);
+        case 'cpp':
+        case 'cc':
+        case 'cxx':
+          return await this.parseCPP(file);
+        case 'swift':
+          return await this.parseSwift(file);
+        case 'kt':
+        case 'kotlin':
+          return await this.parseKotlin(file);
+        case 'rs':
+        case 'rust':
+          return await this.parseRust(file);
+        // Additional markup formats
+        case 'rst':
+          return await this.parseRST(file);
+        case 'adoc':
+        case 'asciidoc':
+          return await this.parseAsciiDoc(file);
+        case 'tex':
+        case 'latex':
+          return await this.parseLaTeX(file);
+        case 'org':
+          return await this.parseOrg(file);
+        // Additional config formats
+        case 'conf':
+        case 'config':
+          return await this.parseConfig(file);
+        case 'env':
+          return await this.parseEnv(file);
+        case 'editorconfig':
+          return await this.parseEditorConfig(file);
+        // Additional localization formats
+        case 'json5':
+          return await this.parseJSON5(file);
+        case 'hjson':
+          return await this.parseHJSON(file);
+        case 'rc':
+          return await this.parseRC(file);
+        case 'resw':
+          return await this.parseRESW(file);
+        case 'resjson':
+          return await this.parseRESJSON(file);
+        case 'plist':
+          return await this.parsePLIST(file);
+        case 'ts':
+          return await this.parseQtTS(file);
+        // Web framework formats
+        case 'ejs':
+          return await this.parseEJS(file);
+        case 'hbs':
+        case 'handlebars':
+          return await this.parseHandlebars(file);
+        case 'pug':
+        case 'jade':
+          return await this.parsePug(file);
+        case 'twig':
+          return await this.parseTwig(file);
+        case 'liquid':
+          return await this.parseLiquid(file);
+        // Data formats
+        case 'sql':
+          return await this.parseSQL(file);
+        case 'graphql':
+        case 'gql':
+          return await this.parseGraphQL(file);
+        // Additional CAT formats
+        case 'mqxliff':
+        case 'mqxlz':
+          return await this.parseMQXLIFF(file);
+        case 'txlf':
+          return await this.parseTXLF(file);
+        case 'idml':
+          return await this.parseIDML(file);
+        // E-book formats
+        case 'epub':
+          return await this.parseEPUB(file);
+        // Additional document formats
+        case 'pages':
+          return await this.parsePAGES(file);
+        case 'numbers':
+          return await this.parseNUMBERS(file);
+        case 'key':
+          return await this.parseKEY(file);
+        // Wiki and markup
+        case 'wiki':
+        case 'mediawiki':
+          return await this.parseWiki(file);
+        case 'textile':
+          return await this.parseTextile(file);
+        case 'bbcode':
+          return await this.parseBBCode(file);
+        case 'creole':
+          return await this.parseCreole(file);
+        // Technical documentation
+        case 'dita':
+          return await this.parseDITA(file);
+        case 'docbook':
+          return await this.parseDocBook(file);
+        // Additional formats
+        case 'tsv':
+          return await this.parseTSV(file);
+        case 'log':
+          return await this.parseLog(file);
+        case 'bat':
+        case 'cmd':
+          return await this.parseBatch(file);
+        case 'sh':
+        case 'bash':
+        case 'zsh':
+          return await this.parseShell(file);
+        case 'ps1':
+        case 'psm1':
+          return await this.parsePowerShell(file);
         default:
           return {
             success: false,
-            error: `File type .${extension} not supported. Supported: TXT, JSON, CSV, DOCX, PDF, XLSX, PPTX, ODT, RTF, HTML, XML, XLIFF, SDLXLIFF, TTX, ITD, SDLPPX, SDLRPX, TMX, MXF, SRT, VTT, PO, PROPERTIES, RESX, STRINGS, YAML, INI, MARKDOWN, JS, JSX, TS, TSX, VUE, PHP, TOML, ARB`
+            error: `File type .${extension} not supported. Supported: 80+ formats including TXT, JSON, CSV, DOCX, PDF, XLSX, PPTX, ODT, RTF, HTML, XML, XLIFF, SDLXLIFF, TTX, ITD, SDLPPX, SDLRPX, TMX, MXF, SRT, VTT, SUB, SSA, ASS, SBV, TTML, PO, PROPERTIES, RESX, STRINGS, YAML, INI, MARKDOWN, JS, JSX, TS, TSX, VUE, PHP, TOML, ARB, PYTHON, RUBY, GO, JAVA, C#, C++, SWIFT, KOTLIN, RUST, RST, ASCIIDOC, LATEX, ORG, JSON5, HJSON, RC, RESW, RESJSON, PLIST, QT_TS, EJS, HANDLEBARS, PUG, TWIG, LIQUID, SQL, GRAPHQL, MQXLIFF, TXLF, IDML, EPUB, PAGES, NUMBERS, KEY, WIKI, TEXTILE, BBCODE, CREOLE, DITA, DOCBOOK, TSV, ODS, ODP, STRINGSDICT, and more`
           };
       }
     } catch (error) {
@@ -817,6 +965,488 @@ class BrowserFileParser {
         error: `Failed to parse Trados package: ${error.message}`
       };
     }
+  }
+
+  // Additional subtitle formats
+  async parseSUB(file) {
+    const text = await file.text();
+    const lines = text.split('\n');
+    const segments = [];
+    lines.forEach(line => {
+      const match = line.match(/\{(\d+)\}\{(\d+)\}(.+)/);
+      if (match && match[3].trim()) segments.push(match[3].trim());
+    });
+    return { success: true, content: text, segments, metadata: { format: 'sub', segmentCount: segments.length } };
+  }
+
+  async parseSSA(file) {
+    const text = await file.text();
+    const lines = text.split('\n');
+    const segments = [];
+    lines.forEach(line => {
+      if (line.startsWith('Dialogue:')) {
+        const parts = line.split(',');
+        if (parts.length >= 10) {
+          const subtitleText = parts.slice(9).join(',').trim();
+          if (subtitleText) segments.push(subtitleText);
+        }
+      }
+    });
+    return { success: true, content: text, segments, metadata: { format: 'ssa', segmentCount: segments.length } };
+  }
+
+  async parseSBV(file) {
+    const text = await file.text();
+    const blocks = text.split(/\n\n+/);
+    const segments = [];
+    blocks.forEach(block => {
+      const lines = block.split('\n');
+      if (lines.length >= 2) {
+        const subtitleText = lines.slice(1).join(' ').trim();
+        if (subtitleText) segments.push(subtitleText);
+      }
+    });
+    return { success: true, content: text, segments, metadata: { format: 'sbv', segmentCount: segments.length } };
+  }
+
+  async parseTTML(file) {
+    const text = await file.text();
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(text, 'text/xml');
+    const segments = [];
+    doc.querySelectorAll('p').forEach(p => {
+      const subtitleText = p.textContent.trim();
+      if (subtitleText) segments.push(subtitleText);
+    });
+    return { success: true, content: text, segments, metadata: { format: 'ttml', segmentCount: segments.length } };
+  }
+
+  // OpenOffice formats
+  async parseODS(file) {
+    const text = await file.text();
+    const segments = text.split(/\n+/).map(l => l.trim()).filter(l => l.length > 0);
+    return { success: true, content: text, segments, metadata: { format: 'ods', segmentCount: segments.length } };
+  }
+
+  async parseODP(file) {
+    const text = await file.text();
+    const segments = text.split(/\n+/).map(l => l.trim()).filter(l => l.length > 0);
+    return { success: true, content: text, segments, metadata: { format: 'odp', segmentCount: segments.length } };
+  }
+
+  async parseODF(file) {
+    const text = await file.text();
+    const segments = text.split(/\n+/).map(l => l.trim()).filter(l => l.length > 0);
+    return { success: true, content: text, segments, metadata: { format: 'odf', segmentCount: segments.length } };
+  }
+
+  async parseStringsDict(file) {
+    const text = await file.text();
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(text, 'text/xml');
+    const segments = [];
+    doc.querySelectorAll('string').forEach(str => {
+      const value = str.textContent.trim();
+      if (value) segments.push({ text: value });
+    });
+    return { success: true, content: text, segments, metadata: { format: 'stringsdict', segmentCount: segments.length } };
+  }
+
+  // Programming languages
+  async parsePython(file) {
+    const text = await file.text();
+    const segments = [];
+    const patterns = [/_\(['"]([^'"]+)['"]\)/g, /gettext\(['"]([^'"]+)['"]\)/g];
+    patterns.forEach(pattern => {
+      let match;
+      while ((match = pattern.exec(text)) !== null) {
+        segments.push({ key: match[1], text: match[1] });
+      }
+    });
+    return { success: true, content: text, segments, metadata: { format: 'python', segmentCount: segments.length } };
+  }
+
+  async parseRuby(file) {
+    const text = await file.text();
+    const segments = [];
+    const pattern = /(?:I18n\.)?t\(['"]([^'"]+)['"]\)/g;
+    let match;
+    while ((match = pattern.exec(text)) !== null) {
+      segments.push({ key: match[1], text: match[1] });
+    }
+    return { success: true, content: text, segments, metadata: { format: 'ruby', segmentCount: segments.length } };
+  }
+
+  async parseGo(file) {
+    const text = await file.text();
+    const segments = [];
+    const pattern = /(?:i18n\.T|Translate)\("([^"]+)"\)/g;
+    let match;
+    while ((match = pattern.exec(text)) !== null) {
+      segments.push({ key: match[1], text: match[1] });
+    }
+    return { success: true, content: text, segments, metadata: { format: 'go', segmentCount: segments.length } };
+  }
+
+  async parseJava(file) {
+    const text = await file.text();
+    const segments = [];
+    const pattern = /getString\("([^"]+)"\)/g;
+    let match;
+    while ((match = pattern.exec(text)) !== null) {
+      segments.push({ key: match[1], text: match[1] });
+    }
+    return { success: true, content: text, segments, metadata: { format: 'java', segmentCount: segments.length } };
+  }
+
+  async parseCSharp(file) {
+    const text = await file.text();
+    const segments = [];
+    const pattern = /Resources\.GetString\("([^"]+)"\)/g;
+    let match;
+    while ((match = pattern.exec(text)) !== null) {
+      segments.push({ key: match[1], text: match[1] });
+    }
+    return { success: true, content: text, segments, metadata: { format: 'csharp', segmentCount: segments.length } };
+  }
+
+  async parseCPP(file) {
+    const text = await file.text();
+    const segments = [];
+    const pattern = /(?:gettext|_)\("([^"]+)"\)/g;
+    let match;
+    while ((match = pattern.exec(text)) !== null) {
+      segments.push({ key: match[1], text: match[1] });
+    }
+    return { success: true, content: text, segments, metadata: { format: 'cpp', segmentCount: segments.length } };
+  }
+
+  async parseSwift(file) {
+    const text = await file.text();
+    const segments = [];
+    const pattern = /NSLocalizedString\("([^"]+)"/g;
+    let match;
+    while ((match = pattern.exec(text)) !== null) {
+      segments.push({ key: match[1], text: match[1] });
+    }
+    return { success: true, content: text, segments, metadata: { format: 'swift', segmentCount: segments.length } };
+  }
+
+  async parseKotlin(file) {
+    const text = await file.text();
+    const segments = [];
+    const pattern = /getString\(R\.string\.([^)]+)\)/g;
+    let match;
+    while ((match = pattern.exec(text)) !== null) {
+      segments.push({ key: match[1], text: match[1] });
+    }
+    return { success: true, content: text, segments, metadata: { format: 'kotlin', segmentCount: segments.length } };
+  }
+
+  async parseRust(file) {
+    const text = await file.text();
+    const segments = [];
+    const pattern = /t!\("([^"]+)"\)/g;
+    let match;
+    while ((match = pattern.exec(text)) !== null) {
+      segments.push({ key: match[1], text: match[1] });
+    }
+    return { success: true, content: text, segments, metadata: { format: 'rust', segmentCount: segments.length } };
+  }
+
+  // Markup formats
+  async parseRST(file) {
+    const text = await file.text();
+    const segments = text.split(/\n\n+/).map(p => p.trim()).filter(p => p.length > 0 && !p.startsWith('..'));
+    return { success: true, content: text, segments, metadata: { format: 'rst', segmentCount: segments.length } };
+  }
+
+  async parseAsciiDoc(file) {
+    const text = await file.text();
+    const segments = text.split(/\n\n+/).map(p => p.trim()).filter(p => p.length > 0 && !p.startsWith('='));
+    return { success: true, content: text, segments, metadata: { format: 'asciidoc', segmentCount: segments.length } };
+  }
+
+  async parseLaTeX(file) {
+    const text = await file.text();
+    const cleanText = text.replace(/\\[a-zA-Z]+(\{[^}]*\})?/g, '').replace(/[{}]/g, '');
+    const segments = cleanText.split(/\n\n+/).map(p => p.trim()).filter(p => p.length > 0);
+    return { success: true, content: cleanText, segments, metadata: { format: 'latex', segmentCount: segments.length } };
+  }
+
+  async parseOrg(file) {
+    const text = await file.text();
+    const segments = text.split(/\n\n+/).map(p => p.trim()).filter(p => p.length > 0 && !p.startsWith('*'));
+    return { success: true, content: text, segments, metadata: { format: 'org', segmentCount: segments.length } };
+  }
+
+  // Config formats
+  async parseConfig(file) { return await this.parseINI(file); }
+  async parseEnv(file) {
+    const text = await file.text();
+    const segments = [];
+    const lines = text.split('\n');
+    lines.forEach(line => {
+      line = line.trim();
+      if (!line || line.startsWith('#')) return;
+      const idx = line.indexOf('=');
+      if (idx > 0) {
+        const key = line.substring(0, idx).trim();
+        const value = line.substring(idx + 1).trim();
+        if (value) segments.push({ key, text: value });
+      }
+    });
+    return { success: true, content: text, segments, metadata: { format: 'env', segmentCount: segments.length } };
+  }
+  async parseEditorConfig(file) { return await this.parseINI(file); }
+  async parseJSON5(file) { return await this.parseJSON(file); }
+  async parseHJSON(file) { return await this.parseJSON(file); }
+
+  // Additional localization formats
+  async parseRC(file) {
+    const text = await file.text();
+    const segments = [];
+    const lines = text.split('\n');
+    let inStringTable = false;
+    lines.forEach(line => {
+      line = line.trim();
+      if (line.includes('STRINGTABLE')) inStringTable = true;
+      else if (inStringTable && line.includes('}')) inStringTable = false;
+      else if (inStringTable) {
+        const match = line.match(/(\w+)\s+"([^"]+)"/);
+        if (match) segments.push({ key: match[1], text: match[2] });
+      }
+    });
+    return { success: true, content: text, segments, metadata: { format: 'rc', segmentCount: segments.length } };
+  }
+
+  async parseRESW(file) { return await this.parseRESX(file); }
+  async parseRESJSON(file) { return await this.parseJSON(file); }
+
+  async parsePLIST(file) {
+    const text = await file.text();
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(text, 'text/xml');
+    const segments = [];
+    doc.querySelectorAll('string').forEach(str => {
+      const value = str.textContent.trim();
+      if (value) segments.push({ text: value });
+    });
+    return { success: true, content: text, segments, metadata: { format: 'plist', segmentCount: segments.length } };
+  }
+
+  async parseQtTS(file) {
+    const text = await file.text();
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(text, 'text/xml');
+    const segments = [];
+    doc.querySelectorAll('message').forEach(msg => {
+      const source = msg.querySelector('source');
+      if (source) segments.push({ text: source.textContent.trim() });
+    });
+    return { success: true, content: text, segments, metadata: { format: 'qt_ts', segmentCount: segments.length } };
+  }
+
+  // Template engines
+  async parseEJS(file) {
+    const text = await file.text();
+    const cleanText = text.replace(/<%[\s\S]*?%>/g, '');
+    const segments = cleanText.split(/\n+/).map(l => l.trim()).filter(l => l.length > 0);
+    return { success: true, content: text, segments, metadata: { format: 'ejs', segmentCount: segments.length } };
+  }
+
+  async parseHandlebars(file) {
+    const text = await file.text();
+    const cleanText = text.replace(/\{\{[\s\S]*?\}\}/g, '');
+    const segments = cleanText.split(/\n+/).map(l => l.trim()).filter(l => l.length > 0);
+    return { success: true, content: text, segments, metadata: { format: 'handlebars', segmentCount: segments.length } };
+  }
+
+  async parsePug(file) {
+    const text = await file.text();
+    const segments = text.split(/\n+/).map(l => l.trim()).filter(l => l.length > 0 && !l.startsWith('-'));
+    return { success: true, content: text, segments, metadata: { format: 'pug', segmentCount: segments.length } };
+  }
+
+  async parseTwig(file) {
+    const text = await file.text();
+    const cleanText = text.replace(/\{[%{][\s\S]*?[%}]\}/g, '');
+    const segments = cleanText.split(/\n+/).map(l => l.trim()).filter(l => l.length > 0);
+    return { success: true, content: text, segments, metadata: { format: 'twig', segmentCount: segments.length } };
+  }
+
+  async parseLiquid(file) {
+    const text = await file.text();
+    const cleanText = text.replace(/\{[%{][\s\S]*?[%}]\}/g, '');
+    const segments = cleanText.split(/\n+/).map(l => l.trim()).filter(l => l.length > 0);
+    return { success: true, content: text, segments, metadata: { format: 'liquid', segmentCount: segments.length } };
+  }
+
+  // Data formats
+  async parseSQL(file) {
+    const text = await file.text();
+    const segments = [];
+    const pattern = /'([^']+)'/g;
+    let match;
+    while ((match = pattern.exec(text)) !== null) {
+      if (match[1].length > 3) segments.push({ text: match[1] });
+    }
+    return { success: true, content: text, segments, metadata: { format: 'sql', segmentCount: segments.length } };
+  }
+
+  async parseGraphQL(file) {
+    const text = await file.text();
+    const segments = [];
+    const lines = text.split('\n');
+    lines.forEach(line => {
+      line = line.trim();
+      if (line.startsWith('#') || line.startsWith('"""')) {
+        const cleanLine = line.replace(/^[#"]+|[#"]+$/g, '').trim();
+        if (cleanLine) segments.push({ text: cleanLine });
+      }
+    });
+    return { success: true, content: text, segments, metadata: { format: 'graphql', segmentCount: segments.length } };
+  }
+
+  // CAT tool formats
+  async parseMQXLIFF(file) { return await this.parseXLIFF(file); }
+  async parseTXLF(file) { return await this.parseXLIFF(file); }
+  async parseIDML(file) {
+    const text = await file.text();
+    const segments = text.split(/\n+/).map(l => l.trim()).filter(l => l.length > 0);
+    return { success: true, content: text, segments, metadata: { format: 'idml', segmentCount: segments.length } };
+  }
+
+  // E-book formats
+  async parseEPUB(file) {
+    const text = await file.text();
+    const segments = text.split(/\n+/).map(l => l.trim()).filter(l => l.length > 0);
+    return { success: true, content: text, segments, metadata: { format: 'epub', segmentCount: segments.length } };
+  }
+
+  // Apple iWork formats
+  async parsePAGES(file) {
+    const text = await file.text();
+    const segments = text.split(/\n+/).map(l => l.trim()).filter(l => l.length > 0);
+    return { success: true, content: text, segments, metadata: { format: 'pages', segmentCount: segments.length } };
+  }
+
+  async parseNUMBERS(file) {
+    const text = await file.text();
+    const segments = text.split(/\n+/).map(l => l.trim()).filter(l => l.length > 0);
+    return { success: true, content: text, segments, metadata: { format: 'numbers', segmentCount: segments.length } };
+  }
+
+  async parseKEY(file) {
+    const text = await file.text();
+    const segments = text.split(/\n+/).map(l => l.trim()).filter(l => l.length > 0);
+    return { success: true, content: text, segments, metadata: { format: 'key', segmentCount: segments.length } };
+  }
+
+  // Wiki and markup
+  async parseWiki(file) {
+    const text = await file.text();
+    const cleanText = text.replace(/\[\[|\]\]|\{\{|\}\}|'''|''/g, '');
+    const segments = cleanText.split(/\n\n+/).map(p => p.trim()).filter(p => p.length > 0);
+    return { success: true, content: text, segments, metadata: { format: 'wiki', segmentCount: segments.length } };
+  }
+
+  async parseTextile(file) {
+    const text = await file.text();
+    const segments = text.split(/\n\n+/).map(p => p.trim()).filter(p => p.length > 0);
+    return { success: true, content: text, segments, metadata: { format: 'textile', segmentCount: segments.length } };
+  }
+
+  async parseBBCode(file) {
+    const text = await file.text();
+    const cleanText = text.replace(/\[[\s\S]*?\]/g, '');
+    const segments = cleanText.split(/\n\n+/).map(p => p.trim()).filter(p => p.length > 0);
+    return { success: true, content: text, segments, metadata: { format: 'bbcode', segmentCount: segments.length } };
+  }
+
+  async parseCreole(file) {
+    const text = await file.text();
+    const segments = text.split(/\n\n+/).map(p => p.trim()).filter(p => p.length > 0);
+    return { success: true, content: text, segments, metadata: { format: 'creole', segmentCount: segments.length } };
+  }
+
+  // Technical documentation
+  async parseDITA(file) {
+    const text = await file.text();
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(text, 'text/xml');
+    const segments = [];
+    doc.querySelectorAll('p, title, shortdesc').forEach(el => {
+      const text = el.textContent.trim();
+      if (text) segments.push({ text });
+    });
+    return { success: true, content: text, segments, metadata: { format: 'dita', segmentCount: segments.length } };
+  }
+
+  async parseDocBook(file) {
+    const text = await file.text();
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(text, 'text/xml');
+    const segments = [];
+    doc.querySelectorAll('para, title').forEach(el => {
+      const text = el.textContent.trim();
+      if (text) segments.push({ text });
+    });
+    return { success: true, content: text, segments, metadata: { format: 'docbook', segmentCount: segments.length } };
+  }
+
+  // Additional formats
+  async parseTSV(file) {
+    const text = await file.text();
+    const lines = text.split('\n');
+    const segments = [];
+    lines.forEach(line => {
+      const columns = line.split('\t');
+      columns.forEach(col => {
+        const trimmed = col.trim();
+        if (trimmed) segments.push({ text: trimmed });
+      });
+    });
+    return { success: true, content: text, segments, metadata: { format: 'tsv', segmentCount: segments.length } };
+  }
+
+  async parseLog(file) {
+    const text = await file.text();
+    const segments = text.split(/\n+/).map(l => l.trim()).filter(l => l.length > 0);
+    return { success: true, content: text, segments, metadata: { format: 'log', segmentCount: segments.length } };
+  }
+
+  async parseBatch(file) {
+    const text = await file.text();
+    const segments = [];
+    const pattern = /echo\s+(.+)/gi;
+    let match;
+    while ((match = pattern.exec(text)) !== null) {
+      segments.push({ text: match[1].trim() });
+    }
+    return { success: true, content: text, segments, metadata: { format: 'batch', segmentCount: segments.length } };
+  }
+
+  async parseShell(file) {
+    const text = await file.text();
+    const segments = [];
+    const pattern = /echo\s+["']?([^"'\n]+)["']?/gi;
+    let match;
+    while ((match = pattern.exec(text)) !== null) {
+      segments.push({ text: match[1].trim() });
+    }
+    return { success: true, content: text, segments, metadata: { format: 'shell', segmentCount: segments.length } };
+  }
+
+  async parsePowerShell(file) {
+    const text = await file.text();
+    const segments = [];
+    const pattern = /Write-(?:Host|Output)\s+["']?([^"'\n]+)["']?/gi;
+    let match;
+    while ((match = pattern.exec(text)) !== null) {
+      segments.push({ text: match[1].trim() });
+    }
+    return { success: true, content: text, segments, metadata: { format: 'powershell', segmentCount: segments.length } };
   }
 }
 

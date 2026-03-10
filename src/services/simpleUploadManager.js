@@ -283,13 +283,23 @@ class SimpleUploadManager {
       '.xlsx', '.xls', '.pptx', '.odt', '.rtf',
       '.html', '.htm', '.xml', 
       '.xliff', '.xlf', '.sdlxliff', '.ttx', '.itd', '.sdlppx', '.sdlrpx',
-      '.tmx', '.mxf',
-      '.srt', '.vtt', 
-      '.po', '.properties', '.resx', '.strings',
-      '.yaml', '.yml', '.ini',
-      '.md', '.markdown',
-      '.js', '.jsx', '.ts', '.tsx',
-      '.vue', '.php', '.toml', '.arb'
+      '.tmx', '.mxf', '.mqxliff', '.mqxlz', '.txlf', '.idml',
+      '.srt', '.vtt', '.sub', '.ssa', '.ass', '.sbv', '.ttml', '.dfxp',
+      '.po', '.properties', '.resx', '.strings', '.stringsdict',
+      '.yaml', '.yml', '.ini', '.toml', '.arb',
+      '.md', '.markdown', '.rst', '.adoc', '.asciidoc', '.tex', '.latex', '.org',
+      '.js', '.jsx', '.ts', '.tsx', '.vue', '.php',
+      '.py', '.python', '.rb', '.ruby', '.go', '.java', '.cs', '.csharp',
+      '.cpp', '.cc', '.cxx', '.swift', '.kt', '.kotlin', '.rs', '.rust',
+      '.conf', '.config', '.env', '.editorconfig',
+      '.json5', '.hjson', '.rc', '.resw', '.resjson', '.plist',
+      '.ejs', '.hbs', '.handlebars', '.pug', '.jade', '.twig', '.liquid',
+      '.sql', '.graphql', '.gql',
+      '.epub', '.pages', '.numbers', '.key',
+      '.wiki', '.mediawiki', '.textile', '.bbcode', '.creole',
+      '.dita', '.docbook',
+      '.tsv', '.ods', '.odp', '.odf',
+      '.log', '.bat', '.cmd', '.sh', '.bash', '.zsh', '.ps1', '.psm1'
     ];
     const fileExtension = '.' + file.name.split('.').pop().toLowerCase();
 
@@ -299,7 +309,7 @@ class SimpleUploadManager {
     if (!isAllowedType) {
       return { 
         valid: false, 
-        error: `File type not supported. Allowed: TXT, JSON, CSV, DOCX, HTML, XML, XLIFF, TMX, SRT, VTT, PO, PROPERTIES, MARKDOWN` 
+        error: `File type not supported. Supported: 80+ formats including TXT, JSON, CSV, DOCX, PDF, XLSX, PPTX, ODT, RTF, HTML, XML, XLIFF, SDLXLIFF, TTX, ITD, TMX, MXF, SRT, VTT, SUB, SSA, ASS, PO, PROPERTIES, RESX, STRINGS, YAML, INI, MARKDOWN, JS, TS, JSX, TSX, VUE, PHP, PYTHON, RUBY, GO, JAVA, C#, C++, SWIFT, KOTLIN, RUST, RST, ASCIIDOC, LATEX, ORG, JSON5, HJSON, RC, RESW, RESJSON, PLIST, QT_TS, EJS, HANDLEBARS, PUG, TWIG, LIQUID, SQL, GRAPHQL, MQXLIFF, TXLF, IDML, EPUB, PAGES, NUMBERS, KEY, WIKI, TEXTILE, BBCODE, CREOLE, DITA, DOCBOOK, TSV, ODS, ODP, STRINGSDICT, LOG, BATCH, SHELL, POWERSHELL, and more` 
       };
     }
 
