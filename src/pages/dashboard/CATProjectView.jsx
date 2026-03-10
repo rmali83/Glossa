@@ -788,7 +788,11 @@ ${segments.map(seg => `      <trans-unit id="${seg.segment_number}">
                                     dir={getTextDirection(project?.source_language)}
                                     style={{ textAlign: getTextAlign(project?.source_language) }}
                                 >
-                                    <div dangerouslySetInnerHTML={{ __html: activeSegment?.source.replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/&lt;b&gt;/g, '<span class="tag-pill">&lt;b&gt;</span>').replace(/&lt;\/b&gt;/g, '<span class="tag-pill">&lt;/b&gt;</span>') }} />
+                                    {activeSegment?.source ? (
+                                        <div dangerouslySetInnerHTML={{ __html: activeSegment.source.replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/&lt;b&gt;/g, '<span class="tag-pill">&lt;b&gt;</span>').replace(/&lt;\/b&gt;/g, '<span class="tag-pill">&lt;/b&gt;</span>') }} />
+                                    ) : (
+                                        <div className="text-slate-400 italic">No source text available for this segment</div>
+                                    )}
                                 </div>
                             </div>
 
