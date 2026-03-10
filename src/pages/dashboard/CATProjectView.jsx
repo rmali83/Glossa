@@ -8,6 +8,64 @@ import simpleUploadManager from '../../services/simpleUploadManager';
 import { getTextDirection, getTextAlign, isRTL } from '../../data/languageDirections';
 import './CATProjectWorkspace.css';
 
+/**
+ * Highlights placeholders and special codes in text that should not be translated
+ * Supports: {0}, {name}, {{var}}, %s, %d, %1$s, <tags>, [0], $var, ${var}, etc.
+ */
+const highlightPlaceholders = (text) => {
+    if (!text) return '';
+    
+    // Escape HTML to prevent XSS
+    const escapeHtml = (str) => {
+        return str.replace(/&/g, '&amp;')
+                  .replace(/</g, '&lt;')
+                  .replace(/>/g, '&gt;')
+                  .replace(/"/g, '&quot;')
+                  .replace(/'/g, '&#039;');
+    };
+    
+    let result = escapeHtml(text);
+    
+    // Define placeholder patterns with their colors
+    const patterns = [
+        // Curly braces: {0}, {name}, {variable_name}
+        { regex: /\{[a-zA-Z0-9_]+\}/g, color: '#a855f7', label: 'Variable' },
+        
+        // Double curly braces: {{variable}}, {{user.name}}
+        { regex: /\{\{[a-zA-Z0-9_.]+\}\}/g, color: '#8b5cf6', label: 'Template' },
+        
+        // Percent formats: %s, %d, %f, %1$s, %2$d
+        { regex: /%(?:\d+\$)?[sdfioxXeEgGcpn]/g, color: '#3b82f6', label: 'Format' },
+        
+        // HTML/XML tags: <b>, </b>, <span class="x">, <br/>, <img src="..."/>
+        { regex: /<\/?[a-zA-Z][a-zA-Z0-9]*(?:\s+[a-zA-Z][a-zA-Z0-9-]*(?:=(?:"[^"]*"|'[^']*'|[^\s>]+))?)*\s*\/?>/g, color: '#10b981', label: 'Tag' },
+        
+        // Square brackets: [0], [link], [variable]
+        { regex: /\[[a-zA-Z0-9_]+\]/g, color: '#f59e0b', label: 'Placeholder' },
+        
+        // Dollar signs: $variable, ${var}, ${user.name}
+        { regex: /\$\{[a-zA-Z0-9_.]+\}|\$[a-zA-Z_][a-zA-Z0-9_]*/g, color: '#ec4899', label: 'Variable' },
+        
+        // Angle brackets: <variable>, <0>
+        { regex: /&lt;[a-zA-Z0-9_]+&gt;/g, color: '#06b6d4', label: 'Placeholder' },
+        
+        // Numbered placeholders: #1, #2, #name
+        { regex: /#[a-zA-Z0-9_]+/g, color: '#84cc16', label: 'Ref' },
+        
+        // Colon placeholders: :variable, :name
+        { regex: /:[a-zA-Z_][a-zA-Z0-9_]*/g, color: '#f97316', label: 'Symbol' }
+    ];
+    
+    // Apply highlighting for each pattern
+    patterns.forEach(({ regex, color, label }) => {
+        result = result.replace(regex, (match) => {
+            return `<span class="tag-pill" style="background-color: ${color}; color: white; padding: 2px 6px; border-radius: 4px; font-size: 0.85em; font-weight: 600; font-family: 'Courier New', monospace; white-space: nowrap; display: inline-block; margin: 0 2px;" title="${label}: Do not translate">${match}</span>`;
+        });
+    });
+    
+    return result;
+};
+
 const CATProjectView = () => {
     const { projectId } = useParams();
     const { user } = useAuth();
@@ -789,7 +847,9 @@ ${segments.map(seg => `      <trans-unit id="${seg.segment_number}">
                                     style={{ textAlign: getTextAlign(project?.source_language) }}
                                 >
                                     {activeSegment?.source ? (
-                                        <div dangerouslySetInnerHTML={{ __html: activeSegment.source.replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/&lt;b&gt;/g, '<span class="tag-pill">&lt;b&gt;</span>').replace(/&lt;\/b&gt;/g, '<span class="tag-pill">&lt;/b&gt;</span>') }} />
+                                        <div dangerouslySetInnerHTML={{ 
+                                            __html: highlightPlaceholders(activeSegment.source)
+                                        }} />
                                     ) : (
                                         <div className="text-slate-400 italic">No source text available for this segment</div>
                                     )}
