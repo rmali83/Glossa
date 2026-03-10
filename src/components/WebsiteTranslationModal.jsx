@@ -131,11 +131,6 @@ const WebsiteTranslationModal = ({ projectId, projectName, onClose, onComplete }
         pages: scrapedPages
       });
 
-      // Call onComplete after a short delay
-      setTimeout(() => {
-        if (onComplete) onComplete();
-      }, 2000);
-
     } catch (error) {
       console.error('[WebsiteTranslation] Error:', error);
       setResults({
@@ -357,8 +352,8 @@ const WebsiteTranslationModal = ({ projectId, projectName, onClose, onComplete }
             {results?.success ? 'Close' : 'Cancel'}
           </button>
           <button
-            onClick={handleScrape}
-            disabled={!url.trim() || scraping || results?.success}
+            onClick={results?.success ? () => { onComplete(); onClose(); } : handleScrape}
+            disabled={!url.trim() || scraping}
             className="px-8 py-2 bg-primary-600 hover:bg-primary-700 text-white rounded-lg font-semibold shadow-lg shadow-primary-500/30 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {scraping ? 'Scraping...' : results?.success ? 'Complete' : 'Start Scraping'}
