@@ -73,7 +73,7 @@ const WebsiteTranslationModal = ({ projectId, projectName, onClose, onComplete }
       }
 
       if (allSegments.length === 0) {
-        throw new Error('No content extracted from website');
+        throw new Error('No content extracted from website. This could be because: 1) The website is blocking automated access, 2) The page is JavaScript-rendered (try a different page), or 3) The URL is incorrect. Please try a different website or contact support.');
       }
 
       setProgress('Saving segments to database...');
@@ -243,6 +243,20 @@ const WebsiteTranslationModal = ({ projectId, projectName, onClose, onComplete }
               <li>✓ ARIA labels (accessibility)</li>
               <li>✓ Hidden content and data attributes</li>
               <li>✓ Form placeholders and options</li>
+            </ul>
+          </div>
+
+          {/* Tips */}
+          <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-4">
+            <h3 className="text-sm font-bold text-yellow-900 dark:text-yellow-100 mb-2">
+              💡 Tips for Best Results:
+            </h3>
+            <ul className="text-xs text-yellow-800 dark:text-yellow-200 space-y-1">
+              <li>• Use publicly accessible websites (no login required)</li>
+              <li>• Static HTML pages work best</li>
+              <li>• Some websites may block automated access</li>
+              <li>• If scraping fails, try the homepage or a different page</li>
+              <li>• JavaScript-heavy sites may not work (try static pages)</li>
             </ul>
           </div>
 

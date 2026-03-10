@@ -86,34 +86,66 @@ class WebsiteScraper {
    * Fetch webpage content
    */
   async fetchWebpage(url) {
+    // List of CORS proxies to try
+    const proxies = [
+      // AllOrigins - returns raw HTML
+      (url) => `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`,
+      // CORS Anywhere alternative
+      (url) => `https://corsproxy.io/?${encodeURIComponent(url)}`,
+      // ThingProxy
+      (url) => `https://thingproxy.freeboard.io/fetch/${url}`
+    ];
+
+    // Try direct fetch first
     try {
-      // Try direct fetch first
+      console.log('[WebsiteScraper] Trying direct fetch...');
       const response = await fetch(url, {
         method: 'GET',
+        mode: 'cors',
         headers: {
           'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
         }
       });
 
-      if (!response.ok) {
-        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      if (response.ok) {
+        const html = await response.text();
+        if (html && html.length > 100) {
+          console.log('[WebsiteScraper] Direct fetch successful');
+          return html;
+        }
       }
-
-      return await response.text();
     } catch (error) {
-      // If CORS error, try using a CORS proxy
-      console.warn('[WebsiteScraper] Direct fetch failed, trying CORS proxy...');
-      
-      // Use AllOrigins CORS proxy
-      const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`;
-      const response = await fetch(proxyUrl);
-      
-      if (!response.ok) {
-        throw new Error(`Failed to fetch webpage: ${error.message}`);
-      }
-
-      return await response.text();
+      console.warn('[WebsiteScraper] Direct fetch failed:', error.message);
     }
+
+    // Try each proxy
+    for (let i = 0; i < proxies.length; i++) {
+      try {
+        const proxyUrl = proxies[i](url);
+        console.log(`[WebsiteScraper] Trying proxy ${i + 1}/${proxies.length}...`);
+        
+        const response = await fetch(proxyUrl, {
+          method: 'GET',
+          headers: {
+            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8'
+          }
+        });
+
+        if (response.ok) {
+          const html = await response.text();
+          if (html && html.length > 100) {
+            console.log(`[WebsiteScraper] Proxy ${i + 1} successful`);
+            return html;
+          }
+        }
+      } catch (error) {
+        console.warn(`[WebsiteScraper] Proxy ${i + 1} failed:`, error.message);
+        continue;
+      }
+    }
+
+    // All methods failed
+    throw new Error('Unable to fetch webpage. The website may be blocking automated access. Try a different URL or contact support.');
   }
 
   /**
