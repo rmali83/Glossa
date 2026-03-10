@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../context/AuthContext';
+import JobTemplatesModal from '../../components/JobTemplatesModal';
 import './DashboardPages.css';
 
 const JobManagement = () => {
@@ -748,6 +749,11 @@ const JobManagement = () => {
                         </div>
                     </div>
                 </div>
+            )}
+
+            {/* Job Templates Modal */}
+            {showTemplateModal && (
+                <JobTemplatesModal onClose={() => setShowTemplateModal(false)} />
             )}
         </div>
     );

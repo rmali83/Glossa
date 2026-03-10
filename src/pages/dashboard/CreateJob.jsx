@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../context/AuthContext';
 import SimpleUploadModal from '../../components/SimpleUploadModal';
@@ -10,16 +10,65 @@ import LANGUAGES from '../../data/languages';
 const CreateJob = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const template = searchParams.get('template');
   
+  // Template configurations
+  const templateConfigs = {
+    website: {
+      name: 'Website Translation',
+      specialization: 'General',
+      difficulty_level: 'standard',
+      pay_rate_per_word: 0.05,
+      job_description: 'Translate website content including all text, SEO meta tags, navigation, and hidden content.',
+      autoOpenWebsiteModal: true
+    },
+    legal: {
+      name: 'Legal Translation',
+      specialization: 'Legal',
+      difficulty_level: 'expert',
+      pay_rate_per_word: 0.10,
+      job_description: 'Translate legal documents with specialized legal terminology and accuracy.'
+    },
+    technical: {
+      name: 'Technical Translation',
+      specialization: 'Technical',
+      difficulty_level: 'expert',
+      pay_rate_per_word: 0.08,
+      job_description: 'Translate technical documentation, manuals, and specifications.'
+    },
+    marketing: {
+      name: 'Marketing Translation',
+      specialization: 'Marketing',
+      difficulty_level: 'standard',
+      pay_rate_per_word: 0.06,
+      job_description: 'Translate marketing materials, ads, and promotional content with creative adaptation.'
+    },
+    medical: {
+      name: 'Medical Translation',
+      specialization: 'Medical',
+      difficulty_level: 'expert',
+      pay_rate_per_word: 0.12,
+      job_description: 'Translate medical documents, reports, and pharmaceutical content with precision.'
+    },
+    ecommerce: {
+      name: 'E-commerce Translation',
+      specialization: 'General',
+      difficulty_level: 'standard',
+      pay_rate_per_word: 0.05,
+      job_description: 'Translate product descriptions, categories, and e-commerce store content.'
+    }
+  };
+
   const [formData, setFormData] = useState({
-    name: '',
+    name: template && templateConfigs[template] ? templateConfigs[template].name : '',
     source_language: 'English',
     target_language: 'Spanish',
-    pay_rate_per_word: 0.05,
+    pay_rate_per_word: template && templateConfigs[template] ? templateConfigs[template].pay_rate_per_word : 0.05,
     deadline: '',
-    job_description: '',
-    specialization: 'General',
-    difficulty_level: 'standard',
+    job_description: template && templateConfigs[template] ? templateConfigs[template].job_description : '',
+    specialization: template && templateConfigs[template] ? templateConfigs[template].specialization : 'General',
+    difficulty_level: template && templateConfigs[template] ? templateConfigs[template].difficulty_level : 'standard',
     translator_id: '',
     reviewer_id: ''
   });
@@ -54,6 +103,17 @@ const CreateJob = () => {
     };
     fetchUsers();
   }, []);
+
+  // Auto-open website modal for website template
+  useEffect(() => {
+    if (template === 'website' && projectId && !showWebsiteModal) {
+      // Small delay to ensure project is created
+      const timer = setTimeout(() => {
+        setShowWebsiteModal(true);
+      }, 500);
+      return () => clearTimeout(timer);
+    }
+  }, [template, projectId, showWebsiteModal]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -212,9 +272,18 @@ const CreateJob = () => {
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950 p-6">
       <div className="max-w-4xl mx-auto">
         <div className="flex items-center justify-between mb-6">
-          <h1 className="text-3xl font-bold text-slate-900 dark:text-slate-100">
-            Create Translation Job
-          </h1>
+          <div>
+            <h1 className="text-3xl font-bold text-slate-900 dark:text-slate-100">
+              Create Translation Job
+            </h1>
+            {template && templateConfigs[template] && (
+              <div className="mt-2 flex items-center gap-2">
+                <span className="px-3 py-1 bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 rounded-full text-sm font-semibold">
+                  📋 Template: {templateConfigs[template].name}
+                </span>
+              </div>
+            )}
+          </div>
           <button
             onClick={() => navigate('/dashboard/admin')}
             className="px-4 py-2 text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-100"
