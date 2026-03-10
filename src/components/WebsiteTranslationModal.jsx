@@ -176,7 +176,7 @@ const WebsiteTranslationModal = ({ projectId, projectName, onClose, onComplete }
           {/* URL Input */}
           <div>
             <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">
-              Website URL
+              Website URL {!useSitemap && '*'}
             </label>
             <input
               type="url"
@@ -187,7 +187,9 @@ const WebsiteTranslationModal = ({ projectId, projectName, onClose, onComplete }
               className="w-full px-4 py-3 border border-slate-300 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-primary-500 focus:border-transparent disabled:opacity-50"
             />
             <p className="text-xs text-slate-500 mt-2">
-              Enter the URL of the website you want to translate
+              {useSitemap 
+                ? 'Enter the homepage or any page from the website (used as reference)'
+                : 'Enter the URL of the specific page you want to translate'}
             </p>
           </div>
 
@@ -206,13 +208,16 @@ const WebsiteTranslationModal = ({ projectId, projectName, onClose, onComplete }
                   Scrape Multiple Pages (Sitemap)
                 </span>
                 <p className="text-xs text-slate-500 mt-1">
-                  Extract content from all pages listed in your sitemap.xml
+                  Extract content from all pages listed in your sitemap.xml file
                 </p>
               </div>
             </label>
 
             {useSitemap && (
               <div className="mt-4">
+                <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">
+                  Sitemap URL *
+                </label>
                 <input
                   type="url"
                   value={sitemapUrl}
@@ -221,6 +226,9 @@ const WebsiteTranslationModal = ({ projectId, projectName, onClose, onComplete }
                   disabled={scraping}
                   className="w-full px-4 py-2 border border-slate-300 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-primary-500 focus:border-transparent disabled:opacity-50"
                 />
+                <p className="text-xs text-slate-500 mt-2">
+                  💡 Common sitemap locations: /sitemap.xml, /sitemap_index.xml, /sitemap-pages.xml
+                </p>
               </div>
             )}
           </div>
@@ -258,6 +266,26 @@ const WebsiteTranslationModal = ({ projectId, projectName, onClose, onComplete }
               <li>• If scraping fails, try the homepage or a different page</li>
               <li>• JavaScript-heavy sites may not work (try static pages)</li>
             </ul>
+          </div>
+
+          {/* Examples */}
+          <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg p-4">
+            <h3 className="text-sm font-bold text-green-900 dark:text-green-100 mb-2">
+              📝 Examples:
+            </h3>
+            <div className="text-xs text-green-800 dark:text-green-200 space-y-2">
+              <div>
+                <p className="font-semibold">Single Page Mode:</p>
+                <p className="ml-2">Website URL: https://example.com/about</p>
+                <p className="ml-2 text-green-600 dark:text-green-400">→ Scrapes only the About page</p>
+              </div>
+              <div className="pt-2 border-t border-green-200 dark:border-green-700">
+                <p className="font-semibold">Multiple Pages Mode:</p>
+                <p className="ml-2">Website URL: https://example.com</p>
+                <p className="ml-2">Sitemap URL: https://example.com/sitemap.xml</p>
+                <p className="ml-2 text-green-600 dark:text-green-400">→ Scrapes all pages in sitemap</p>
+              </div>
+            </div>
           </div>
 
           {/* Progress */}
