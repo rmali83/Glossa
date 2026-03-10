@@ -102,28 +102,26 @@ const WebsiteTranslationModal = ({ projectId, projectName, onClose, onComplete }
       if (fileError) throw fileError;
 
       // Save segments to database
+      // Use only the core required fields to avoid schema cache issues
       const segmentsToInsert = allSegments.map((seg, index) => ({
         project_id: projectId,
         file_id: fileRecord.id,
-        segment_number: index + 1,
         source_text: seg.source,
         target_text: '',
         status: 'pending',
-        original_format: 'html',
-        segment_key: seg.type || 'content',
-        metadata: {
-          type: seg.type,
-          pageUrl: seg.pageUrl,
-          pageTitle: seg.pageTitle,
-          ...seg.metadata
-        }
+        segment_number: index + 1
       }));
+
+      console.log('[WebsiteTranslation] Inserting segments:', segmentsToInsert.length);
 
       const { error: segmentError } = await supabase
         .from('segments')
         .insert(segmentsToInsert);
 
-      if (segmentError) throw segmentError;
+      if (segmentError) {
+        console.error('[WebsiteTranslation] Segment insert error:', segmentError);
+        throw segmentError;
+      }
 
       setProgress('Complete!');
       setResults({
@@ -334,7 +332,15 @@ const WebsiteTranslationModal = ({ projectId, projectName, onClose, onComplete }
                   <h3 className="text-sm font-bold text-red-900 dark:text-red-100 mb-2">
                     ❌ Error
                   </h3>
-                  <p className="text-sm text-red-800 dark:text-red-200">{results.error}</p>
+                  <p className="text-sm text-red-800 dark:text-red-200 mb-2">{results.error}</p>
+                  {results.error.includes('schema cache') && (
+                    <div className="mt-3 p-3 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded">
+                      <p className="text-xs text-yellow-800 dark:text-yellow-200">
+                        <strong>Database Schema Issue:</strong> Your Supabase schema cache may be out of sync. 
+                        Try refreshing the page or contact support if the issue persists.
+                      </p>
+                    </div>
+                  )}
                 </div>
               )}
             </div>
