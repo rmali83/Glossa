@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../context/AuthContext';
 import SimpleUploadModal from '../../components/SimpleUploadModal';
+import WebsiteTranslationModal from '../../components/WebsiteTranslationModal';
 import simpleUploadManager from '../../services/simpleUploadManager';
 import LANGUAGES from '../../data/languages';
 
@@ -26,6 +27,7 @@ const CreateJob = () => {
   const [uploadedFiles, setUploadedFiles] = useState([]);
   const [totalWords, setTotalWords] = useState(0);
   const [showUploadModal, setShowUploadModal] = useState(false);
+  const [showWebsiteModal, setShowWebsiteModal] = useState(false);
   const [creating, setCreating] = useState(false);
   const [projectId, setProjectId] = useState(null);
   const [translators, setTranslators] = useState([]);
@@ -418,14 +420,25 @@ const CreateJob = () => {
             <div className="border-t border-slate-200 dark:border-slate-800 pt-6 space-y-4">
               <div className="flex items-center justify-between">
                 <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-100">
-                  Upload Files
+                  Upload Content
                 </h3>
-                <button
-                  onClick={() => setShowUploadModal(true)}
-                  className="px-6 py-2 bg-green-600 hover:bg-green-700 text-white rounded-xl font-semibold transition-all"
-                >
-                  + Upload Files
-                </button>
+                <div className="flex gap-3">
+                  <button
+                    onClick={() => setShowWebsiteModal(true)}
+                    className="px-6 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-xl font-semibold transition-all flex items-center gap-2"
+                  >
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />
+                    </svg>
+                    Translate Website
+                  </button>
+                  <button
+                    onClick={() => setShowUploadModal(true)}
+                    className="px-6 py-2 bg-green-600 hover:bg-green-700 text-white rounded-xl font-semibold transition-all"
+                  >
+                    + Upload Files
+                  </button>
+                </div>
               </div>
 
               {uploadedFiles.length > 0 && (
@@ -484,6 +497,16 @@ const CreateJob = () => {
           projectName={formData.name}
           onClose={() => setShowUploadModal(false)}
           onUploadComplete={handleUploadComplete}
+        />
+      )}
+
+      {/* Website Translation Modal */}
+      {showWebsiteModal && projectId && (
+        <WebsiteTranslationModal
+          projectId={projectId}
+          projectName={formData.name}
+          onClose={() => setShowWebsiteModal(false)}
+          onComplete={handleUploadComplete}
         />
       )}
     </div>
