@@ -4,6 +4,7 @@ import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../context/AuthContext';
 import JobTemplatesModal from '../../components/JobTemplatesModal';
 import './DashboardPages.css';
+import './DashboardTheme.css';
 
 const JobManagement = () => {
     const { user } = useAuth();

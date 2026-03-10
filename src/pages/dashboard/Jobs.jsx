@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import './DashboardPages.css';
+import './DashboardTheme.css';
 import { mockJobs } from '../../data/mockData';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../context/AuthContext';

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import './GlossaCATStyle.css';
+import './DashboardTheme.css';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../context/AuthContext';
 import { Link } from 'react-router-dom';

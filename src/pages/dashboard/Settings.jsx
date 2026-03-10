@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import './DashboardPages.css';
+import './DashboardTheme.css';
 import { useAuth } from '../../context/AuthContext';
 import { supabase } from '../../lib/supabase';
 import { useNavigate } from 'react-router-dom';

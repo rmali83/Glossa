@@ -6,6 +6,7 @@ import SimpleUploadModal from '../../components/SimpleUploadModal';
 import WebsiteTranslationModal from '../../components/WebsiteTranslationModal';
 import simpleUploadManager from '../../services/simpleUploadManager';
 import LANGUAGES from '../../data/languages';
+import './DashboardTheme.css';
 
 const CreateJob = () => {
   const { user } = useAuth();

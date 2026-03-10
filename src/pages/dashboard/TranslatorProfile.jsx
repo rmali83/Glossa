@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../context/AuthContext';
 import './DashboardPages.css';
+import './DashboardTheme.css';
 
 const TranslatorProfile = () => {
     const { userId } = useParams(); // If viewing another user's profile
