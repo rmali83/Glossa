@@ -109,19 +109,43 @@ const WebsiteTranslationModal = ({ projectId, projectName, onClose, onComplete }
         source_text: seg.source,
         target_text: '',
         status: 'pending',
+        // Store metadata in context if column exists, otherwise in notes
         context: JSON.stringify({
           type: seg.type,
           pageUrl: seg.pageUrl,
           pageTitle: seg.pageTitle,
           metadata: seg.metadata || {}
-        })
+        }),
+        notes: `Type: ${seg.type} | Page: ${seg.pageTitle || seg.pageUrl}`
       }));
 
       const { error: segmentError } = await supabase
         .from('segments')
         .insert(segmentsToInsert);
 
-      if (segmentError) throw segmentError;
+      if (segmentError) {
+        // If context column doesn't exist, try without it
+        if (segmentError.message.includes('context')) {
+          console.warn('Context column not found, inserting without context');
+          const segmentsWithoutContext = allSegments.map((seg, index) => ({
+            project_id: projectId,
+            file_id: fileRecord.id,
+            segment_number: index + 1,
+            source_text: seg.source,
+            target_text: '',
+            status: 'pending',
+            notes: `Type: ${seg.type} | Page: ${seg.pageTitle || seg.pageUrl}`
+          }));
+          
+          const { error: retryError } = await supabase
+            .from('segments')
+            .insert(segmentsWithoutContext);
+          
+          if (retryError) throw retryError;
+        } else {
+          throw segmentError;
+        }
+      }
 
       setProgress('Complete!');
       setResults({
