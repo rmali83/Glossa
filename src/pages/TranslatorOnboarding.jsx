@@ -3,17 +3,13 @@ import { useAuth } from '../context/AuthContext';
 import { supabase } from '../lib/supabase';
 
 import { languagesData } from '../data/languagesData';
+import { translationDomains, getDomainNames } from '../data/translationDomains';
 import './TranslatorOnboarding.css';
 
 const allLanguages = Object.keys(languagesData).sort();
 
-const freelancerSpecs = [
-    'Legal', 'Medical', 'Technical', 'IT / Software', 'Marketing',
-    'Finance', 'E-commerce', 'News & Media', 'Subtitling', 'Gaming',
-    'Civil Rights / NGO', 'Agriculture / Agritech', 'Aerospace', 'Automotive',
-    'Life Sciences', 'Education / E-learning', 'Tourism & Hospitality',
-    'Energy & Environment', 'Luxury Goods', 'Military & Defense'
-];
+// No longer needed - using translationDomains from data file
+// const freelancerSpecs = [...];
 
 import TypewriterText from '../components/TypewriterText';
 
@@ -62,6 +58,7 @@ const TranslatorOnboarding = () => {
     const [status, setStatus] = useState('idle'); // idle, submitting, success
     const [userType, setUserType] = useState('Freelance Translator');
     const [isOtherTZ, setIsOtherTZ] = useState(false);
+    const [selectedDomain, setSelectedDomain] = useState(''); // For domain/subdomain selection
 
     const [formData, setFormData] = useState({
         // Common / Shared
@@ -393,15 +390,105 @@ const TranslatorOnboarding = () => {
                         </Section>
 
                         <Section userType={userType} title="3. Areas of Specialization" icon="📚" id="specialization">
-                            <p className="note text-neon-pink" style={{ fontWeight: 'bold' }}>Note: Choose EXACTLY 5 specializations. ({formData.specializations.length}/5)</p>
-                            <div className="checkbox-grid-large mt-1">
-                                {freelancerSpecs.map(spec => (
-                                    <label key={spec} className={`checkbox-item card-style ${formData.specializations.includes(spec) ? 'selected' : ''}`}>
-                                        <input type="checkbox" checked={formData.specializations.includes(spec)} onChange={() => handleMultiSelect('specializations', spec, 5)} />
-                                        <span>{spec}</span>
-                                    </label>
+                            <p className="note text-neon-pink" style={{ fontWeight: 'bold' }}>Note: Choose EXACTLY 5 specializations (domain + subdomain). ({formData.specializations.length}/5)</p>
+                            
+                            {/* Domain/Subdomain Selector */}
+                            <div className="form-grid mt-1">
+                                <div className="form-group">
+                                    <label>Select Domain</label>
+                                    <select 
+                                        className="glass-input"
+                                        value={selectedDomain}
+                                        onChange={(e) => setSelectedDomain(e.target.value)}
+                                    >
+                                        <option value="">Choose a domain...</option>
+                                        {getDomainNames().map(domain => (
+                                            <option key={domain} value={domain}>
+                                                {translationDomains[domain].icon} {domain}
+                                            </option>
+                                        ))}
+                                    </select>
+                                </div>
+                                
+                                <div className="form-group">
+                                    <label>Select Subdomain</label>
+                                    <select 
+                                        className="glass-input"
+                                        disabled={!selectedDomain}
+                                        value=""
+                                        onChange={(e) => {
+                                            const subdomain = e.target.value;
+                                            if (subdomain && selectedDomain) {
+                                                const specialization = `${selectedDomain}: ${subdomain}`;
+                                                if (formData.specializations.length < 5 && !formData.specializations.includes(specialization)) {
+                                                    setFormData(prev => ({
+                                                        ...prev,
+                                                        specializations: [...prev.specializations, specialization]
+                                                    }));
+                                                    setSelectedDomain(''); // Reset domain selection
+                                                } else if (formData.specializations.length >= 5) {
+                                                    alert('You can only select up to 5 specializations.');
+                                                } else {
+                                                    alert('This specialization is already selected.');
+                                                }
+                                            }
+                                        }}
+                                    >
+                                        <option value="">Choose subdomain...</option>
+                                        {selectedDomain && translationDomains[selectedDomain]?.subdomains.map(subdomain => (
+                                            <option key={subdomain} value={subdomain}>
+                                                {subdomain}
+                                            </option>
+                                        ))}
+                                    </select>
+                                </div>
+                            </div>
+                            
+                            {/* Display Selected Specializations */}
+                            <div className="selected-tags mt-1">
+                                {formData.specializations.map(spec => (
+                                    <span key={spec} className="tag" style={{
+                                        background: 'linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%)',
+                                        color: 'white',
+                                        padding: '0.5rem 1rem',
+                                        borderRadius: '8px',
+                                        display: 'inline-flex',
+                                        alignItems: 'center',
+                                        gap: '0.5rem',
+                                        margin: '0.25rem',
+                                        fontSize: '0.875rem',
+                                        fontWeight: '600'
+                                    }}>
+                                        {spec}
+                                        <button 
+                                            type="button" 
+                                            onClick={() => removeItem('specializations', spec)}
+                                            style={{
+                                                background: 'rgba(255,255,255,0.2)',
+                                                border: 'none',
+                                                borderRadius: '50%',
+                                                width: '20px',
+                                                height: '20px',
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                justifyContent: 'center',
+                                                cursor: 'pointer',
+                                                color: 'white',
+                                                fontSize: '1rem',
+                                                lineHeight: '1'
+                                            }}
+                                        >
+                                            ×
+                                        </button>
+                                    </span>
                                 ))}
                             </div>
+                            
+                            {formData.specializations.length === 0 && (
+                                <p className="helper-text" style={{marginTop: '1rem', color: '#9ca3af'}}>
+                                    💡 Select a domain first, then choose a specific subdomain to add to your specializations.
+                                </p>
+                            )}
                         </Section>
 
                         <Section userType={userType} title="4. Services Offered" icon="🛠️" id="services">
