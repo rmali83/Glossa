@@ -1275,21 +1275,36 @@ ${segments.map(seg => `      <trans-unit id="${seg.segment_number}">
 
                                     {/* Domain Classification */}
                                     <div className="space-y-3">
-                                        <label className="text-xs font-bold text-slate-500 uppercase block">Domain</label>
+                                        <label className="text-xs font-bold text-slate-500 uppercase block">Domain / Specialization</label>
                                         <select
                                             value={annotation.domain}
                                             onChange={(e) => setAnnotation({ ...annotation, domain: e.target.value })}
                                             className="w-full bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 rounded-lg p-2 text-sm focus:ring-1 focus:ring-primary-500"
                                         >
                                             <option value="">Select Domain</option>
-                                            <option value="General">General</option>
-                                            <option value="Legal">Legal</option>
-                                            <option value="Medical">Medical</option>
-                                            <option value="Technical">Technical</option>
-                                            <option value="Marketing">Marketing</option>
-                                            <option value="Finance">Finance</option>
-                                            <option value="Scientific">Scientific</option>
-                                            <option value="Literary">Literary</option>
+                                            <option value="Legal">⚖️ Legal Translation</option>
+                                            <option value="Medical">🏥 Medical & Healthcare</option>
+                                            <option value="Technical">⚙️ Technical Translation</option>
+                                            <option value="IT & Software">💻 IT & Software Localization</option>
+                                            <option value="Marketing">🌍 Marketing & Advertising</option>
+                                            <option value="Financial">💰 Financial Translation</option>
+                                            <option value="Business">🏢 Business & Corporate</option>
+                                            <option value="Gaming">🎮 Gaming Localization</option>
+                                            <option value="Audiovisual">🎬 Audiovisual Translation</option>
+                                            <option value="E-commerce">🛒 E-commerce Translation</option>
+                                            <option value="Scientific">🔬 Scientific Translation</option>
+                                            <option value="Educational">🎓 Educational / Academic</option>
+                                            <option value="Government">🏛️ Government & Public Sector</option>
+                                            <option value="Travel">✈️ Travel & Tourism</option>
+                                            <option value="Media">📰 Media & Journalism</option>
+                                            <option value="Religious">⛪ Religious Translation</option>
+                                            <option value="Literary">📚 Literary Translation</option>
+                                            <option value="Automotive">🚗 Automotive Translation</option>
+                                            <option value="Manufacturing">🏭 Manufacturing & Industrial</option>
+                                            <option value="Energy">🌱 Energy & Environment</option>
+                                            <option value="Life Sciences">🧬 Life Sciences</option>
+                                            <option value="Telecom">📡 Telecommunications</option>
+                                            <option value="General">📄 General</option>
                                         </select>
                                     </div>
 
