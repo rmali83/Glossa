@@ -89,6 +89,19 @@ const CATProjectView = () => {
     const [selectedTone, setSelectedTone] = useState('professional');
     const [mtSuggestion, setMtSuggestion] = useState(null);
 
+    // Annotation state
+    const [annotation, setAnnotation] = useState({
+        error_fluency: false,
+        error_grammar: false,
+        error_terminology: false,
+        error_style: false,
+        error_accuracy: false,
+        domain: '',
+        quality_rating: null,
+        notes: ''
+    });
+    const [savingAnnotation, setSavingAnnotation] = useState(false);
+
     const userRole = user?.user_metadata?.user_type || 'Translator';
     const isReviewer = userRole === 'Reviewer';
     const isAdmin = userRole === 'Agencies' || user?.email === 'rmali@live.com';
@@ -99,6 +112,7 @@ const CATProjectView = () => {
             fetchTranslationMemory();
             fetchGlossaryTerms();
             fetchMTSuggestion();
+            fetchAnnotation();
         }
     }, [activeSegmentIndex, project]);
 
@@ -158,6 +172,79 @@ const CATProjectView = () => {
             console.error('Error fetching MT:', err);
         } finally {
             setIsTranslating(false);
+        }
+    };
+
+    const fetchAnnotation = async () => {
+        if (!segments[activeSegmentIndex]) return;
+        
+        try {
+            const { data, error } = await supabase
+                .from('annotations')
+                .select('*')
+                .eq('segment_id', segments[activeSegmentIndex].id)
+                .eq('annotator_id', user.id)
+                .single();
+
+            if (!error && data) {
+                setAnnotation({
+                    error_fluency: data.error_fluency || false,
+                    error_grammar: data.error_grammar || false,
+                    error_terminology: data.error_terminology || false,
+                    error_style: data.error_style || false,
+                    error_accuracy: data.error_accuracy || false,
+                    domain: data.domain || '',
+                    quality_rating: data.quality_rating || null,
+                    notes: data.notes || ''
+                });
+            } else {
+                // Reset annotation for new segment
+                setAnnotation({
+                    error_fluency: false,
+                    error_grammar: false,
+                    error_terminology: false,
+                    error_style: false,
+                    error_accuracy: false,
+                    domain: '',
+                    quality_rating: null,
+                    notes: ''
+                });
+            }
+        } catch (err) {
+            console.error('Error fetching annotation:', err);
+        }
+    };
+
+    const saveAnnotation = async () => {
+        if (!segments[activeSegmentIndex]) return;
+        
+        setSavingAnnotation(true);
+        try {
+            const annotationData = {
+                segment_id: segments[activeSegmentIndex].id,
+                project_id: projectId,
+                annotator_id: user.id,
+                ...annotation
+            };
+
+            const { error } = await supabase
+                .from('annotations')
+                .upsert(annotationData, {
+                    onConflict: 'segment_id,annotator_id'
+                });
+
+            if (error) {
+                console.error('Error saving annotation:', error);
+                alert('Failed to save annotation');
+            } else {
+                console.log('Annotation saved successfully');
+                // Optionally show success message
+            }
+        } catch (err) {
+            console.error('Save annotation error:', err);
+            alert('Error saving annotation');
+        } finally {
+            setSavingAnnotation(false);
         }
     };
 
@@ -987,6 +1074,17 @@ ${segments.map(seg => `      <trans-unit id="${seg.segment_number}">
                                 </svg>
                                 AI
                             </button>
+                            <button 
+                                onClick={() => setActiveTab('annotation')}
+                                className={`flex-1 py-4 text-[10px] font-bold uppercase tracking-widest border-b-2 flex items-center justify-center gap-1 ${
+                                    activeTab === 'annotation' ? 'border-primary-500 text-primary-500' : 'border-transparent text-slate-400 hover:text-slate-600 dark:hover:text-slate-200'
+                                }`}
+                            >
+                                <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path>
+                                </svg>
+                                QA
+                            </button>
                         </div>
 
                         <div className="flex-1 overflow-y-auto p-4 space-y-6">
@@ -1140,6 +1238,129 @@ ${segments.map(seg => `      <trans-unit id="${seg.segment_number}">
                                             <p>Click "Generate Suggestions" to get AI-powered alternatives</p>
                                         </div>
                                     )}
+                                </div>
+                            )}
+
+                            {activeTab === 'annotation' && (
+                                <div className="space-y-4">
+                                    <h4 className="text-xs font-bold text-slate-500 uppercase">Quality Annotation</h4>
+                                    
+                                    {/* Error Types */}
+                                    <div className="space-y-3">
+                                        <label className="text-xs font-bold text-slate-500 uppercase block">Error Types</label>
+                                        <div className="space-y-2">
+                                            {[
+                                                { key: 'error_fluency', label: 'Fluency', icon: '💬', color: 'bg-blue-500' },
+                                                { key: 'error_grammar', label: 'Grammar', icon: '📝', color: 'bg-red-500' },
+                                                { key: 'error_terminology', label: 'Terminology', icon: '📚', color: 'bg-purple-500' },
+                                                { key: 'error_style', label: 'Style', icon: '🎨', color: 'bg-pink-500' },
+                                                { key: 'error_accuracy', label: 'Accuracy', icon: '🎯', color: 'bg-green-500' }
+                                            ].map(({ key, label, icon, color }) => (
+                                                <label key={key} className="flex items-center gap-3 p-3 bg-white dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700 cursor-pointer hover:border-primary-500 transition-colors">
+                                                    <input
+                                                        type="checkbox"
+                                                        checked={annotation[key]}
+                                                        onChange={(e) => setAnnotation({ ...annotation, [key]: e.target.checked })}
+                                                        className="w-4 h-4 rounded border-slate-300 text-primary-600 focus:ring-primary-500"
+                                                    />
+                                                    <span className="text-lg">{icon}</span>
+                                                    <span className="text-sm font-medium flex-1">{label}</span>
+                                                    {annotation[key] && (
+                                                        <span className={`w-2 h-2 rounded-full ${color}`}></span>
+                                                    )}
+                                                </label>
+                                            ))}
+                                        </div>
+                                    </div>
+
+                                    {/* Domain Classification */}
+                                    <div className="space-y-3">
+                                        <label className="text-xs font-bold text-slate-500 uppercase block">Domain</label>
+                                        <select
+                                            value={annotation.domain}
+                                            onChange={(e) => setAnnotation({ ...annotation, domain: e.target.value })}
+                                            className="w-full bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 rounded-lg p-2 text-sm focus:ring-1 focus:ring-primary-500"
+                                        >
+                                            <option value="">Select Domain</option>
+                                            <option value="General">General</option>
+                                            <option value="Legal">Legal</option>
+                                            <option value="Medical">Medical</option>
+                                            <option value="Technical">Technical</option>
+                                            <option value="Marketing">Marketing</option>
+                                            <option value="Finance">Finance</option>
+                                            <option value="Scientific">Scientific</option>
+                                            <option value="Literary">Literary</option>
+                                        </select>
+                                    </div>
+
+                                    {/* Quality Rating */}
+                                    <div className="space-y-3">
+                                        <label className="text-xs font-bold text-slate-500 uppercase block">Quality Rating</label>
+                                        <div className="flex gap-2 justify-center">
+                                            {[1, 2, 3, 4, 5].map((rating) => (
+                                                <button
+                                                    key={rating}
+                                                    onClick={() => setAnnotation({ ...annotation, quality_rating: rating })}
+                                                    className={`w-10 h-10 rounded-lg border-2 transition-all ${
+                                                        annotation.quality_rating === rating
+                                                            ? 'border-yellow-500 bg-yellow-500/20 scale-110'
+                                                            : 'border-slate-300 dark:border-slate-700 hover:border-yellow-500'
+                                                    }`}
+                                                >
+                                                    <svg className={`w-6 h-6 mx-auto ${annotation.quality_rating >= rating ? 'text-yellow-500' : 'text-slate-300'}`} fill="currentColor" viewBox="0 0 24 24">
+                                                        <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"/>
+                                                    </svg>
+                                                </button>
+                                            ))}
+                                        </div>
+                                        <div className="flex justify-between text-[10px] text-slate-400 px-1">
+                                            <span>Poor</span>
+                                            <span>Excellent</span>
+                                        </div>
+                                    </div>
+
+                                    {/* Notes */}
+                                    <div className="space-y-3">
+                                        <label className="text-xs font-bold text-slate-500 uppercase block">Notes</label>
+                                        <textarea
+                                            value={annotation.notes}
+                                            onChange={(e) => setAnnotation({ ...annotation, notes: e.target.value })}
+                                            placeholder="Add any additional comments..."
+                                            className="w-full bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 rounded-lg p-3 text-sm focus:ring-1 focus:ring-primary-500 resize-none"
+                                            rows="3"
+                                        />
+                                    </div>
+
+                                    {/* Save Button */}
+                                    <button
+                                        onClick={saveAnnotation}
+                                        disabled={savingAnnotation}
+                                        className="w-full py-3 bg-gradient-to-r from-green-600 to-emerald-600 text-white rounded-lg text-sm font-bold shadow-lg shadow-green-500/20 hover:shadow-green-500/40 transition-all disabled:opacity-50 flex items-center justify-center gap-2"
+                                    >
+                                        {savingAnnotation ? (
+                                            <>
+                                                <svg className="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
+                                                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                                </svg>
+                                                Saving...
+                                            </>
+                                        ) : (
+                                            <>
+                                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
+                                                </svg>
+                                                Save Annotation
+                                            </>
+                                        )}
+                                    </button>
+
+                                    {/* Info Box */}
+                                    <div className="p-3 bg-blue-500/10 border border-blue-500/20 rounded-lg">
+                                        <p className="text-xs text-blue-600 dark:text-blue-400">
+                                            💡 Annotations help improve AI translation quality and are used for training datasets.
+                                        </p>
+                                    </div>
                                 </div>
                             )}
                         </div>
