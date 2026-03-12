@@ -100,10 +100,10 @@ const MQMEvaluationPanel = ({ annotation, setAnnotation }) => {
     return (
         <div className="space-y-3">
             <div className="flex items-center justify-between">
-                <label className="text-sm font-semibold text-white font-sans">📊 MQM Evaluation</label>
+                <label className="text-sm font-semibold text-white" style={{ fontFamily: 'SF Pro Display, Helvetica Neue, Arial, sans-serif' }}>📊 MQM Evaluation</label>
                 <div className="flex items-center gap-2">
-                    <span className="text-xs text-white font-medium font-sans">Score:</span>
-                    <span className={`px-2 py-1 rounded-lg text-xs font-semibold shadow-md font-sans ${
+                    <span className="text-xs text-white font-medium" style={{ fontFamily: 'SF Pro Display, Helvetica Neue, Arial, sans-serif' }}>Score:</span>
+                    <span className={`px-2 py-1 rounded-lg text-xs font-semibold shadow-md ${
                         mqmScore >= 85 ? 'bg-green-500 text-white' :
                         mqmScore >= 70 ? 'bg-yellow-500 text-white' :
                         'bg-red-500 text-white'
@@ -116,7 +116,7 @@ const MQMEvaluationPanel = ({ annotation, setAnnotation }) => {
             {/* Current Errors */}
             {mqmErrors.length > 0 && (
                 <div className="space-y-2">
-                    <h5 className="text-xs font-semibold text-white font-sans">Current Issues:</h5>
+                    <h5 className="text-xs font-semibold text-white" style={{ fontFamily: 'SF Pro Display, Helvetica Neue, Arial, sans-serif' }}>Current Issues:</h5>
                     {mqmErrors.map((error) => (
                         <div key={error.id} className="flex items-center justify-between p-2 bg-white/15 backdrop-blur-sm rounded-lg border border-white/30 shadow-md">
                             <div className="flex items-center gap-2">
@@ -142,20 +142,21 @@ const MQMEvaluationPanel = ({ annotation, setAnnotation }) => {
 
             {/* Add New Error */}
             <div className="space-y-3">
-                <h5 className="text-xs font-semibold text-white font-sans">Add Issue:</h5>
+                <h5 className="text-xs font-semibold text-white" style={{ fontFamily: 'SF Pro Display, Helvetica Neue, Arial, sans-serif' }}>Add Issue:</h5>
                 {mqmCategories.map((category) => (
                     <div key={category.name} className="space-y-2">
-                        <h6 className="text-xs font-medium text-white font-sans">{category.name}</h6>
+                        <h6 className="text-xs font-medium text-white" style={{ fontFamily: 'SF Pro Display, Helvetica Neue, Arial, sans-serif' }}>{category.name}</h6>
                         <div className="grid grid-cols-1 gap-2">
                             {category.subcategories.map((subcategory) => (
                                 <div key={subcategory} className="flex items-center gap-2 p-2 bg-white/10 backdrop-blur-sm rounded-lg border border-white/20 shadow-sm">
-                                    <span className="text-xs flex-1 text-white font-medium font-sans">{subcategory}</span>
+                                    <span className="text-xs flex-1 text-white font-medium" style={{ fontFamily: 'SF Pro Display, Helvetica Neue, Arial, sans-serif' }}>{subcategory}</span>
                                     <div className="flex gap-1">
                                         {severityLevels.map((severity) => (
                                             <button
                                                 key={severity.value}
                                                 onClick={() => addMQMError(category.name, subcategory, severity.value)}
-                                                className={`px-2 py-1 text-xs rounded ${severity.color} text-white hover:opacity-90 transition-opacity font-medium shadow-sm min-w-[45px] font-sans`}
+                                                className={`px-2 py-1 text-xs rounded ${severity.color} text-white hover:opacity-90 transition-opacity font-medium shadow-sm min-w-[45px]`}
+                                                style={{ fontFamily: 'SF Pro Display, Helvetica Neue, Arial, sans-serif' }}
                                                 title={`${severity.label} (-${severity.penalty} points)`}
                                             >
                                                 {severity.label}
@@ -1843,13 +1844,13 @@ ${segments.map(seg => `      <trans-unit id="${seg.segment_number}">
                                         <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent rounded-2xl"></div>
                                         
                                         {/* Content */}
-                                        <div className="relative z-10 p-4 space-y-4 text-white font-sans">
-                                            <h4 className="text-sm font-semibold text-white tracking-wide font-sans">Quality Annotation</h4>
+                                        <div className="relative z-10 p-4 space-y-4 text-white" style={{ fontFamily: 'SF Pro Display, Helvetica Neue, Arial, sans-serif' }}>
+                                            <h4 className="text-sm font-semibold text-white tracking-wide" style={{ fontFamily: 'SF Pro Display, Helvetica Neue, Arial, sans-serif' }}>Quality Annotation</h4>
                                             
                                             {/* Error Types with Severity */}
                                             {annotationSettings.error_types && (
                                                 <div className="space-y-3">
-                                                    <label className="text-xs font-semibold text-white block font-sans">Error Types{annotationSettings.error_severity && ' & Severity'}</label>
+                                                    <label className="text-xs font-semibold text-white block" style={{ fontFamily: 'SF Pro Display, Helvetica Neue, Arial, sans-serif' }}>Error Types{annotationSettings.error_severity && ' & Severity'}</label>
                                                     <div className="space-y-2">
                                                         {[
                                                             { key: 'error_fluency', label: 'Fluency', icon: '💬', color: 'bg-blue-500' },
@@ -1867,7 +1868,7 @@ ${segments.map(seg => `      <trans-unit id="${seg.segment_number}">
                                                                         className="w-4 h-4 rounded border-white/40 text-blue-500 focus:ring-blue-400 bg-white/20"
                                                                     />
                                                                     <span className="text-sm">{icon}</span>
-                                                                    <span className="text-xs font-medium flex-1 text-white font-sans">{label}</span>
+                                                                    <span className="text-xs font-medium flex-1 text-white" style={{ fontFamily: 'SF Pro Display, Helvetica Neue, Arial, sans-serif' }}>{label}</span>
                                                                     {annotation[key] && (
                                                                         <span className={`w-2 h-2 rounded-full ${color} shadow-sm`}></span>
                                                                     )}
@@ -1879,11 +1880,12 @@ ${segments.map(seg => `      <trans-unit id="${seg.segment_number}">
                                                                             <button
                                                                                 key={severity}
                                                                                 onClick={() => setAnnotation({ ...annotation, [`${key}_severity`]: severity })}
-                                                                                className={`flex-1 px-2 py-1 text-xs rounded font-medium font-sans ${
+                                                                                className={`flex-1 px-2 py-1 text-xs rounded font-medium ${
                                                                                     annotation[`${key}_severity`] === severity
                                                                                         ? 'bg-white text-blue-800 font-semibold shadow-sm'
                                                                                         : 'bg-white/20 text-white hover:bg-white/30'
                                                                                 }`}
+                                                                                style={{ fontFamily: 'SF Pro Display, Helvetica Neue, Arial, sans-serif' }}
                                                                             >
                                                                                 {severity.charAt(0).toUpperCase() + severity.slice(1)}
                                                                             </button>
@@ -1899,7 +1901,7 @@ ${segments.map(seg => `      <trans-unit id="${seg.segment_number}">
                                             {/* Domain Classification */}
                                             {annotationSettings.domain_classification && (
                                                 <div className="space-y-3">
-                                                    <label className="text-xs font-semibold text-white block font-sans">Domain / Specialization</label>
+                                                    <label className="text-xs font-semibold text-white block" style={{ fontFamily: 'SF Pro Display, Helvetica Neue, Arial, sans-serif' }}>Domain / Specialization</label>
                                                     
                                                     {/* Domain Dropdown */}
                                                     <select
@@ -1910,8 +1912,8 @@ ${segments.map(seg => `      <trans-unit id="${seg.segment_number}">
                                                             setSelectedSubdomain('');
                                                             setAnnotation({ ...annotation, domain: '' });
                                                         }}
-                                                        className="w-full bg-white/15 backdrop-blur-sm border border-white/30 rounded-lg p-3 text-white placeholder-white/70 focus:ring-2 focus:ring-white/50 focus:border-white/50 shadow-md text-xs font-sans"
-                                                        style={{ borderRadius: '8px' }}
+                                                        className="w-full bg-white/15 backdrop-blur-sm border border-white/30 rounded-lg p-3 text-white placeholder-white/70 focus:ring-2 focus:ring-white/50 focus:border-white/50 shadow-md text-xs"
+                                                        style={{ borderRadius: '8px', fontFamily: 'SF Pro Display, Helvetica Neue, Arial, sans-serif' }}
                                                     >
                                                         <option value="" className="text-gray-800">Select Domain</option>
                                                         {getDomainNames().map((domain) => (
@@ -1932,7 +1934,7 @@ ${segments.map(seg => `      <trans-unit id="${seg.segment_number}">
                                                                 setAnnotation({ ...annotation, domain: fullDomain });
                                                             }}
                                                             className="w-full bg-white/15 backdrop-blur-sm border border-white/30 rounded-lg p-3 text-white placeholder-white/70 focus:ring-2 focus:ring-white/50 focus:border-white/50 shadow-md text-xs"
-                                                            style={{ borderRadius: '8px' }}
+                                                            style={{ borderRadius: '8px', fontFamily: 'SF Pro Display, Helvetica Neue, Arial, sans-serif' }}
                                                         >
                                                             <option value="" className="text-gray-800">Select Subdomain</option>
                                                             {getSubdomains(selectedDomain).map((subdomain) => (
@@ -1946,7 +1948,7 @@ ${segments.map(seg => `      <trans-unit id="${seg.segment_number}">
                                                     {/* Display selected domain/subdomain */}
                                                     {annotation.domain && (
                                                         <div className="p-3 bg-white/20 backdrop-blur-sm border border-white/40 rounded-lg shadow-md">
-                                                            <p className="text-xs text-white font-medium">
+                                                            <p className="text-xs text-white font-medium" style={{ fontFamily: 'SF Pro Display, Helvetica Neue, Arial, sans-serif' }}>
                                                                 {getDomainIcon(selectedDomain)} {annotation.domain}
                                                             </p>
                                                         </div>
@@ -1956,9 +1958,9 @@ ${segments.map(seg => `      <trans-unit id="${seg.segment_number}">
 
                                             {/* NEW FEATURE 1: Effort Tracking */}
                                             {annotationSettings.translation_effort && (
-                                                <div className="space-y-4">
-                                                    <label className="text-sm font-semibold text-white/80 block">⏱️ Translation Effort</label>
-                                                    <div className="grid grid-cols-2 gap-3">
+                                                <div className="space-y-3">
+                                                    <label className="text-xs font-semibold text-white block" style={{ fontFamily: 'SF Pro Display, Helvetica Neue, Arial, sans-serif' }}>⏱️ Translation Effort</label>
+                                                    <div className="grid grid-cols-2 gap-2">
                                                         {[
                                                             { value: 'easy', label: 'Easy', desc: '< 5 min', color: 'from-green-500 to-emerald-500' },
                                                             { value: 'medium', label: 'Medium', desc: '5-15 min', color: 'from-yellow-500 to-orange-500' },
@@ -1968,13 +1970,14 @@ ${segments.map(seg => `      <trans-unit id="${seg.segment_number}">
                                                             <button
                                                                 key={value}
                                                                 onClick={() => setAnnotation({ ...annotation, translation_effort: value })}
-                                                                className={`p-4 rounded-2xl border-2 transition-all text-left ${
+                                                                className={`p-3 rounded-lg border-2 transition-all text-left ${
                                                                     annotation.translation_effort === value
-                                                                        ? `bg-gradient-to-r ${color} text-white border-transparent font-bold shadow-lg`
+                                                                        ? `bg-gradient-to-r ${color} text-white border-transparent font-semibold shadow-md`
                                                                         : 'bg-white/10 backdrop-blur-sm border-white/20 text-white hover:bg-white/20'
                                                                 }`}
+                                                                style={{ fontFamily: 'SF Pro Display, Helvetica Neue, Arial, sans-serif' }}
                                                             >
-                                                                <div className="text-sm font-bold">{label}</div>
+                                                                <div className="text-xs font-semibold">{label}</div>
                                                                 <div className="text-xs opacity-75">{desc}</div>
                                                             </button>
                                                         ))}
@@ -1984,9 +1987,9 @@ ${segments.map(seg => `      <trans-unit id="${seg.segment_number}">
 
                                             {/* NEW FEATURE 2: Post-Editing Effort */}
                                             {annotationSettings.post_editing_effort && segments[activeSegmentIndex]?.ai_translation && (
-                                                <div className="space-y-4">
-                                                    <label className="text-sm font-semibold text-white/80 block">🤖 Post-Editing Effort</label>
-                                                    <div className="grid grid-cols-2 gap-3">
+                                                <div className="space-y-3">
+                                                    <label className="text-xs font-semibold text-white block" style={{ fontFamily: 'SF Pro Display, Helvetica Neue, Arial, sans-serif' }}>🤖 Post-Editing Effort</label>
+                                                    <div className="grid grid-cols-2 gap-2">
                                                         {[
                                                             { value: 'no_editing', label: 'No Editing', icon: '✓' },
                                                             { value: 'light_editing', label: 'Light', icon: '✏️' },
@@ -1996,13 +1999,14 @@ ${segments.map(seg => `      <trans-unit id="${seg.segment_number}">
                                                             <button
                                                                 key={value}
                                                                 onClick={() => setAnnotation({ ...annotation, post_editing_effort: value })}
-                                                                className={`p-4 rounded-2xl border-2 transition-all ${
+                                                                className={`p-3 rounded-lg border-2 transition-all ${
                                                                     annotation.post_editing_effort === value
-                                                                        ? 'bg-white text-blue-700 border-white font-bold shadow-lg'
+                                                                        ? 'bg-white text-blue-700 border-white font-semibold shadow-md'
                                                                         : 'bg-white/10 backdrop-blur-sm border-white/20 text-white hover:bg-white/20'
                                                                 }`}
+                                                                style={{ fontFamily: 'SF Pro Display, Helvetica Neue, Arial, sans-serif' }}
                                                             >
-                                                                <div className="text-sm font-bold">{icon} {label}</div>
+                                                                <div className="text-xs font-semibold">{icon} {label}</div>
                                                             </button>
                                                         ))}
                                                     </div>
@@ -2011,32 +2015,32 @@ ${segments.map(seg => `      <trans-unit id="${seg.segment_number}">
 
                                             {/* NEW FEATURE 3: AI Translation Quality */}
                                             {annotationSettings.ai_quality_rating && segments[activeSegmentIndex]?.ai_translation && (
-                                                <div className="space-y-4">
-                                                    <label className="text-sm font-semibold text-white/80 block">🤖 AI Translation Quality</label>
-                                                    <div className="flex gap-3 justify-center">
+                                                <div className="space-y-3">
+                                                    <label className="text-xs font-semibold text-white block" style={{ fontFamily: 'SF Pro Display, Helvetica Neue, Arial, sans-serif' }}>🤖 AI Translation Quality</label>
+                                                    <div className="flex gap-2 justify-center">
                                                         {[1, 2, 3, 4, 5].map((rating) => (
                                                             <button
                                                                 key={rating}
                                                                 onClick={() => setAnnotation({ ...annotation, ai_translation_quality: rating })}
-                                                                className={`w-12 h-12 rounded-2xl border-2 transition-all ${
+                                                                className={`w-8 h-8 rounded-lg border-2 transition-all shadow-md ${
                                                                     annotation.ai_translation_quality === rating
                                                                         ? 'border-white bg-white/20 scale-110 shadow-lg'
                                                                         : 'border-white/30 hover:border-white/60 hover:bg-white/10'
                                                                 }`}
                                                             >
-                                                                <svg className={`w-7 h-7 mx-auto ${annotation.ai_translation_quality >= rating ? 'text-yellow-400' : 'text-white/40'}`} fill="currentColor" viewBox="0 0 24 24">
+                                                                <svg className={`w-5 h-5 mx-auto ${annotation.ai_translation_quality >= rating ? 'text-yellow-400' : 'text-white/40'}`} fill="currentColor" viewBox="0 0 24 24">
                                                                     <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"/>
                                                                 </svg>
                                                             </button>
                                                         ))}
                                                     </div>
-                                                    <div className="flex justify-between text-xs text-white/60 px-2">
+                                                    <div className="flex justify-between text-xs text-white/70 px-1 font-medium" style={{ fontFamily: 'SF Pro Display, Helvetica Neue, Arial, sans-serif' }}>
                                                         <span>Poor</span>
                                                         <span>Excellent</span>
                                                     </div>
                                                     
                                                     {/* AI Helpfulness */}
-                                                    <div className="grid grid-cols-2 gap-3 mt-4">
+                                                    <div className="grid grid-cols-2 gap-2 mt-3">
                                                         {[
                                                             { value: 'very_helpful', label: 'Very Helpful', desc: 'Used as-is' },
                                                             { value: 'helpful', label: 'Helpful', desc: 'Minor edits' },
@@ -2046,13 +2050,14 @@ ${segments.map(seg => `      <trans-unit id="${seg.segment_number}">
                                                             <button
                                                                 key={value}
                                                                 onClick={() => setAnnotation({ ...annotation, ai_helpfulness: value })}
-                                                                className={`p-3 rounded-2xl border transition-all text-left ${
+                                                                className={`p-2 rounded-lg border transition-all text-left ${
                                                                     annotation.ai_helpfulness === value
-                                                                        ? 'bg-white text-blue-700 border-white font-bold shadow-lg'
+                                                                        ? 'bg-white text-blue-700 border-white font-semibold shadow-md'
                                                                         : 'bg-white/10 backdrop-blur-sm border-white/20 text-white hover:bg-white/20'
                                                                 }`}
+                                                                style={{ fontFamily: 'SF Pro Display, Helvetica Neue, Arial, sans-serif' }}
                                                             >
-                                                                <div className="text-sm font-bold">{label}</div>
+                                                                <div className="text-xs font-semibold">{label}</div>
                                                                 <div className="text-xs opacity-75">{desc}</div>
                                                             </button>
                                                         ))}
@@ -2062,37 +2067,37 @@ ${segments.map(seg => `      <trans-unit id="${seg.segment_number}">
 
                                             {/* NEW FEATURE 4: Confidence Score */}
                                             {annotationSettings.confidence_score && (
-                                                <div className="space-y-4">
-                                                    <label className="text-sm font-semibold text-white/80 block">💪 Your Confidence</label>
-                                                    <div className="flex gap-3 justify-center">
+                                                <div className="space-y-3">
+                                                    <label className="text-xs font-semibold text-white block" style={{ fontFamily: 'SF Pro Display, Helvetica Neue, Arial, sans-serif' }}>💪 Your Confidence</label>
+                                                    <div className="flex gap-2 justify-center">
                                                         {[1, 2, 3, 4, 5].map((rating) => (
                                                             <button
                                                                 key={rating}
                                                                 onClick={() => setAnnotation({ ...annotation, confidence_score: rating })}
-                                                                className={`w-12 h-12 rounded-2xl border-2 transition-all ${
+                                                                className={`w-8 h-8 rounded-lg border-2 transition-all shadow-md ${
                                                                     annotation.confidence_score === rating
                                                                         ? 'border-white bg-white/20 scale-110 shadow-lg'
                                                                         : 'border-white/30 hover:border-white/60 hover:bg-white/10'
                                                                 }`}
                                                             >
-                                                                <svg className={`w-7 h-7 mx-auto ${annotation.confidence_score >= rating ? 'text-purple-400' : 'text-white/40'}`} fill="currentColor" viewBox="0 0 24 24">
+                                                                <svg className={`w-5 h-5 mx-auto ${annotation.confidence_score >= rating ? 'text-purple-400' : 'text-white/40'}`} fill="currentColor" viewBox="0 0 24 24">
                                                                     <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"/>
                                                                 </svg>
                                                             </button>
                                                         ))}
                                                     </div>
-                                                    <div className="flex justify-between text-xs text-white/60 px-2">
+                                                    <div className="flex justify-between text-xs text-white/70 px-1 font-medium" style={{ fontFamily: 'SF Pro Display, Helvetica Neue, Arial, sans-serif' }}>
                                                         <span>Uncertain</span>
                                                         <span>Very Confident</span>
                                                     </div>
                                                     
                                                     {/* Uncertainty Areas */}
                                                     {annotation.confidence_score && annotation.confidence_score < 4 && (
-                                                        <div className="mt-4">
-                                                            <label className="text-xs text-white/70 block mb-3">Uncertain About:</label>
-                                                            <div className="grid grid-cols-2 gap-3">
+                                                        <div className="mt-3">
+                                                            <label className="text-xs text-white/70 block mb-2" style={{ fontFamily: 'SF Pro Display, Helvetica Neue, Arial, sans-serif' }}>Uncertain About:</label>
+                                                            <div className="grid grid-cols-2 gap-2">
                                                                 {['terminology', 'grammar', 'cultural', 'technical'].map((area) => (
-                                                                    <label key={area} className="flex items-center gap-3 p-3 bg-white/10 backdrop-blur-sm rounded-2xl border border-white/20 cursor-pointer hover:bg-white/15 transition-colors">
+                                                                    <label key={area} className="flex items-center gap-2 p-2 bg-white/10 backdrop-blur-sm rounded-lg border border-white/20 cursor-pointer hover:bg-white/15 transition-colors">
                                                                         <input
                                                                             type="checkbox"
                                                                             checked={annotation.uncertain_about.includes(area)}
@@ -2102,9 +2107,9 @@ ${segments.map(seg => `      <trans-unit id="${seg.segment_number}">
                                                                                     : annotation.uncertain_about.filter(a => a !== area);
                                                                                 setAnnotation({ ...annotation, uncertain_about: updated });
                                                                             }}
-                                                                            className="w-4 h-4 rounded-lg border-white/30 text-purple-500 focus:ring-purple-400 bg-white/20"
+                                                                            className="w-3 h-3 rounded border-white/30 text-purple-500 focus:ring-purple-400 bg-white/20"
                                                                         />
-                                                                        <span className="text-sm capitalize text-white">{area}</span>
+                                                                        <span className="text-xs capitalize text-white" style={{ fontFamily: 'SF Pro Display, Helvetica Neue, Arial, sans-serif' }}>{area}</span>
                                                                     </label>
                                                                 ))}
                                                             </div>
@@ -2116,7 +2121,7 @@ ${segments.map(seg => `      <trans-unit id="${seg.segment_number}">
                                             {/* Quality Rating */}
                                             {annotationSettings.quality_rating && (
                                                 <div className="space-y-3">
-                                                    <label className="text-xs font-semibold text-white block font-sans">Quality Rating</label>
+                                                    <label className="text-xs font-semibold text-white block" style={{ fontFamily: 'SF Pro Display, Helvetica Neue, Arial, sans-serif' }}>Quality Rating</label>
                                                     <div className="flex gap-2 justify-center">
                                                         {[1, 2, 3, 4, 5].map((rating) => (
                                                             <button
@@ -2154,12 +2159,13 @@ ${segments.map(seg => `      <trans-unit id="${seg.segment_number}">
                                             {/* Notes */}
                                             {annotationSettings.notes && (
                                                 <div className="space-y-3">
-                                                    <label className="text-xs font-semibold text-white block font-sans">Notes</label>
+                                                    <label className="text-xs font-semibold text-white block" style={{ fontFamily: 'SF Pro Display, Helvetica Neue, Arial, sans-serif' }}>Notes</label>
                                                     <textarea
                                                         value={annotation.notes}
                                                         onChange={(e) => setAnnotation({ ...annotation, notes: e.target.value })}
                                                         placeholder="Add any additional comments..."
-                                                        className="w-full bg-white/15 backdrop-blur-sm border border-white/30 rounded-lg p-3 text-white placeholder-white/70 focus:ring-2 focus:ring-white/50 focus:border-white/50 resize-none shadow-md text-xs font-sans"
+                                                        className="w-full bg-white/15 backdrop-blur-sm border border-white/30 rounded-lg p-3 text-white placeholder-white/70 focus:ring-2 focus:ring-white/50 focus:border-white/50 resize-none shadow-md text-xs"
+                                                        style={{ fontFamily: 'SF Pro Display, Helvetica Neue, Arial, sans-serif' }}
                                                         rows="3"
                                                     />
                                                 </div>
@@ -2169,7 +2175,8 @@ ${segments.map(seg => `      <trans-unit id="${seg.segment_number}">
                                             <button
                                                 onClick={saveAnnotation}
                                                 disabled={savingAnnotation}
-                                                className="w-full py-3 bg-white/25 backdrop-blur-sm border border-white/40 text-white rounded-lg text-sm font-semibold hover:bg-white/35 transition-all disabled:opacity-50 flex items-center justify-center gap-2 shadow-lg font-sans"
+                                                className="w-full py-3 bg-white/25 backdrop-blur-sm border border-white/40 text-white rounded-lg text-sm font-semibold hover:bg-white/35 transition-all disabled:opacity-50 flex items-center justify-center gap-2 shadow-lg"
+                                                style={{ fontFamily: 'SF Pro Display, Helvetica Neue, Arial, sans-serif' }}
                                             >
                                                 {savingAnnotation ? (
                                                     <>
@@ -2191,7 +2198,7 @@ ${segments.map(seg => `      <trans-unit id="${seg.segment_number}">
 
                                             {/* Info Box */}
                                             <div className="p-3 bg-white/15 backdrop-blur-sm border border-white/30 rounded-lg shadow-md">
-                                                <p className="text-xs text-white">
+                                                <p className="text-xs text-white" style={{ fontFamily: 'SF Pro Display, Helvetica Neue, Arial, sans-serif' }}>
                                                     💡 Enhanced annotations with effort tracking, AI quality rating, and confidence scoring help improve translation quality and train better AI models.
                                                 </p>
                                             </div>
