@@ -98,12 +98,12 @@ const MQMEvaluationPanel = ({ annotation, setAnnotation }) => {
     const mqmScore = annotation.mqm_score || 100;
 
     return (
-        <div className="space-y-4">
+        <div className="space-y-6">
             <div className="flex items-center justify-between">
-                <label className="text-xs font-bold text-slate-500 uppercase block">📊 MQM Evaluation</label>
-                <div className="flex items-center gap-2">
-                    <span className="text-xs text-slate-500">Score:</span>
-                    <span className={`px-2 py-1 rounded text-xs font-bold ${
+                <label className="text-lg font-bold text-white">📊 MQM Evaluation</label>
+                <div className="flex items-center gap-3">
+                    <span className="text-sm text-white/80">Score:</span>
+                    <span className={`px-3 py-1.5 rounded-xl text-sm font-bold ${
                         mqmScore >= 85 ? 'bg-green-500 text-white' :
                         mqmScore >= 70 ? 'bg-yellow-500 text-white' :
                         'bg-red-500 text-white'
@@ -115,23 +115,23 @@ const MQMEvaluationPanel = ({ annotation, setAnnotation }) => {
 
             {/* Current Errors */}
             {mqmErrors.length > 0 && (
-                <div className="space-y-2">
-                    <h5 className="text-xs font-semibold text-slate-600 dark:text-slate-400">Current Issues:</h5>
+                <div className="space-y-3">
+                    <h5 className="text-sm font-semibold text-white/80">Current Issues:</h5>
                     {mqmErrors.map((error) => (
-                        <div key={error.id} className="flex items-center justify-between p-2 bg-slate-50 dark:bg-slate-800 rounded-lg">
-                            <div className="flex items-center gap-2">
-                                <span className={`w-2 h-2 rounded-full ${
+                        <div key={error.id} className="flex items-center justify-between p-3 bg-white/10 backdrop-blur-sm rounded-2xl border border-white/20">
+                            <div className="flex items-center gap-3">
+                                <span className={`w-3 h-3 rounded-full ${
                                     severityLevels.find(s => s.value === error.severity)?.color || 'bg-gray-500'
                                 }`}></span>
-                                <span className="text-xs font-medium">{error.category}</span>
-                                <span className="text-xs text-slate-500">→</span>
-                                <span className="text-xs">{error.subcategory}</span>
-                                <span className="text-xs text-slate-500">({error.severity})</span>
-                                <span className="text-xs font-bold text-red-600">-{error.penalty}</span>
+                                <span className="text-sm font-medium text-white">{error.category}</span>
+                                <span className="text-sm text-white/60">→</span>
+                                <span className="text-sm text-white/80">{error.subcategory}</span>
+                                <span className="text-sm text-white/60">({error.severity})</span>
+                                <span className="text-sm font-bold text-red-400">-{error.penalty}</span>
                             </div>
                             <button
                                 onClick={() => removeMQMError(error.id)}
-                                className="text-red-500 hover:text-red-700 text-xs"
+                                className="text-red-400 hover:text-red-300 text-lg font-bold"
                             >
                                 ✕
                             </button>
@@ -141,21 +141,21 @@ const MQMEvaluationPanel = ({ annotation, setAnnotation }) => {
             )}
 
             {/* Add New Error */}
-            <div className="space-y-3">
-                <h5 className="text-xs font-semibold text-slate-600 dark:text-slate-400">Add Issue:</h5>
+            <div className="space-y-4">
+                <h5 className="text-sm font-semibold text-white/80">Add Issue:</h5>
                 {mqmCategories.map((category) => (
-                    <div key={category.name} className="space-y-2">
-                        <h6 className="text-xs font-medium text-slate-700 dark:text-slate-300">{category.name}</h6>
-                        <div className="grid grid-cols-1 gap-1">
+                    <div key={category.name} className="space-y-3">
+                        <h6 className="text-sm font-medium text-white">{category.name}</h6>
+                        <div className="grid grid-cols-1 gap-2">
                             {category.subcategories.map((subcategory) => (
-                                <div key={subcategory} className="flex items-center gap-2">
-                                    <span className="text-xs flex-1">{subcategory}</span>
-                                    <div className="flex gap-1">
+                                <div key={subcategory} className="flex items-center gap-3">
+                                    <span className="text-sm flex-1 text-white/90">{subcategory}</span>
+                                    <div className="flex gap-2">
                                         {severityLevels.map((severity) => (
                                             <button
                                                 key={severity.value}
                                                 onClick={() => addMQMError(category.name, subcategory, severity.value)}
-                                                className={`px-2 py-1 text-[10px] rounded ${severity.color} text-white hover:opacity-80 transition-opacity`}
+                                                className={`px-3 py-1.5 text-xs rounded-xl ${severity.color} text-white hover:opacity-80 transition-opacity font-medium`}
                                                 title={`${severity.label} (-${severity.penalty} points)`}
                                             >
                                                 {severity.label}
@@ -170,8 +170,8 @@ const MQMEvaluationPanel = ({ annotation, setAnnotation }) => {
             </div>
 
             {/* MQM Info */}
-            <div className="p-3 bg-blue-500/10 border border-blue-500/20 rounded-lg">
-                <p className="text-xs text-blue-600 dark:text-blue-400">
+            <div className="p-4 bg-white/10 backdrop-blur-sm border border-white/20 rounded-2xl">
+                <p className="text-sm text-white/80">
                     💡 <strong>MQM Scoring:</strong> Minor (-1), Major (-5), Critical (-10). 
                     Score ≥85 = Excellent, ≥70 = Good, &lt;70 = Needs Improvement
                 </p>
@@ -1837,355 +1837,361 @@ ${segments.map(seg => `      <trans-unit id="${seg.segment_number}">
                                 )}
 
                                 {activeTab === 'annotation' && (
-                                    <div className="space-y-4">
-                                        <h4 className="text-xs font-bold text-slate-500 uppercase">Quality Annotation</h4>
+                                    <div className="relative min-h-full">
+                                        {/* Gradient Background */}
+                                        <div className="absolute inset-0 bg-gradient-to-br from-blue-600 via-blue-700 to-purple-800 rounded-2xl opacity-95"></div>
                                         
-                                        {/* Error Types with Severity */}
-                                        {annotationSettings.error_types && (
-                                            <div className="space-y-3">
-                                                <label className="text-xs font-bold text-slate-500 uppercase block">Error Types{annotationSettings.error_severity && ' & Severity'}</label>
-                                                <div className="space-y-2">
-                                                    {[
-                                                        { key: 'error_fluency', label: 'Fluency', icon: '💬', color: 'bg-blue-500' },
-                                                        { key: 'error_grammar', label: 'Grammar', icon: '📝', color: 'bg-red-500' },
-                                                        { key: 'error_terminology', label: 'Terminology', icon: '📚', color: 'bg-purple-500' },
-                                                        { key: 'error_style', label: 'Style', icon: '🎨', color: 'bg-pink-500' },
-                                                        { key: 'error_accuracy', label: 'Accuracy', icon: '🎯', color: 'bg-green-500' }
-                                                    ].map(({ key, label, icon, color }) => (
-                                                        <div key={key} className="bg-white dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700">
-                                                            <label className="flex items-center gap-3 p-3 cursor-pointer hover:border-primary-500 transition-colors">
-                                                                <input
-                                                                    type="checkbox"
-                                                                    checked={annotation[key]}
-                                                                    onChange={(e) => setAnnotation({ ...annotation, [key]: e.target.checked })}
-                                                                    className="w-4 h-4 rounded border-slate-300 text-primary-600 focus:ring-primary-500"
-                                                                />
-                                                                <span className="text-lg">{icon}</span>
-                                                                <span className="text-sm font-medium flex-1">{label}</span>
-                                                                {annotation[key] && (
-                                                                    <span className={`w-2 h-2 rounded-full ${color}`}></span>
+                                        {/* Content */}
+                                        <div className="relative z-10 p-6 space-y-6 text-white">
+                                            <h4 className="text-lg font-bold text-white/90 tracking-wide">Quality Annotation</h4>
+                                            
+                                            {/* Error Types with Severity */}
+                                            {annotationSettings.error_types && (
+                                                <div className="space-y-4">
+                                                    <label className="text-sm font-semibold text-white/80 block">Error Types{annotationSettings.error_severity && ' & Severity'}</label>
+                                                    <div className="space-y-3">
+                                                        {[
+                                                            { key: 'error_fluency', label: 'Fluency', icon: '💬', color: 'bg-blue-500' },
+                                                            { key: 'error_grammar', label: 'Grammar', icon: '📝', color: 'bg-red-500' },
+                                                            { key: 'error_terminology', label: 'Terminology', icon: '📚', color: 'bg-purple-500' },
+                                                            { key: 'error_style', label: 'Style', icon: '🎨', color: 'bg-pink-500' },
+                                                            { key: 'error_accuracy', label: 'Accuracy', icon: '🎯', color: 'bg-green-500' }
+                                                        ].map(({ key, label, icon, color }) => (
+                                                            <div key={key} className="bg-white/10 backdrop-blur-sm rounded-2xl border border-white/20 hover:bg-white/15 transition-all duration-300">
+                                                                <label className="flex items-center gap-4 p-4 cursor-pointer">
+                                                                    <input
+                                                                        type="checkbox"
+                                                                        checked={annotation[key]}
+                                                                        onChange={(e) => setAnnotation({ ...annotation, [key]: e.target.checked })}
+                                                                        className="w-5 h-5 rounded-lg border-white/30 text-blue-500 focus:ring-blue-400 bg-white/20"
+                                                                    />
+                                                                    <span className="text-2xl">{icon}</span>
+                                                                    <span className="text-base font-medium flex-1 text-white">{label}</span>
+                                                                    {annotation[key] && (
+                                                                        <span className={`w-3 h-3 rounded-full ${color} shadow-lg`}></span>
+                                                                    )}
+                                                                </label>
+                                                                {/* Severity selector - only show if error is checked AND severity feature is enabled */}
+                                                                {annotationSettings.error_severity && annotation[key] && (
+                                                                    <div className="px-4 pb-4 flex gap-3">
+                                                                        {['minor', 'major', 'critical'].map((severity) => (
+                                                                            <button
+                                                                                key={severity}
+                                                                                onClick={() => setAnnotation({ ...annotation, [`${key}_severity`]: severity })}
+                                                                                className={`flex-1 px-3 py-2 text-sm rounded-xl transition-all font-medium ${
+                                                                                    annotation[`${key}_severity`] === severity
+                                                                                        ? 'bg-white text-blue-700 font-bold shadow-lg'
+                                                                                        : 'bg-white/20 text-white/80 hover:bg-white/30'
+                                                                                }`}
+                                                                            >
+                                                                                {severity.charAt(0).toUpperCase() + severity.slice(1)}
+                                                                            </button>
+                                                                        ))}
+                                                                    </div>
                                                                 )}
-                                                            </label>
-                                                            {/* Severity selector - only show if error is checked AND severity feature is enabled */}
-                                                            {annotationSettings.error_severity && annotation[key] && (
-                                                                <div className="px-3 pb-3 flex gap-2">
-                                                                    {['minor', 'major', 'critical'].map((severity) => (
-                                                                        <button
-                                                                            key={severity}
-                                                                            onClick={() => setAnnotation({ ...annotation, [`${key}_severity`]: severity })}
-                                                                            className={`flex-1 px-2 py-1 text-xs rounded transition-all ${
-                                                                                annotation[`${key}_severity`] === severity
-                                                                                    ? 'bg-primary-500 text-white font-bold'
-                                                                                    : 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-200'
-                                                                            }`}
-                                                                        >
-                                                                            {severity.charAt(0).toUpperCase() + severity.slice(1)}
-                                                                        </button>
-                                                                    ))}
-                                                                </div>
-                                                            )}
-                                                        </div>
-                                                    ))}
+                                                            </div>
+                                                        ))}
+                                                    </div>
                                                 </div>
-                                            </div>
-                                        )}
+                                            )}
 
-                                        {/* Domain Classification */}
-                                        {annotationSettings.domain_classification && (
-                                            <div className="space-y-3">
-                                                <label className="text-xs font-bold text-slate-500 uppercase block">Domain / Specialization</label>
-                                                
-                                                {/* Domain Dropdown */}
-                                                <select
-                                                    value={selectedDomain}
-                                                    onChange={(e) => {
-                                                        const domain = e.target.value;
-                                                        setSelectedDomain(domain);
-                                                        setSelectedSubdomain('');
-                                                        setAnnotation({ ...annotation, domain: '' });
-                                                    }}
-                                                    className="w-full bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 rounded-xl p-2 text-sm focus:ring-1 focus:ring-primary-500"
-                                                    style={{ borderRadius: '12px' }}
-                                                >
-                                                    <option value="">Select Domain</option>
-                                                    {getDomainNames().map((domain) => (
-                                                        <option key={domain} value={domain}>
-                                                            {getDomainIcon(domain)} {domain}
-                                                        </option>
-                                                    ))}
-                                                </select>
-
-                                                {/* Subdomain Dropdown */}
-                                                {selectedDomain && (
+                                            {/* Domain Classification */}
+                                            {annotationSettings.domain_classification && (
+                                                <div className="space-y-4">
+                                                    <label className="text-sm font-semibold text-white/80 block">Domain / Specialization</label>
+                                                    
+                                                    {/* Domain Dropdown */}
                                                     <select
-                                                        value={selectedSubdomain}
+                                                        value={selectedDomain}
                                                         onChange={(e) => {
-                                                            const subdomain = e.target.value;
-                                                            setSelectedSubdomain(subdomain);
-                                                            const fullDomain = subdomain ? `${selectedDomain}: ${subdomain}` : '';
-                                                            setAnnotation({ ...annotation, domain: fullDomain });
+                                                            const domain = e.target.value;
+                                                            setSelectedDomain(domain);
+                                                            setSelectedSubdomain('');
+                                                            setAnnotation({ ...annotation, domain: '' });
                                                         }}
-                                                        className="w-full bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 rounded-xl p-2 text-sm focus:ring-1 focus:ring-primary-500"
-                                                        style={{ borderRadius: '12px' }}
+                                                        className="w-full bg-white/10 backdrop-blur-sm border border-white/20 rounded-2xl p-4 text-white placeholder-white/60 focus:ring-2 focus:ring-white/40 focus:border-white/40"
                                                     >
-                                                        <option value="">Select Subdomain</option>
-                                                        {getSubdomains(selectedDomain).map((subdomain) => (
-                                                            <option key={subdomain} value={subdomain}>
-                                                                {subdomain}
+                                                        <option value="" className="text-gray-800">Select Domain</option>
+                                                        {getDomainNames().map((domain) => (
+                                                            <option key={domain} value={domain} className="text-gray-800">
+                                                                {getDomainIcon(domain)} {domain}
                                                             </option>
                                                         ))}
                                                     </select>
-                                                )}
 
-                                                {/* Display selected domain/subdomain */}
-                                                {annotation.domain && (
-                                                    <div className="p-2 bg-gradient-to-r from-blue-500/10 to-purple-500/10 border border-blue-500/20 rounded-lg">
-                                                        <p className="text-xs text-blue-600 dark:text-blue-400 font-medium">
-                                                            {getDomainIcon(selectedDomain)} {annotation.domain}
-                                                        </p>
-                                                    </div>
-                                                )}
-                                            </div>
-                                        )}
-
-                                        {/* NEW FEATURE 1: Effort Tracking */}
-                                        {annotationSettings.translation_effort && (
-                                            <div className="space-y-3">
-                                                <label className="text-xs font-bold text-slate-500 uppercase block">⏱️ Translation Effort</label>
-                                                <div className="grid grid-cols-2 gap-2">
-                                                    {[
-                                                        { value: 'easy', label: 'Easy', desc: '< 5 min', color: 'from-green-500 to-emerald-500' },
-                                                        { value: 'medium', label: 'Medium', desc: '5-15 min', color: 'from-yellow-500 to-orange-500' },
-                                                        { value: 'hard', label: 'Hard', desc: '15-30 min', color: 'from-orange-500 to-red-500' },
-                                                        { value: 'very_hard', label: 'Very Hard', desc: '> 30 min', color: 'from-red-500 to-pink-500' }
-                                                    ].map(({ value, label, desc, color }) => (
-                                                        <button
-                                                            key={value}
-                                                            onClick={() => setAnnotation({ ...annotation, translation_effort: value })}
-                                                            className={`p-2 rounded-lg border-2 transition-all text-left ${
-                                                                annotation.translation_effort === value
-                                                                    ? `bg-gradient-to-r ${color} text-white border-transparent font-bold`
-                                                                    : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 hover:border-primary-500'
-                                                            }`}
+                                                    {/* Subdomain Dropdown */}
+                                                    {selectedDomain && (
+                                                        <select
+                                                            value={selectedSubdomain}
+                                                            onChange={(e) => {
+                                                                const subdomain = e.target.value;
+                                                                setSelectedSubdomain(subdomain);
+                                                                const fullDomain = subdomain ? `${selectedDomain}: ${subdomain}` : '';
+                                                                setAnnotation({ ...annotation, domain: fullDomain });
+                                                            }}
+                                                            className="w-full bg-white/10 backdrop-blur-sm border border-white/20 rounded-2xl p-4 text-white placeholder-white/60 focus:ring-2 focus:ring-white/40 focus:border-white/40"
                                                         >
-                                                            <div className="text-xs font-bold">{label}</div>
-                                                            <div className="text-[10px] opacity-75">{desc}</div>
-                                                        </button>
-                                                    ))}
-                                                </div>
-                                            </div>
-                                        )}
+                                                            <option value="" className="text-gray-800">Select Subdomain</option>
+                                                            {getSubdomains(selectedDomain).map((subdomain) => (
+                                                                <option key={subdomain} value={subdomain} className="text-gray-800">
+                                                                    {subdomain}
+                                                                </option>
+                                                            ))}
+                                                        </select>
+                                                    )}
 
-                                        {/* NEW FEATURE 2: Post-Editing Effort (only show if AI translation exists AND feature enabled) */}
-                                        {annotationSettings.post_editing_effort && segments[activeSegmentIndex]?.ai_translation && (
-                                            <div className="space-y-3">
-                                                <label className="text-xs font-bold text-slate-500 uppercase block">🤖 Post-Editing Effort</label>
-                                                <div className="grid grid-cols-2 gap-2">
-                                                    {[
-                                                        { value: 'no_editing', label: 'No Editing', icon: '✓' },
-                                                        { value: 'light_editing', label: 'Light', icon: '✏️' },
-                                                        { value: 'heavy_editing', label: 'Heavy', icon: '🔧' },
-                                                        { value: 'complete_retranslation', label: 'Retranslated', icon: '🔄' }
-                                                    ].map(({ value, label, icon }) => (
-                                                        <button
-                                                            key={value}
-                                                            onClick={() => setAnnotation({ ...annotation, post_editing_effort: value })}
-                                                            className={`p-2 rounded-lg border-2 transition-all ${
-                                                                annotation.post_editing_effort === value
-                                                                    ? 'bg-primary-500 text-white border-transparent font-bold'
-                                                                    : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 hover:border-primary-500'
-                                                            }`}
-                                                        >
-                                                            <div className="text-xs font-bold">{icon} {label}</div>
-                                                        </button>
-                                                    ))}
+                                                    {/* Display selected domain/subdomain */}
+                                                    {annotation.domain && (
+                                                        <div className="p-4 bg-white/15 backdrop-blur-sm border border-white/30 rounded-2xl">
+                                                            <p className="text-sm text-white font-medium">
+                                                                {getDomainIcon(selectedDomain)} {annotation.domain}
+                                                            </p>
+                                                        </div>
+                                                    )}
                                                 </div>
-                                            </div>
-                                        )}
+                                            )}
 
-                                        {/* NEW FEATURE 3: AI Translation Quality (only show if AI translation exists AND feature enabled) */}
-                                        {annotationSettings.ai_quality_rating && segments[activeSegmentIndex]?.ai_translation && (
-                                            <div className="space-y-3">
-                                                <label className="text-xs font-bold text-slate-500 uppercase block">🤖 AI Translation Quality</label>
-                                                <div className="flex gap-2 justify-center">
-                                                    {[1, 2, 3, 4, 5].map((rating) => (
-                                                        <button
-                                                            key={rating}
-                                                            onClick={() => setAnnotation({ ...annotation, ai_translation_quality: rating })}
-                                                            className={`w-10 h-10 rounded-lg border-2 transition-all ${
-                                                                annotation.ai_translation_quality === rating
-                                                                    ? 'border-blue-500 bg-blue-500/20 scale-110'
-                                                                    : 'border-slate-300 dark:border-slate-700 hover:border-blue-500'
-                                                            }`}
-                                                        >
-                                                            <svg className={`w-6 h-6 mx-auto ${annotation.ai_translation_quality >= rating ? 'text-blue-500' : 'text-slate-300'}`} fill="currentColor" viewBox="0 0 24 24">
-                                                                <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"/>
-                                                            </svg>
-                                                        </button>
-                                                    ))}
-                                                </div>
-                                                <div className="flex justify-between text-[10px] text-slate-400 px-1">
-                                                    <span>Poor</span>
-                                                    <span>Excellent</span>
-                                                </div>
-                                                
-                                                {/* AI Helpfulness */}
-                                                <div className="grid grid-cols-2 gap-2 mt-2">
-                                                    {[
-                                                        { value: 'very_helpful', label: 'Very Helpful', desc: 'Used as-is' },
-                                                        { value: 'helpful', label: 'Helpful', desc: 'Minor edits' },
-                                                        { value: 'somewhat_helpful', label: 'Somewhat', desc: 'Major edits' },
-                                                        { value: 'not_helpful', label: 'Not Helpful', desc: 'Retranslated' }
-                                                    ].map(({ value, label, desc }) => (
-                                                        <button
-                                                            key={value}
-                                                            onClick={() => setAnnotation({ ...annotation, ai_helpfulness: value })}
-                                                            className={`p-2 rounded-lg border transition-all text-left ${
-                                                                annotation.ai_helpfulness === value
-                                                                    ? 'bg-blue-500 text-white border-transparent font-bold'
-                                                                    : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 hover:border-blue-500'
-                                                            }`}
-                                                        >
-                                                            <div className="text-xs font-bold">{label}</div>
-                                                            <div className="text-[10px] opacity-75">{desc}</div>
-                                                        </button>
-                                                    ))}
-                                                </div>
-                                            </div>
-                                        )}
-
-                                        {/* NEW FEATURE 4: Confidence Score */}
-                                        {annotationSettings.confidence_score && (
-                                            <div className="space-y-3">
-                                                <label className="text-xs font-bold text-slate-500 uppercase block">💪 Your Confidence</label>
-                                            <div className="flex gap-2 justify-center">
-                                                {[1, 2, 3, 4, 5].map((rating) => (
-                                                    <button
-                                                        key={rating}
-                                                        onClick={() => setAnnotation({ ...annotation, confidence_score: rating })}
-                                                        className={`w-10 h-10 rounded-lg border-2 transition-all ${
-                                                            annotation.confidence_score === rating
-                                                                ? 'border-purple-500 bg-purple-500/20 scale-110'
-                                                                : 'border-slate-300 dark:border-slate-700 hover:border-purple-500'
-                                                        }`}
-                                                    >
-                                                        <svg className={`w-6 h-6 mx-auto ${annotation.confidence_score >= rating ? 'text-purple-500' : 'text-slate-300'}`} fill="currentColor" viewBox="0 0 24 24">
-                                                            <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"/>
-                                                        </svg>
-                                                    </button>
-                                                ))}
-                                            </div>
-                                            <div className="flex justify-between text-[10px] text-slate-400 px-1">
-                                                <span>Uncertain</span>
-                                                <span>Very Confident</span>
-                                            </div>
-                                            
-                                            {/* Uncertainty Areas */}
-                                            {annotation.confidence_score && annotation.confidence_score < 4 && (
-                                                <div className="mt-2">
-                                                    <label className="text-[10px] text-slate-500 uppercase block mb-2">Uncertain About:</label>
-                                                    <div className="grid grid-cols-2 gap-2">
-                                                        {['terminology', 'grammar', 'cultural', 'technical'].map((area) => (
-                                                            <label key={area} className="flex items-center gap-2 p-2 bg-white dark:bg-slate-800 rounded border border-slate-200 dark:border-slate-700 cursor-pointer hover:border-purple-500 transition-colors">
-                                                                <input
-                                                                    type="checkbox"
-                                                                    checked={annotation.uncertain_about.includes(area)}
-                                                                    onChange={(e) => {
-                                                                        const updated = e.target.checked
-                                                                            ? [...annotation.uncertain_about, area]
-                                                                            : annotation.uncertain_about.filter(a => a !== area);
-                                                                        setAnnotation({ ...annotation, uncertain_about: updated });
-                                                                    }}
-                                                                    className="w-3 h-3 rounded border-slate-300 text-purple-600 focus:ring-purple-500"
-                                                                />
-                                                                <span className="text-xs capitalize">{area}</span>
-                                                            </label>
+                                            {/* NEW FEATURE 1: Effort Tracking */}
+                                            {annotationSettings.translation_effort && (
+                                                <div className="space-y-4">
+                                                    <label className="text-sm font-semibold text-white/80 block">⏱️ Translation Effort</label>
+                                                    <div className="grid grid-cols-2 gap-3">
+                                                        {[
+                                                            { value: 'easy', label: 'Easy', desc: '< 5 min', color: 'from-green-500 to-emerald-500' },
+                                                            { value: 'medium', label: 'Medium', desc: '5-15 min', color: 'from-yellow-500 to-orange-500' },
+                                                            { value: 'hard', label: 'Hard', desc: '15-30 min', color: 'from-orange-500 to-red-500' },
+                                                            { value: 'very_hard', label: 'Very Hard', desc: '> 30 min', color: 'from-red-500 to-pink-500' }
+                                                        ].map(({ value, label, desc, color }) => (
+                                                            <button
+                                                                key={value}
+                                                                onClick={() => setAnnotation({ ...annotation, translation_effort: value })}
+                                                                className={`p-4 rounded-2xl border-2 transition-all text-left ${
+                                                                    annotation.translation_effort === value
+                                                                        ? `bg-gradient-to-r ${color} text-white border-transparent font-bold shadow-lg`
+                                                                        : 'bg-white/10 backdrop-blur-sm border-white/20 text-white hover:bg-white/20'
+                                                                }`}
+                                                            >
+                                                                <div className="text-sm font-bold">{label}</div>
+                                                                <div className="text-xs opacity-75">{desc}</div>
+                                                            </button>
                                                         ))}
                                                     </div>
                                                 </div>
                                             )}
-                                            </div>
-                                        )}
 
-                                        {/* Quality Rating */}
-                                        {annotationSettings.quality_rating && (
-                                            <div className="space-y-3">
-                                            <label className="text-xs font-bold text-slate-500 uppercase block">Quality Rating</label>
-                                            <div className="flex gap-2 justify-center">
-                                                {[1, 2, 3, 4, 5].map((rating) => (
-                                                    <button
-                                                        key={rating}
-                                                        onClick={() => setAnnotation({ ...annotation, quality_rating: rating })}
-                                                        className={`w-10 h-10 rounded-lg border-2 transition-all ${
-                                                            annotation.quality_rating === rating
-                                                                ? 'border-yellow-500 bg-yellow-500/20 scale-110'
-                                                                : 'border-slate-300 dark:border-slate-700 hover:border-yellow-500'
-                                                        }`}
-                                                    >
-                                                        <svg className={`w-6 h-6 mx-auto ${annotation.quality_rating >= rating ? 'text-yellow-500' : 'text-slate-300'}`} fill="currentColor" viewBox="0 0 24 24">
-                                                            <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"/>
-                                                        </svg>
-                                                    </button>
-                                                ))}
-                                            </div>
-                                            <div className="flex justify-between text-[10px] text-slate-400 px-1">
-                                                <span>Poor</span>
-                                                <span>Excellent</span>
-                                            </div>
-                                            </div>
-                                        )}
-
-                                        {/* MQM Evaluation */}
-                                        {annotationSettings.mqm_evaluation && (
-                                            <MQMEvaluationPanel 
-                                                annotation={annotation}
-                                                setAnnotation={setAnnotation}
-                                            />
-                                        )}
-
-                                        {/* Notes */}
-                                        {annotationSettings.notes && (
-                                            <div className="space-y-3">
-                                            <label className="text-xs font-bold text-slate-500 uppercase block">Notes</label>
-                                            <textarea
-                                                value={annotation.notes}
-                                                onChange={(e) => setAnnotation({ ...annotation, notes: e.target.value })}
-                                                placeholder="Add any additional comments..."
-                                                className="w-full bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 rounded-lg p-3 text-sm focus:ring-1 focus:ring-primary-500 resize-none"
-                                                rows="3"
-                                            />
-                                            </div>
-                                        )}
-
-                                        {/* Save Button */}
-                                        <button
-                                            onClick={saveAnnotation}
-                                            disabled={savingAnnotation}
-                                            className="w-full py-3 bg-gradient-to-r from-green-600 to-emerald-600 text-white rounded-lg text-sm font-bold shadow-lg shadow-green-500/20 hover:shadow-green-500/40 transition-all disabled:opacity-50 flex items-center justify-center gap-2"
-                                        >
-                                            {savingAnnotation ? (
-                                                <>
-                                                    <svg className="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
-                                                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                                                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                                                    </svg>
-                                                    Saving...
-                                                </>
-                                            ) : (
-                                                <>
-                                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
-                                                    </svg>
-                                                    Save Annotation
-                                                </>
+                                            {/* NEW FEATURE 2: Post-Editing Effort */}
+                                            {annotationSettings.post_editing_effort && segments[activeSegmentIndex]?.ai_translation && (
+                                                <div className="space-y-4">
+                                                    <label className="text-sm font-semibold text-white/80 block">🤖 Post-Editing Effort</label>
+                                                    <div className="grid grid-cols-2 gap-3">
+                                                        {[
+                                                            { value: 'no_editing', label: 'No Editing', icon: '✓' },
+                                                            { value: 'light_editing', label: 'Light', icon: '✏️' },
+                                                            { value: 'heavy_editing', label: 'Heavy', icon: '🔧' },
+                                                            { value: 'complete_retranslation', label: 'Retranslated', icon: '🔄' }
+                                                        ].map(({ value, label, icon }) => (
+                                                            <button
+                                                                key={value}
+                                                                onClick={() => setAnnotation({ ...annotation, post_editing_effort: value })}
+                                                                className={`p-4 rounded-2xl border-2 transition-all ${
+                                                                    annotation.post_editing_effort === value
+                                                                        ? 'bg-white text-blue-700 border-white font-bold shadow-lg'
+                                                                        : 'bg-white/10 backdrop-blur-sm border-white/20 text-white hover:bg-white/20'
+                                                                }`}
+                                                            >
+                                                                <div className="text-sm font-bold">{icon} {label}</div>
+                                                            </button>
+                                                        ))}
+                                                    </div>
+                                                </div>
                                             )}
-                                        </button>
 
-                                        {/* Info Box */}
-                                        <div className="p-3 bg-blue-500/10 border border-blue-500/20 rounded-lg">
-                                            <p className="text-xs text-blue-600 dark:text-blue-400">
-                                                💡 Enhanced annotations with effort tracking, AI quality rating, and confidence scoring help improve translation quality and train better AI models.
-                                            </p>
+                                            {/* NEW FEATURE 3: AI Translation Quality */}
+                                            {annotationSettings.ai_quality_rating && segments[activeSegmentIndex]?.ai_translation && (
+                                                <div className="space-y-4">
+                                                    <label className="text-sm font-semibold text-white/80 block">🤖 AI Translation Quality</label>
+                                                    <div className="flex gap-3 justify-center">
+                                                        {[1, 2, 3, 4, 5].map((rating) => (
+                                                            <button
+                                                                key={rating}
+                                                                onClick={() => setAnnotation({ ...annotation, ai_translation_quality: rating })}
+                                                                className={`w-12 h-12 rounded-2xl border-2 transition-all ${
+                                                                    annotation.ai_translation_quality === rating
+                                                                        ? 'border-white bg-white/20 scale-110 shadow-lg'
+                                                                        : 'border-white/30 hover:border-white/60 hover:bg-white/10'
+                                                                }`}
+                                                            >
+                                                                <svg className={`w-7 h-7 mx-auto ${annotation.ai_translation_quality >= rating ? 'text-yellow-400' : 'text-white/40'}`} fill="currentColor" viewBox="0 0 24 24">
+                                                                    <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"/>
+                                                                </svg>
+                                                            </button>
+                                                        ))}
+                                                    </div>
+                                                    <div className="flex justify-between text-xs text-white/60 px-2">
+                                                        <span>Poor</span>
+                                                        <span>Excellent</span>
+                                                    </div>
+                                                    
+                                                    {/* AI Helpfulness */}
+                                                    <div className="grid grid-cols-2 gap-3 mt-4">
+                                                        {[
+                                                            { value: 'very_helpful', label: 'Very Helpful', desc: 'Used as-is' },
+                                                            { value: 'helpful', label: 'Helpful', desc: 'Minor edits' },
+                                                            { value: 'somewhat_helpful', label: 'Somewhat', desc: 'Major edits' },
+                                                            { value: 'not_helpful', label: 'Not Helpful', desc: 'Retranslated' }
+                                                        ].map(({ value, label, desc }) => (
+                                                            <button
+                                                                key={value}
+                                                                onClick={() => setAnnotation({ ...annotation, ai_helpfulness: value })}
+                                                                className={`p-3 rounded-2xl border transition-all text-left ${
+                                                                    annotation.ai_helpfulness === value
+                                                                        ? 'bg-white text-blue-700 border-white font-bold shadow-lg'
+                                                                        : 'bg-white/10 backdrop-blur-sm border-white/20 text-white hover:bg-white/20'
+                                                                }`}
+                                                            >
+                                                                <div className="text-sm font-bold">{label}</div>
+                                                                <div className="text-xs opacity-75">{desc}</div>
+                                                            </button>
+                                                        ))}
+                                                    </div>
+                                                </div>
+                                            )}
+
+                                            {/* NEW FEATURE 4: Confidence Score */}
+                                            {annotationSettings.confidence_score && (
+                                                <div className="space-y-4">
+                                                    <label className="text-sm font-semibold text-white/80 block">💪 Your Confidence</label>
+                                                    <div className="flex gap-3 justify-center">
+                                                        {[1, 2, 3, 4, 5].map((rating) => (
+                                                            <button
+                                                                key={rating}
+                                                                onClick={() => setAnnotation({ ...annotation, confidence_score: rating })}
+                                                                className={`w-12 h-12 rounded-2xl border-2 transition-all ${
+                                                                    annotation.confidence_score === rating
+                                                                        ? 'border-white bg-white/20 scale-110 shadow-lg'
+                                                                        : 'border-white/30 hover:border-white/60 hover:bg-white/10'
+                                                                }`}
+                                                            >
+                                                                <svg className={`w-7 h-7 mx-auto ${annotation.confidence_score >= rating ? 'text-purple-400' : 'text-white/40'}`} fill="currentColor" viewBox="0 0 24 24">
+                                                                    <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"/>
+                                                                </svg>
+                                                            </button>
+                                                        ))}
+                                                    </div>
+                                                    <div className="flex justify-between text-xs text-white/60 px-2">
+                                                        <span>Uncertain</span>
+                                                        <span>Very Confident</span>
+                                                    </div>
+                                                    
+                                                    {/* Uncertainty Areas */}
+                                                    {annotation.confidence_score && annotation.confidence_score < 4 && (
+                                                        <div className="mt-4">
+                                                            <label className="text-xs text-white/70 block mb-3">Uncertain About:</label>
+                                                            <div className="grid grid-cols-2 gap-3">
+                                                                {['terminology', 'grammar', 'cultural', 'technical'].map((area) => (
+                                                                    <label key={area} className="flex items-center gap-3 p-3 bg-white/10 backdrop-blur-sm rounded-2xl border border-white/20 cursor-pointer hover:bg-white/15 transition-colors">
+                                                                        <input
+                                                                            type="checkbox"
+                                                                            checked={annotation.uncertain_about.includes(area)}
+                                                                            onChange={(e) => {
+                                                                                const updated = e.target.checked
+                                                                                    ? [...annotation.uncertain_about, area]
+                                                                                    : annotation.uncertain_about.filter(a => a !== area);
+                                                                                setAnnotation({ ...annotation, uncertain_about: updated });
+                                                                            }}
+                                                                            className="w-4 h-4 rounded-lg border-white/30 text-purple-500 focus:ring-purple-400 bg-white/20"
+                                                                        />
+                                                                        <span className="text-sm capitalize text-white">{area}</span>
+                                                                    </label>
+                                                                ))}
+                                                            </div>
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            )}
+
+                                            {/* Quality Rating */}
+                                            {annotationSettings.quality_rating && (
+                                                <div className="space-y-4">
+                                                    <label className="text-sm font-semibold text-white/80 block">Quality Rating</label>
+                                                    <div className="flex gap-3 justify-center">
+                                                        {[1, 2, 3, 4, 5].map((rating) => (
+                                                            <button
+                                                                key={rating}
+                                                                onClick={() => setAnnotation({ ...annotation, quality_rating: rating })}
+                                                                className={`w-12 h-12 rounded-2xl border-2 transition-all ${
+                                                                    annotation.quality_rating === rating
+                                                                        ? 'border-white bg-white/20 scale-110 shadow-lg'
+                                                                        : 'border-white/30 hover:border-white/60 hover:bg-white/10'
+                                                                }`}
+                                                            >
+                                                                <svg className={`w-7 h-7 mx-auto ${annotation.quality_rating >= rating ? 'text-yellow-400' : 'text-white/40'}`} fill="currentColor" viewBox="0 0 24 24">
+                                                                    <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"/>
+                                                                </svg>
+                                                            </button>
+                                                        ))}
+                                                    </div>
+                                                    <div className="flex justify-between text-xs text-white/60 px-2">
+                                                        <span>Poor</span>
+                                                        <span>Excellent</span>
+                                                    </div>
+                                                </div>
+                                            )}
+
+                                            {/* MQM Evaluation */}
+                                            {annotationSettings.mqm_evaluation && (
+                                                <div className="bg-white/5 backdrop-blur-sm rounded-2xl border border-white/20 p-6">
+                                                    <MQMEvaluationPanel 
+                                                        annotation={annotation}
+                                                        setAnnotation={setAnnotation}
+                                                    />
+                                                </div>
+                                            )}
+
+                                            {/* Notes */}
+                                            {annotationSettings.notes && (
+                                                <div className="space-y-4">
+                                                    <label className="text-sm font-semibold text-white/80 block">Notes</label>
+                                                    <textarea
+                                                        value={annotation.notes}
+                                                        onChange={(e) => setAnnotation({ ...annotation, notes: e.target.value })}
+                                                        placeholder="Add any additional comments..."
+                                                        className="w-full bg-white/10 backdrop-blur-sm border border-white/20 rounded-2xl p-4 text-white placeholder-white/60 focus:ring-2 focus:ring-white/40 focus:border-white/40 resize-none"
+                                                        rows="4"
+                                                    />
+                                                </div>
+                                            )}
+
+                                            {/* Save Button */}
+                                            <button
+                                                onClick={saveAnnotation}
+                                                disabled={savingAnnotation}
+                                                className="w-full py-4 bg-white/20 backdrop-blur-sm border border-white/30 text-white rounded-2xl text-base font-bold hover:bg-white/30 transition-all disabled:opacity-50 flex items-center justify-center gap-3 shadow-lg"
+                                            >
+                                                {savingAnnotation ? (
+                                                    <>
+                                                        <svg className="animate-spin h-5 w-5" fill="none" viewBox="0 0 24 24">
+                                                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                                        </svg>
+                                                        Saving...
+                                                    </>
+                                                ) : (
+                                                    <>
+                                                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
+                                                        </svg>
+                                                        Save Annotation
+                                                    </>
+                                                )}
+                                            </button>
+
+                                            {/* Info Box */}
+                                            <div className="p-4 bg-white/10 backdrop-blur-sm border border-white/20 rounded-2xl">
+                                                <p className="text-sm text-white/80">
+                                                    💡 Enhanced annotations with effort tracking, AI quality rating, and confidence scoring help improve translation quality and train better AI models.
+                                                </p>
+                                            </div>
                                         </div>
                                     </div>
                                 )}
