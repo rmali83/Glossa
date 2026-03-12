@@ -92,7 +92,7 @@ const CATProjectView = () => {
     const [selectedTone, setSelectedTone] = useState('professional');
     const [mtSuggestion, setMtSuggestion] = useState(null);
     
-    // Annotation settings from project (admin-controlled)
+    // Annotation settings from global workspace settings (admin-controlled)
     const [annotationSettings, setAnnotationSettings] = useState({
         error_types: true,
         error_severity: false,
@@ -426,9 +426,10 @@ const CATProjectView = () => {
                 if (projError) throw projError;
                 setProject(projData);
                 
-                // Load annotation settings from project
-                if (projData.annotation_settings) {
-                    setAnnotationSettings(projData.annotation_settings);
+                // Load global annotation settings from localStorage (set by admin)
+                const savedSettings = localStorage.getItem('glossa_global_annotation_settings');
+                if (savedSettings) {
+                    setAnnotationSettings(JSON.parse(savedSettings));
                 }
 
                 // Fetch segments for this project

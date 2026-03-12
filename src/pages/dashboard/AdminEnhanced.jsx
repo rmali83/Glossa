@@ -5,7 +5,337 @@ import './DashboardTheme.css';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../context/AuthContext';
 
-// Component for managing annotation settings per project
+// Component for managing global annotation settings for the entire workspace
+const GlobalAnnotationSettings = ({ onUpdate }) => {
+    const [settings, setSettings] = useState({
+        error_types: true,
+        error_severity: false,
+        domain_classification: true,
+        quality_rating: true,
+        translation_effort: false,
+        post_editing_effort: false,
+        ai_quality_rating: false,
+        confidence_score: false,
+        notes: true
+    });
+    const [saving, setSaving] = useState(false);
+    const [loading, setLoading] = useState(true);
+
+    const annotationFeatures = [
+        { 
+            key: 'error_types', 
+            label: 'Error Types', 
+            desc: 'Fluency, Grammar, Terminology, Style, Accuracy checkboxes', 
+            default: true,
+            icon: '🔍'
+        },
+        { 
+            key: 'error_severity', 
+            label: 'Error Severity Levels', 
+            desc: 'Minor, Major, Critical severity selection for each error type', 
+            default: false,
+            icon: '⚠️'
+        },
+        { 
+            key: 'domain_classification', 
+            label: 'Domain Classification', 
+            desc: 'Domain and subdomain selection dropdowns', 
+            default: true,
+            icon: '🏷️'
+        },
+        { 
+            key: 'quality_rating', 
+            label: 'Quality Rating', 
+            desc: '1-5 star overall translation quality rating', 
+            default: true,
+            icon: '⭐'
+        },
+        { 
+            key: 'translation_effort', 
+            label: 'Translation Effort Tracking', 
+            desc: 'Easy, Medium, Hard, Very Hard effort level buttons', 
+            default: false,
+            icon: '⏱️'
+        },
+        { 
+            key: 'post_editing_effort', 
+            label: 'Post-Editing Effort', 
+            desc: 'AI translation editing effort tracking (No Editing, Light, Heavy, Retranslated)', 
+            default: false,
+            icon: '🤖'
+        },
+        { 
+            key: 'ai_quality_rating', 
+            label: 'AI Translation Quality', 
+            desc: '1-5 star AI translation quality rating + helpfulness assessment', 
+            default: false,
+            icon: '🧠'
+        },
+        { 
+            key: 'confidence_score', 
+            label: 'Translator Confidence', 
+            desc: '1-5 star confidence rating + uncertainty area checkboxes', 
+            default: false,
+            icon: '💪'
+        },
+        { 
+            key: 'notes', 
+            label: 'Notes Field', 
+            desc: 'Free text notes and comments textarea', 
+            default: true,
+            icon: '📝'
+        }
+    ];
+
+    // Load current global settings
+    useEffect(() => {
+        loadGlobalSettings();
+    }, []);
+
+    const loadGlobalSettings = async () => {
+        setLoading(true);
+        try {
+            // Check if global settings exist in a settings table or use default
+            // For now, we'll store in localStorage and later move to database
+            const savedSettings = localStorage.getItem('glossa_global_annotation_settings');
+            if (savedSettings) {
+                setSettings(JSON.parse(savedSettings));
+            }
+        } catch (err) {
+            console.error('Error loading global settings:', err);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleToggle = (key) => {
+        setSettings({ ...settings, [key]: !settings[key] });
+    };
+
+    const handleSave = async () => {
+        setSaving(true);
+        try {
+            // Save to localStorage for now (later we can move to database)
+            localStorage.setItem('glossa_global_annotation_settings', JSON.stringify(settings));
+            
+            // Also update all existing projects to use these global settings
+            const { data: projects } = await supabase
+                .from('projects')
+                .select('id')
+                .limit(1000);
+
+            if (projects && projects.length > 0) {
+                const { error } = await supabase
+                    .from('projects')
+                    .update({ annotation_settings: settings })
+                    .in('id', projects.map(p => p.id));
+
+                if (error) {
+                    console.error('Error updating project settings:', error);
+                }
+            }
+
+            alert('✅ Global annotation settings saved successfully!\nAll projects will now use these settings.');
+            if (onUpdate) onUpdate();
+        } catch (err) {
+            console.error('Save error:', err);
+            alert('❌ Error saving settings');
+        } finally {
+            setSaving(false);
+        }
+    };
+
+    const handleResetToDefaults = () => {
+        const defaults = {
+            error_types: true,
+            error_severity: false,
+            domain_classification: true,
+            quality_rating: true,
+            translation_effort: false,
+            post_editing_effort: false,
+            ai_quality_rating: false,
+            confidence_score: false,
+            notes: true
+        };
+        setSettings(defaults);
+    };
+
+    const enabledCount = Object.values(settings).filter(v => v).length;
+
+    if (loading) {
+        return (
+            <div style={{ textAlign: 'center', padding: '2rem', color: '#666' }}>
+                Loading settings...
+            </div>
+        );
+    }
+
+    return (
+        <div>
+            {/* Header Info */}
+            <div style={{
+                padding: '1.5rem',
+                background: 'rgba(16, 185, 129, 0.1)',
+                border: '1px solid rgba(16, 185, 129, 0.3)',
+                borderRadius: '12px',
+                marginBottom: '2rem'
+            }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1rem' }}>
+                    <div style={{ fontSize: '2rem' }}>🌐</div>
+                    <div>
+                        <h3 style={{ margin: 0, color: '#10b981', fontSize: '1.2rem' }}>
+                            Workspace-Wide Annotation Control
+                        </h3>
+                        <p style={{ margin: '0.25rem 0 0 0', color: '#6ee7b7', fontSize: '0.9rem' }}>
+                            {enabledCount}/9 features enabled • Changes apply to all projects immediately
+                        </p>
+                    </div>
+                </div>
+                <p style={{ margin: 0, fontSize: '0.9rem', color: '#a7f3d0' }}>
+                    💡 <strong>How it works:</strong> Check the annotation features you want available in the CAT workspace. 
+                    Unchecked features will be hidden from all translators and reviewers across all projects.
+                </p>
+            </div>
+
+            {/* Feature Grid */}
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '1rem', marginBottom: '2rem' }}>
+                {annotationFeatures.map(({ key, label, desc, default: isDefault, icon }) => (
+                    <div 
+                        key={key}
+                        style={{
+                            padding: '1.5rem',
+                            background: settings[key] ? 'rgba(16, 185, 129, 0.1)' : 'rgba(255,255,255,0.02)',
+                            border: `2px solid ${settings[key] ? 'rgba(16, 185, 129, 0.5)' : 'rgba(255,255,255,0.1)'}`,
+                            borderRadius: '12px',
+                            transition: 'all 0.3s',
+                            cursor: 'pointer',
+                            position: 'relative'
+                        }}
+                        onClick={() => handleToggle(key)}
+                    >
+                        {/* Status Indicator */}
+                        <div style={{
+                            position: 'absolute',
+                            top: '12px',
+                            right: '12px',
+                            width: '12px',
+                            height: '12px',
+                            borderRadius: '50%',
+                            background: settings[key] ? '#10b981' : '#666'
+                        }} />
+
+                        <div style={{ display: 'flex', alignItems: 'flex-start', gap: '1rem' }}>
+                            <div style={{ fontSize: '2rem' }}>{icon}</div>
+                            <div style={{ flex: 1 }}>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.5rem' }}>
+                                    <input
+                                        type="checkbox"
+                                        checked={settings[key]}
+                                        onChange={() => handleToggle(key)}
+                                        style={{
+                                            width: '20px',
+                                            height: '20px',
+                                            cursor: 'pointer'
+                                        }}
+                                        onClick={(e) => e.stopPropagation()}
+                                    />
+                                    <h4 style={{ margin: 0, fontSize: '1rem', fontWeight: '600' }}>
+                                        {label}
+                                    </h4>
+                                    {isDefault && (
+                                        <span style={{
+                                            fontSize: '0.65rem',
+                                            padding: '3px 8px',
+                                            background: 'rgba(59, 130, 246, 0.2)',
+                                            color: '#60a5fa',
+                                            borderRadius: '6px',
+                                            fontWeight: '700'
+                                        }}>
+                                            DEFAULT
+                                        </span>
+                                    )}
+                                </div>
+                                <p style={{ margin: 0, fontSize: '0.8rem', color: '#888', lineHeight: '1.4' }}>
+                                    {desc}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                ))}
+            </div>
+
+            {/* Action Buttons */}
+            <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center' }}>
+                <button
+                    onClick={handleResetToDefaults}
+                    style={{
+                        padding: '12px 24px',
+                        background: 'rgba(255,255,255,0.05)',
+                        border: '2px solid rgba(255,255,255,0.2)',
+                        borderRadius: '12px',
+                        color: '#fff',
+                        cursor: 'pointer',
+                        fontSize: '1rem',
+                        fontWeight: '600',
+                        transition: 'all 0.2s'
+                    }}
+                >
+                    🔄 Reset to Defaults
+                </button>
+                <button
+                    onClick={handleSave}
+                    disabled={saving}
+                    style={{
+                        padding: '12px 32px',
+                        background: saving ? '#666' : 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+                        border: 'none',
+                        borderRadius: '12px',
+                        color: '#fff',
+                        cursor: saving ? 'not-allowed' : 'pointer',
+                        fontSize: '1rem',
+                        fontWeight: '700',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '0.75rem',
+                        boxShadow: saving ? 'none' : '0 4px 12px rgba(16, 185, 129, 0.3)',
+                        transition: 'all 0.2s'
+                    }}
+                >
+                    {saving ? (
+                        <>
+                            <span style={{ animation: 'spin 1s linear infinite' }}>⏳</span>
+                            Saving...
+                        </>
+                    ) : (
+                        <>
+                            💾 Save Global Settings
+                        </>
+                    )}
+                </button>
+            </div>
+
+            {/* Preview Info */}
+            <div style={{
+                marginTop: '2rem',
+                padding: '1rem',
+                background: 'rgba(59, 130, 246, 0.1)',
+                border: '1px solid rgba(59, 130, 246, 0.3)',
+                borderRadius: '8px'
+            }}>
+                <p style={{ margin: 0, fontSize: '0.85rem', color: '#60a5fa' }}>
+                    🔍 <strong>Preview:</strong> With current settings, translators will see {enabledCount} annotation features in the CAT workspace: {' '}
+                    {annotationFeatures
+                        .filter(f => settings[f.key])
+                        .map(f => f.label)
+                        .join(', ')
+                    }
+                </p>
+            </div>
+        </div>
+    );
+};
+
+// Component for managing annotation settings per project (keeping for backward compatibility)
 const ProjectAnnotationSettings = ({ project, onUpdate }) => {
     const [isExpanded, setIsExpanded] = useState(false);
     const [settings, setSettings] = useState(project.annotation_settings || {
@@ -1104,68 +1434,13 @@ const AdminEnhanced = () => {
             {activeTab === 'annotation-settings' && (
                 <div className="dashboard-card">
                     <div className="card-header">
-                        <h3>⚙️ Annotation Settings per Project</h3>
+                        <h3>⚙️ Global Annotation Settings</h3>
                         <p style={{ fontSize: '0.9rem', color: '#666', marginTop: '0.5rem' }}>
-                            Control which annotation features are visible to translators/reviewers on each project
+                            Control which annotation features are available across all projects in your workspace
                         </p>
                     </div>
                     <div style={{ padding: '1.5rem' }}>
-                        {/* Info Box */}
-                        <div style={{
-                            padding: '1rem',
-                            background: 'rgba(59, 130, 246, 0.1)',
-                            border: '1px solid rgba(59, 130, 246, 0.3)',
-                            borderRadius: '8px',
-                            marginBottom: '1.5rem'
-                        }}>
-                            <p style={{ fontSize: '0.9rem', color: '#60a5fa', margin: 0 }}>
-                                💡 <strong>Default features</strong> (enabled by default): Error Types, Domain Classification, Quality Rating, Notes<br/>
-                                <strong>Advanced features</strong> (disabled by default): Error Severity, Translation Effort, Post-Editing Effort, AI Quality Rating, Confidence Score
-                            </p>
-                        </div>
-
-                        {/* Projects List */}
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                            {projects.length === 0 ? (
-                                <div style={{ 
-                                    textAlign: 'center', 
-                                    color: '#666', 
-                                    padding: '3rem',
-                                    background: 'rgba(255,255,255,0.02)',
-                                    border: '1px solid rgba(255,255,255,0.1)',
-                                    borderRadius: '12px'
-                                }}>
-                                    <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>📋</div>
-                                    <h3 style={{ margin: '0 0 0.5rem 0', color: '#fff' }}>No Projects Found</h3>
-                                    <p style={{ margin: '0 0 1.5rem 0', fontSize: '0.9rem' }}>
-                                        Create your first project to configure annotation settings
-                                    </p>
-                                    <button
-                                        onClick={() => navigate('/dashboard/admin/create-job')}
-                                        style={{
-                                            padding: '12px 24px',
-                                            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                                            color: '#fff',
-                                            border: 'none',
-                                            borderRadius: '8px',
-                                            cursor: 'pointer',
-                                            fontSize: '0.9rem',
-                                            fontWeight: '600'
-                                        }}
-                                    >
-                                        + Create First Project
-                                    </button>
-                                </div>
-                            ) : (
-                                projects.map(project => (
-                                    <ProjectAnnotationSettings 
-                                        key={project.id} 
-                                        project={project}
-                                        onUpdate={fetchAdminData}
-                                    />
-                                ))
-                            )}
-                        </div>
+                        <GlobalAnnotationSettings onUpdate={fetchAdminData} />
                     </div>
                 </div>
             )}
