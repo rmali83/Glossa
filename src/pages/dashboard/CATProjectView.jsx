@@ -515,11 +515,20 @@ const CATProjectView = () => {
     };
 
     const captureDataset = async (segment) => {
+        console.log('🔍 Starting dataset capture for segment:', segment.id);
+        console.log('📊 Segment data:', {
+            hasAI: !!segment.ai_translation,
+            hasTarget: !!segment.target,
+            aiLength: segment.ai_translation?.length,
+            targetLength: segment.target?.length
+        });
+        
         try {
             // Calculate edit distance (simple character difference for now)
             const editDistance = Math.abs(segment.target.length - segment.ai_translation.length);
 
             // 1. Log to post_edits table
+            console.log('📝 Logging to post_edits...');
             const { error: postEditError } = await supabase
                 .from('post_edits')
                 .upsert({
@@ -535,16 +544,26 @@ const CATProjectView = () => {
                 });
 
             if (postEditError) {
-                console.error('Error logging post-edit:', postEditError);
+                console.error('❌ Error logging post-edit:', postEditError);
+                alert('Post-edit error: ' + JSON.stringify(postEditError));
+            } else {
+                console.log('✅ Post-edit logged successfully');
             }
 
             // 2. Fetch annotation data if exists
-            const { data: annotationData } = await supabase
+            console.log('🔍 Fetching annotation data...');
+            const { data: annotationData, error: annotationError } = await supabase
                 .from('annotations')
                 .select('*')
                 .eq('segment_id', segment.id)
                 .eq('annotator_id', user.id)
                 .single();
+
+            if (annotationError && annotationError.code !== 'PGRST116') {
+                console.error('⚠️ Annotation fetch error:', annotationError);
+            } else {
+                console.log('✅ Annotation data:', annotationData);
+            }
 
             // 3. Prepare error types array
             const errorTypes = [];
@@ -555,39 +574,46 @@ const CATProjectView = () => {
                 if (annotationData.error_style) errorTypes.push('style');
                 if (annotationData.error_accuracy) errorTypes.push('accuracy');
             }
+            console.log('🏷️ Error types:', errorTypes);
 
             // 4. Log to dataset_logs table
+            console.log('💾 Logging to dataset_logs...');
+            const datasetPayload = {
+                segment_id: segment.id,
+                project_id: projectId,
+                source_text: segment.source,
+                source_language: project.source_language,
+                target_language: project.target_language,
+                ai_translation: segment.ai_translation,
+                human_translation: segment.target,
+                has_errors: errorTypes.length > 0,
+                error_types: errorTypes,
+                domain: annotationData?.domain || null,
+                quality_rating: annotationData?.quality_rating || null,
+                annotation_notes: annotationData?.notes || null,
+                edit_distance: editDistance,
+                translator_id: user.id,
+                annotator_id: annotationData ? user.id : null,
+                created_at: new Date().toISOString(),
+                exported: false
+            };
+            console.log('📦 Dataset payload:', datasetPayload);
+            
             const { error: datasetError } = await supabase
                 .from('dataset_logs')
-                .upsert({
-                    segment_id: segment.id,
-                    project_id: projectId,
-                    source_text: segment.source,
-                    source_language: project.source_language,
-                    target_language: project.target_language,
-                    ai_translation: segment.ai_translation,
-                    human_translation: segment.target,
-                    has_errors: errorTypes.length > 0,
-                    error_types: errorTypes,
-                    domain: annotationData?.domain || null,
-                    quality_rating: annotationData?.quality_rating || null,
-                    annotation_notes: annotationData?.notes || null,
-                    edit_distance: editDistance,
-                    translator_id: user.id,
-                    annotator_id: annotationData ? user.id : null,
-                    created_at: new Date().toISOString(),
-                    exported: false
-                }, {
+                .upsert(datasetPayload, {
                     onConflict: 'segment_id'
                 });
 
             if (datasetError) {
-                console.error('Error logging to dataset:', datasetError);
+                console.error('❌ Error logging to dataset:', datasetError);
+                alert('Dataset error: ' + JSON.stringify(datasetError));
             } else {
-                console.log('Dataset captured successfully');
+                console.log('✅ Dataset captured successfully!');
             }
         } catch (err) {
-            console.error('Dataset capture error:', err);
+            console.error('💥 Dataset capture error:', err);
+            alert('Dataset capture exception: ' + err.message);
         }
     };
 
