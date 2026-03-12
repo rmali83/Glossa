@@ -170,6 +170,20 @@ const CATProjectView = () => {
             
             if (result.success) {
                 setMtSuggestion(result);
+                
+                // Store AI translation in segment for dataset capture
+                const currentSegment = segments[activeSegmentIndex];
+                if (!currentSegment.ai_translation) {
+                    await supabase
+                        .from('segments')
+                        .update({ ai_translation: result.translation })
+                        .eq('id', currentSegment.id);
+                    
+                    // Update local state
+                    const newSegments = [...segments];
+                    newSegments[activeSegmentIndex].ai_translation = result.translation;
+                    setSegments(newSegments);
+                }
             }
         } catch (err) {
             console.error('Error fetching MT:', err);
@@ -434,7 +448,8 @@ const CATProjectView = () => {
                         source: seg.source_text,
                         target: seg.target_text || '',
                         status: seg.status.toLowerCase().replace(' ', '_'),
-                        segment_number: index + 1 // Generate segment number from index
+                        segment_number: index + 1, // Generate segment number from index
+                        ai_translation: seg.ai_translation || null
                     })));
                 }
             } else {
@@ -445,7 +460,8 @@ const CATProjectView = () => {
                     source: seg.source_text,
                     target: seg.target_text || '',
                     status: seg.status.toLowerCase().replace(' ', '_'),
-                    segment_number: index + 1 // Generate segment number from index
+                    segment_number: index + 1, // Generate segment number from index
+                    ai_translation: seg.ai_translation || null
                 }));
                 console.log('Mapped segments:', mappedSegments);
                 setSegments(mappedSegments);
@@ -472,6 +488,7 @@ const CATProjectView = () => {
 
     const saveSegmentToDatabase = async (segment) => {
         try {
+            // 1. Update segment
             const { error } = await supabase
                 .from('segments')
                 .update({
@@ -483,11 +500,94 @@ const CATProjectView = () => {
 
             if (error) {
                 console.error('Error saving segment:', error);
-            } else {
-                console.log('Segment saved successfully');
+                return;
+            }
+
+            console.log('Segment saved successfully');
+
+            // 2. Auto-capture dataset if AI translation exists and human edited it
+            if (segment.ai_translation && segment.target && segment.target !== segment.ai_translation) {
+                await captureDataset(segment);
             }
         } catch (err) {
             console.error('Save error:', err);
+        }
+    };
+
+    const captureDataset = async (segment) => {
+        try {
+            // Calculate edit distance (simple character difference for now)
+            const editDistance = Math.abs(segment.target.length - segment.ai_translation.length);
+
+            // 1. Log to post_edits table
+            const { error: postEditError } = await supabase
+                .from('post_edits')
+                .upsert({
+                    segment_id: segment.id,
+                    project_id: projectId,
+                    ai_translation: segment.ai_translation,
+                    human_translation: segment.target,
+                    edit_distance: editDistance,
+                    editor_id: user.id,
+                    created_at: new Date().toISOString()
+                }, {
+                    onConflict: 'segment_id'
+                });
+
+            if (postEditError) {
+                console.error('Error logging post-edit:', postEditError);
+            }
+
+            // 2. Fetch annotation data if exists
+            const { data: annotationData } = await supabase
+                .from('annotations')
+                .select('*')
+                .eq('segment_id', segment.id)
+                .eq('annotator_id', user.id)
+                .single();
+
+            // 3. Prepare error types array
+            const errorTypes = [];
+            if (annotationData) {
+                if (annotationData.error_fluency) errorTypes.push('fluency');
+                if (annotationData.error_grammar) errorTypes.push('grammar');
+                if (annotationData.error_terminology) errorTypes.push('terminology');
+                if (annotationData.error_style) errorTypes.push('style');
+                if (annotationData.error_accuracy) errorTypes.push('accuracy');
+            }
+
+            // 4. Log to dataset_logs table
+            const { error: datasetError } = await supabase
+                .from('dataset_logs')
+                .upsert({
+                    segment_id: segment.id,
+                    project_id: projectId,
+                    source_text: segment.source,
+                    source_language: project.source_language,
+                    target_language: project.target_language,
+                    ai_translation: segment.ai_translation,
+                    human_translation: segment.target,
+                    has_errors: errorTypes.length > 0,
+                    error_types: errorTypes,
+                    domain: annotationData?.domain || null,
+                    quality_rating: annotationData?.quality_rating || null,
+                    annotation_notes: annotationData?.notes || null,
+                    edit_distance: editDistance,
+                    translator_id: user.id,
+                    annotator_id: annotationData ? user.id : null,
+                    created_at: new Date().toISOString(),
+                    exported: false
+                }, {
+                    onConflict: 'segment_id'
+                });
+
+            if (datasetError) {
+                console.error('Error logging to dataset:', datasetError);
+            } else {
+                console.log('Dataset captured successfully');
+            }
+        } catch (err) {
+            console.error('Dataset capture error:', err);
         }
     };
 
@@ -657,7 +757,8 @@ const CATProjectView = () => {
                     source: seg.source_text,
                     target: seg.target_text || '',
                     status: seg.status.toLowerCase().replace(' ', '_'),
-                    segment_number: index + 1
+                    segment_number: index + 1,
+                    ai_translation: seg.ai_translation || null
                 }));
                 setSegments(mappedSegments);
                 console.log('Segments updated in UI');
