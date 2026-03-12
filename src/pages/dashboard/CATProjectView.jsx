@@ -545,7 +545,6 @@ const CATProjectView = () => {
 
             if (postEditError) {
                 console.error('❌ Error logging post-edit:', postEditError);
-                alert('Post-edit error: ' + JSON.stringify(postEditError));
             } else {
                 console.log('✅ Post-edit logged successfully');
             }
@@ -607,13 +606,11 @@ const CATProjectView = () => {
 
             if (datasetError) {
                 console.error('❌ Error logging to dataset:', datasetError);
-                alert('Dataset error: ' + JSON.stringify(datasetError));
             } else {
                 console.log('✅ Dataset captured successfully!');
             }
         } catch (err) {
             console.error('💥 Dataset capture error:', err);
-            alert('Dataset capture exception: ' + err.message);
         }
     };
 
