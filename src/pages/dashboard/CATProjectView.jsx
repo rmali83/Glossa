@@ -1212,7 +1212,7 @@ ${segments.map(seg => `      <trans-unit id="${seg.segment_number}">
 
                     {/* Center Panel: Translation Editor */}
                     <section className="flex-1 flex flex-col bg-white dark:bg-slate-950">
-                        <div className="flex-1 p-8 flex flex-col max-w-4xl mx-auto w-full gap-8">
+                        <div className="flex-1 p-8 flex flex-col w-full gap-8">
                             
                             {/* Source Segment */}
                             <div className="space-y-3">
