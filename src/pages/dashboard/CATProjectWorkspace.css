@@ -140,32 +140,61 @@
 
 /* Dropdown select styling with curved edges */
 select.glass-input,
-select {
+select,
+.w-full.bg-white.dark\:bg-slate-800.border-slate-200.dark\:border-slate-700.rounded-lg {
     border-radius: 12px !important;
+    -webkit-border-radius: 12px !important;
+    -moz-border-radius: 12px !important;
     appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%2394a3b8' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
     background-repeat: no-repeat;
     background-position: right 0.75rem center;
     padding-right: 2.5rem;
 }
 
-/* Dropdown option hover effect with blue background and curved edges */
-select option {
-    border-radius: 8px;
-    padding: 0.5rem;
-    margin: 0.25rem;
+/* Force curved edges on dropdown popup */
+select::-webkit-scrollbar {
+    border-radius: 12px;
 }
 
+/* Dropdown option styling */
+select option {
+    border-radius: 8px !important;
+    padding: 0.75rem 1rem !important;
+    margin: 0.25rem !important;
+    background-color: white;
+}
+
+/* Blue hover effect on options */
 select option:hover,
 select option:focus,
-select option:checked {
+select option:checked,
+select option:active {
     background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%) !important;
+    background-color: #3b82f6 !important;
     color: white !important;
-    border-radius: 8px;
+    border-radius: 8px !important;
+    outline: none !important;
 }
 
 /* Dark mode dropdown styling */
 .dark select.glass-input,
-.dark select {
+.dark select,
+.dark .w-full.bg-white.dark\:bg-slate-800.border-slate-200.dark\:border-slate-700.rounded-lg {
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%2394a3b8' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+}
+
+.dark select option {
+    background-color: #1e293b;
+    color: #e2e8f0;
+}
+
+.dark select option:hover,
+.dark select option:focus,
+.dark select option:checked {
+    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%) !important;
+    background-color: #3b82f6 !important;
+    color: white !important;
 }

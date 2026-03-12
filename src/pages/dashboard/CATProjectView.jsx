@@ -1645,7 +1645,8 @@ ${segments.map(seg => `      <trans-unit id="${seg.segment_number}">
                                                     setSelectedSubdomain('');
                                                     setAnnotation({ ...annotation, domain: '' });
                                                 }}
-                                                className="w-full bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 rounded-lg p-2 text-sm focus:ring-1 focus:ring-primary-500"
+                                                className="w-full bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 rounded-xl p-2 text-sm focus:ring-1 focus:ring-primary-500"
+                                                style={{ borderRadius: '12px' }}
                                             >
                                                 <option value="">Select Domain</option>
                                                 {getDomainNames().map((domain) => (
@@ -1665,7 +1666,8 @@ ${segments.map(seg => `      <trans-unit id="${seg.segment_number}">
                                                         const fullDomain = subdomain ? `${selectedDomain}: ${subdomain}` : '';
                                                         setAnnotation({ ...annotation, domain: fullDomain });
                                                     }}
-                                                    className="w-full bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 rounded-lg p-2 text-sm focus:ring-1 focus:ring-primary-500"
+                                                    className="w-full bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 rounded-xl p-2 text-sm focus:ring-1 focus:ring-primary-500"
+                                                    style={{ borderRadius: '12px' }}
                                                 >
                                                     <option value="">Select Subdomain</option>
                                                     {getSubdomains(selectedDomain).map((subdomain) => (
