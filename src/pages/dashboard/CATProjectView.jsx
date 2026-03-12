@@ -99,6 +99,22 @@ const CATProjectView = () => {
         error_terminology: false,
         error_style: false,
         error_accuracy: false,
+        // Severity levels for each error
+        error_fluency_severity: '',
+        error_grammar_severity: '',
+        error_terminology_severity: '',
+        error_style_severity: '',
+        error_accuracy_severity: '',
+        // Effort tracking
+        translation_effort: '',
+        post_editing_effort: '',
+        // AI translation quality
+        ai_translation_quality: null,
+        ai_helpfulness: '',
+        // Confidence score
+        confidence_score: null,
+        uncertain_about: [],
+        // Existing fields
         domain: '',
         quality_rating: null,
         notes: ''
@@ -221,6 +237,22 @@ const CATProjectView = () => {
                     error_terminology: data.error_terminology || false,
                     error_style: data.error_style || false,
                     error_accuracy: data.error_accuracy || false,
+                    // Severity levels
+                    error_fluency_severity: data.error_fluency_severity || '',
+                    error_grammar_severity: data.error_grammar_severity || '',
+                    error_terminology_severity: data.error_terminology_severity || '',
+                    error_style_severity: data.error_style_severity || '',
+                    error_accuracy_severity: data.error_accuracy_severity || '',
+                    // Effort tracking
+                    translation_effort: data.translation_effort || '',
+                    post_editing_effort: data.post_editing_effort || '',
+                    // AI quality
+                    ai_translation_quality: data.ai_translation_quality || null,
+                    ai_helpfulness: data.ai_helpfulness || '',
+                    // Confidence
+                    confidence_score: data.confidence_score || null,
+                    uncertain_about: data.uncertain_about || [],
+                    // Existing fields
                     domain: data.domain || '',
                     quality_rating: data.quality_rating || null,
                     notes: data.notes || ''
@@ -235,6 +267,17 @@ const CATProjectView = () => {
                     error_terminology: false,
                     error_style: false,
                     error_accuracy: false,
+                    error_fluency_severity: '',
+                    error_grammar_severity: '',
+                    error_terminology_severity: '',
+                    error_style_severity: '',
+                    error_accuracy_severity: '',
+                    translation_effort: '',
+                    post_editing_effort: '',
+                    ai_translation_quality: null,
+                    ai_helpfulness: '',
+                    confidence_score: null,
+                    uncertain_about: [],
                     domain: '',
                     quality_rating: null,
                     notes: ''
@@ -246,6 +289,7 @@ const CATProjectView = () => {
             console.error('Error fetching annotation:', err);
         }
     };
+
 
     const saveAnnotation = async () => {
         if (!segments[activeSegmentIndex]) return;
@@ -1604,9 +1648,9 @@ ${segments.map(seg => `      <trans-unit id="${seg.segment_number}">
                                     <div className="space-y-4">
                                         <h4 className="text-xs font-bold text-slate-500 uppercase">Quality Annotation</h4>
                                         
-                                        {/* Error Types */}
+                                        {/* Error Types with Severity */}
                                         <div className="space-y-3">
-                                            <label className="text-xs font-bold text-slate-500 uppercase block">Error Types</label>
+                                            <label className="text-xs font-bold text-slate-500 uppercase block">Error Types & Severity</label>
                                             <div className="space-y-2">
                                                 {[
                                                     { key: 'error_fluency', label: 'Fluency', icon: '💬', color: 'bg-blue-500' },
@@ -1615,19 +1659,39 @@ ${segments.map(seg => `      <trans-unit id="${seg.segment_number}">
                                                     { key: 'error_style', label: 'Style', icon: '🎨', color: 'bg-pink-500' },
                                                     { key: 'error_accuracy', label: 'Accuracy', icon: '🎯', color: 'bg-green-500' }
                                                 ].map(({ key, label, icon, color }) => (
-                                                    <label key={key} className="flex items-center gap-3 p-3 bg-white dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700 cursor-pointer hover:border-primary-500 transition-colors">
-                                                        <input
-                                                            type="checkbox"
-                                                            checked={annotation[key]}
-                                                            onChange={(e) => setAnnotation({ ...annotation, [key]: e.target.checked })}
-                                                            className="w-4 h-4 rounded border-slate-300 text-primary-600 focus:ring-primary-500"
-                                                        />
-                                                        <span className="text-lg">{icon}</span>
-                                                        <span className="text-sm font-medium flex-1">{label}</span>
+                                                    <div key={key} className="bg-white dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700">
+                                                        <label className="flex items-center gap-3 p-3 cursor-pointer hover:border-primary-500 transition-colors">
+                                                            <input
+                                                                type="checkbox"
+                                                                checked={annotation[key]}
+                                                                onChange={(e) => setAnnotation({ ...annotation, [key]: e.target.checked })}
+                                                                className="w-4 h-4 rounded border-slate-300 text-primary-600 focus:ring-primary-500"
+                                                            />
+                                                            <span className="text-lg">{icon}</span>
+                                                            <span className="text-sm font-medium flex-1">{label}</span>
+                                                            {annotation[key] && (
+                                                                <span className={`w-2 h-2 rounded-full ${color}`}></span>
+                                                            )}
+                                                        </label>
+                                                        {/* Severity selector - only show if error is checked */}
                                                         {annotation[key] && (
-                                                            <span className={`w-2 h-2 rounded-full ${color}`}></span>
+                                                            <div className="px-3 pb-3 flex gap-2">
+                                                                {['minor', 'major', 'critical'].map((severity) => (
+                                                                    <button
+                                                                        key={severity}
+                                                                        onClick={() => setAnnotation({ ...annotation, [`${key}_severity`]: severity })}
+                                                                        className={`flex-1 px-2 py-1 text-xs rounded transition-all ${
+                                                                            annotation[`${key}_severity`] === severity
+                                                                                ? 'bg-primary-500 text-white font-bold'
+                                                                                : 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-200'
+                                                                        }`}
+                                                                    >
+                                                                        {severity.charAt(0).toUpperCase() + severity.slice(1)}
+                                                                    </button>
+                                                                ))}
+                                                            </div>
                                                         )}
-                                                    </label>
+                                                    </div>
                                                 ))}
                                             </div>
                                         </div>
@@ -1684,6 +1748,161 @@ ${segments.map(seg => `      <trans-unit id="${seg.segment_number}">
                                                     <p className="text-xs text-blue-600 dark:text-blue-400 font-medium">
                                                         {getDomainIcon(selectedDomain)} {annotation.domain}
                                                     </p>
+                                                </div>
+                                            )}
+                                        </div>
+
+                                        {/* NEW FEATURE 1: Effort Tracking */}
+                                        <div className="space-y-3">
+                                            <label className="text-xs font-bold text-slate-500 uppercase block">⏱️ Translation Effort</label>
+                                            <div className="grid grid-cols-2 gap-2">
+                                                {[
+                                                    { value: 'easy', label: 'Easy', desc: '< 5 min', color: 'from-green-500 to-emerald-500' },
+                                                    { value: 'medium', label: 'Medium', desc: '5-15 min', color: 'from-yellow-500 to-orange-500' },
+                                                    { value: 'hard', label: 'Hard', desc: '15-30 min', color: 'from-orange-500 to-red-500' },
+                                                    { value: 'very_hard', label: 'Very Hard', desc: '> 30 min', color: 'from-red-500 to-pink-500' }
+                                                ].map(({ value, label, desc, color }) => (
+                                                    <button
+                                                        key={value}
+                                                        onClick={() => setAnnotation({ ...annotation, translation_effort: value })}
+                                                        className={`p-2 rounded-lg border-2 transition-all text-left ${
+                                                            annotation.translation_effort === value
+                                                                ? `bg-gradient-to-r ${color} text-white border-transparent font-bold`
+                                                                : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 hover:border-primary-500'
+                                                        }`}
+                                                    >
+                                                        <div className="text-xs font-bold">{label}</div>
+                                                        <div className="text-[10px] opacity-75">{desc}</div>
+                                                    </button>
+                                                ))}
+                                            </div>
+                                        </div>
+
+                                        {/* NEW FEATURE 2: Post-Editing Effort (only show if AI translation exists) */}
+                                        {segments[activeSegmentIndex]?.ai_translation && (
+                                            <div className="space-y-3">
+                                                <label className="text-xs font-bold text-slate-500 uppercase block">🤖 Post-Editing Effort</label>
+                                                <div className="grid grid-cols-2 gap-2">
+                                                    {[
+                                                        { value: 'no_editing', label: 'No Editing', icon: '✓' },
+                                                        { value: 'light_editing', label: 'Light', icon: '✏️' },
+                                                        { value: 'heavy_editing', label: 'Heavy', icon: '🔧' },
+                                                        { value: 'complete_retranslation', label: 'Retranslated', icon: '🔄' }
+                                                    ].map(({ value, label, icon }) => (
+                                                        <button
+                                                            key={value}
+                                                            onClick={() => setAnnotation({ ...annotation, post_editing_effort: value })}
+                                                            className={`p-2 rounded-lg border-2 transition-all ${
+                                                                annotation.post_editing_effort === value
+                                                                    ? 'bg-primary-500 text-white border-transparent font-bold'
+                                                                    : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 hover:border-primary-500'
+                                                            }`}
+                                                        >
+                                                            <div className="text-xs font-bold">{icon} {label}</div>
+                                                        </button>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        )}
+
+                                        {/* NEW FEATURE 3: AI Translation Quality (only show if AI translation exists) */}
+                                        {segments[activeSegmentIndex]?.ai_translation && (
+                                            <div className="space-y-3">
+                                                <label className="text-xs font-bold text-slate-500 uppercase block">🤖 AI Translation Quality</label>
+                                                <div className="flex gap-2 justify-center">
+                                                    {[1, 2, 3, 4, 5].map((rating) => (
+                                                        <button
+                                                            key={rating}
+                                                            onClick={() => setAnnotation({ ...annotation, ai_translation_quality: rating })}
+                                                            className={`w-10 h-10 rounded-lg border-2 transition-all ${
+                                                                annotation.ai_translation_quality === rating
+                                                                    ? 'border-blue-500 bg-blue-500/20 scale-110'
+                                                                    : 'border-slate-300 dark:border-slate-700 hover:border-blue-500'
+                                                            }`}
+                                                        >
+                                                            <svg className={`w-6 h-6 mx-auto ${annotation.ai_translation_quality >= rating ? 'text-blue-500' : 'text-slate-300'}`} fill="currentColor" viewBox="0 0 24 24">
+                                                                <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"/>
+                                                            </svg>
+                                                        </button>
+                                                    ))}
+                                                </div>
+                                                <div className="flex justify-between text-[10px] text-slate-400 px-1">
+                                                    <span>Poor</span>
+                                                    <span>Excellent</span>
+                                                </div>
+                                                
+                                                {/* AI Helpfulness */}
+                                                <div className="grid grid-cols-2 gap-2 mt-2">
+                                                    {[
+                                                        { value: 'very_helpful', label: 'Very Helpful', desc: 'Used as-is' },
+                                                        { value: 'helpful', label: 'Helpful', desc: 'Minor edits' },
+                                                        { value: 'somewhat_helpful', label: 'Somewhat', desc: 'Major edits' },
+                                                        { value: 'not_helpful', label: 'Not Helpful', desc: 'Retranslated' }
+                                                    ].map(({ value, label, desc }) => (
+                                                        <button
+                                                            key={value}
+                                                            onClick={() => setAnnotation({ ...annotation, ai_helpfulness: value })}
+                                                            className={`p-2 rounded-lg border transition-all text-left ${
+                                                                annotation.ai_helpfulness === value
+                                                                    ? 'bg-blue-500 text-white border-transparent font-bold'
+                                                                    : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 hover:border-blue-500'
+                                                            }`}
+                                                        >
+                                                            <div className="text-xs font-bold">{label}</div>
+                                                            <div className="text-[10px] opacity-75">{desc}</div>
+                                                        </button>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        )}
+
+                                        {/* NEW FEATURE 4: Confidence Score */}
+                                        <div className="space-y-3">
+                                            <label className="text-xs font-bold text-slate-500 uppercase block">💪 Your Confidence</label>
+                                            <div className="flex gap-2 justify-center">
+                                                {[1, 2, 3, 4, 5].map((rating) => (
+                                                    <button
+                                                        key={rating}
+                                                        onClick={() => setAnnotation({ ...annotation, confidence_score: rating })}
+                                                        className={`w-10 h-10 rounded-lg border-2 transition-all ${
+                                                            annotation.confidence_score === rating
+                                                                ? 'border-purple-500 bg-purple-500/20 scale-110'
+                                                                : 'border-slate-300 dark:border-slate-700 hover:border-purple-500'
+                                                        }`}
+                                                    >
+                                                        <svg className={`w-6 h-6 mx-auto ${annotation.confidence_score >= rating ? 'text-purple-500' : 'text-slate-300'}`} fill="currentColor" viewBox="0 0 24 24">
+                                                            <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"/>
+                                                        </svg>
+                                                    </button>
+                                                ))}
+                                            </div>
+                                            <div className="flex justify-between text-[10px] text-slate-400 px-1">
+                                                <span>Uncertain</span>
+                                                <span>Very Confident</span>
+                                            </div>
+                                            
+                                            {/* Uncertainty Areas */}
+                                            {annotation.confidence_score && annotation.confidence_score < 4 && (
+                                                <div className="mt-2">
+                                                    <label className="text-[10px] text-slate-500 uppercase block mb-2">Uncertain About:</label>
+                                                    <div className="grid grid-cols-2 gap-2">
+                                                        {['terminology', 'grammar', 'cultural', 'technical'].map((area) => (
+                                                            <label key={area} className="flex items-center gap-2 p-2 bg-white dark:bg-slate-800 rounded border border-slate-200 dark:border-slate-700 cursor-pointer hover:border-purple-500 transition-colors">
+                                                                <input
+                                                                    type="checkbox"
+                                                                    checked={annotation.uncertain_about.includes(area)}
+                                                                    onChange={(e) => {
+                                                                        const updated = e.target.checked
+                                                                            ? [...annotation.uncertain_about, area]
+                                                                            : annotation.uncertain_about.filter(a => a !== area);
+                                                                        setAnnotation({ ...annotation, uncertain_about: updated });
+                                                                    }}
+                                                                    className="w-3 h-3 rounded border-slate-300 text-purple-600 focus:ring-purple-500"
+                                                                />
+                                                                <span className="text-xs capitalize">{area}</span>
+                                                            </label>
+                                                        ))}
+                                                    </div>
                                                 </div>
                                             )}
                                         </div>
@@ -1753,7 +1972,7 @@ ${segments.map(seg => `      <trans-unit id="${seg.segment_number}">
                                         {/* Info Box */}
                                         <div className="p-3 bg-blue-500/10 border border-blue-500/20 rounded-lg">
                                             <p className="text-xs text-blue-600 dark:text-blue-400">
-                                                💡 Annotations help improve AI translation quality and are used for training datasets.
+                                                💡 Enhanced annotations with effort tracking, AI quality rating, and confidence scoring help improve translation quality and train better AI models.
                                             </p>
                                         </div>
                                     </div>
