@@ -91,6 +91,19 @@ const CATProjectView = () => {
     const [isTranslating, setIsTranslating] = useState(false);
     const [selectedTone, setSelectedTone] = useState('professional');
     const [mtSuggestion, setMtSuggestion] = useState(null);
+    
+    // Annotation settings from project (admin-controlled)
+    const [annotationSettings, setAnnotationSettings] = useState({
+        error_types: true,
+        error_severity: false,
+        domain_classification: true,
+        quality_rating: true,
+        translation_effort: false,
+        post_editing_effort: false,
+        ai_quality_rating: false,
+        confidence_score: false,
+        notes: true
+    });
 
     // Annotation state
     const [annotation, setAnnotation] = useState({
@@ -412,6 +425,11 @@ const CATProjectView = () => {
 
                 if (projError) throw projError;
                 setProject(projData);
+                
+                // Load annotation settings from project
+                if (projData.annotation_settings) {
+                    setAnnotationSettings(projData.annotation_settings);
+                }
 
                 // Fetch segments for this project
                 await fetchSegments();
@@ -1649,137 +1667,143 @@ ${segments.map(seg => `      <trans-unit id="${seg.segment_number}">
                                         <h4 className="text-xs font-bold text-slate-500 uppercase">Quality Annotation</h4>
                                         
                                         {/* Error Types with Severity */}
-                                        <div className="space-y-3">
-                                            <label className="text-xs font-bold text-slate-500 uppercase block">Error Types & Severity</label>
-                                            <div className="space-y-2">
-                                                {[
-                                                    { key: 'error_fluency', label: 'Fluency', icon: '💬', color: 'bg-blue-500' },
-                                                    { key: 'error_grammar', label: 'Grammar', icon: '📝', color: 'bg-red-500' },
-                                                    { key: 'error_terminology', label: 'Terminology', icon: '📚', color: 'bg-purple-500' },
-                                                    { key: 'error_style', label: 'Style', icon: '🎨', color: 'bg-pink-500' },
-                                                    { key: 'error_accuracy', label: 'Accuracy', icon: '🎯', color: 'bg-green-500' }
-                                                ].map(({ key, label, icon, color }) => (
-                                                    <div key={key} className="bg-white dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700">
-                                                        <label className="flex items-center gap-3 p-3 cursor-pointer hover:border-primary-500 transition-colors">
-                                                            <input
-                                                                type="checkbox"
-                                                                checked={annotation[key]}
-                                                                onChange={(e) => setAnnotation({ ...annotation, [key]: e.target.checked })}
-                                                                className="w-4 h-4 rounded border-slate-300 text-primary-600 focus:ring-primary-500"
-                                                            />
-                                                            <span className="text-lg">{icon}</span>
-                                                            <span className="text-sm font-medium flex-1">{label}</span>
-                                                            {annotation[key] && (
-                                                                <span className={`w-2 h-2 rounded-full ${color}`}></span>
+                                        {annotationSettings.error_types && (
+                                            <div className="space-y-3">
+                                                <label className="text-xs font-bold text-slate-500 uppercase block">Error Types{annotationSettings.error_severity && ' & Severity'}</label>
+                                                <div className="space-y-2">
+                                                    {[
+                                                        { key: 'error_fluency', label: 'Fluency', icon: '💬', color: 'bg-blue-500' },
+                                                        { key: 'error_grammar', label: 'Grammar', icon: '📝', color: 'bg-red-500' },
+                                                        { key: 'error_terminology', label: 'Terminology', icon: '📚', color: 'bg-purple-500' },
+                                                        { key: 'error_style', label: 'Style', icon: '🎨', color: 'bg-pink-500' },
+                                                        { key: 'error_accuracy', label: 'Accuracy', icon: '🎯', color: 'bg-green-500' }
+                                                    ].map(({ key, label, icon, color }) => (
+                                                        <div key={key} className="bg-white dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700">
+                                                            <label className="flex items-center gap-3 p-3 cursor-pointer hover:border-primary-500 transition-colors">
+                                                                <input
+                                                                    type="checkbox"
+                                                                    checked={annotation[key]}
+                                                                    onChange={(e) => setAnnotation({ ...annotation, [key]: e.target.checked })}
+                                                                    className="w-4 h-4 rounded border-slate-300 text-primary-600 focus:ring-primary-500"
+                                                                />
+                                                                <span className="text-lg">{icon}</span>
+                                                                <span className="text-sm font-medium flex-1">{label}</span>
+                                                                {annotation[key] && (
+                                                                    <span className={`w-2 h-2 rounded-full ${color}`}></span>
+                                                                )}
+                                                            </label>
+                                                            {/* Severity selector - only show if error is checked AND severity feature is enabled */}
+                                                            {annotationSettings.error_severity && annotation[key] && (
+                                                                <div className="px-3 pb-3 flex gap-2">
+                                                                    {['minor', 'major', 'critical'].map((severity) => (
+                                                                        <button
+                                                                            key={severity}
+                                                                            onClick={() => setAnnotation({ ...annotation, [`${key}_severity`]: severity })}
+                                                                            className={`flex-1 px-2 py-1 text-xs rounded transition-all ${
+                                                                                annotation[`${key}_severity`] === severity
+                                                                                    ? 'bg-primary-500 text-white font-bold'
+                                                                                    : 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-200'
+                                                                            }`}
+                                                                        >
+                                                                            {severity.charAt(0).toUpperCase() + severity.slice(1)}
+                                                                        </button>
+                                                                    ))}
+                                                                </div>
                                                             )}
-                                                        </label>
-                                                        {/* Severity selector - only show if error is checked */}
-                                                        {annotation[key] && (
-                                                            <div className="px-3 pb-3 flex gap-2">
-                                                                {['minor', 'major', 'critical'].map((severity) => (
-                                                                    <button
-                                                                        key={severity}
-                                                                        onClick={() => setAnnotation({ ...annotation, [`${key}_severity`]: severity })}
-                                                                        className={`flex-1 px-2 py-1 text-xs rounded transition-all ${
-                                                                            annotation[`${key}_severity`] === severity
-                                                                                ? 'bg-primary-500 text-white font-bold'
-                                                                                : 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-200'
-                                                                        }`}
-                                                                    >
-                                                                        {severity.charAt(0).toUpperCase() + severity.slice(1)}
-                                                                    </button>
-                                                                ))}
-                                                            </div>
-                                                        )}
-                                                    </div>
-                                                ))}
+                                                        </div>
+                                                    ))}
+                                                </div>
                                             </div>
-                                        </div>
+                                        )}
 
                                         {/* Domain Classification */}
-                                        <div className="space-y-3">
-                                            <label className="text-xs font-bold text-slate-500 uppercase block">Domain / Specialization</label>
-                                            
-                                            {/* Domain Dropdown */}
-                                            <select
-                                                value={selectedDomain}
-                                                onChange={(e) => {
-                                                    const domain = e.target.value;
-                                                    setSelectedDomain(domain);
-                                                    setSelectedSubdomain('');
-                                                    setAnnotation({ ...annotation, domain: '' });
-                                                }}
-                                                className="w-full bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 rounded-xl p-2 text-sm focus:ring-1 focus:ring-primary-500"
-                                                style={{ borderRadius: '12px' }}
-                                            >
-                                                <option value="">Select Domain</option>
-                                                {getDomainNames().map((domain) => (
-                                                    <option key={domain} value={domain}>
-                                                        {getDomainIcon(domain)} {domain}
-                                                    </option>
-                                                ))}
-                                            </select>
-
-                                            {/* Subdomain Dropdown */}
-                                            {selectedDomain && (
+                                        {annotationSettings.domain_classification && (
+                                            <div className="space-y-3">
+                                                <label className="text-xs font-bold text-slate-500 uppercase block">Domain / Specialization</label>
+                                                
+                                                {/* Domain Dropdown */}
                                                 <select
-                                                    value={selectedSubdomain}
+                                                    value={selectedDomain}
                                                     onChange={(e) => {
-                                                        const subdomain = e.target.value;
-                                                        setSelectedSubdomain(subdomain);
-                                                        const fullDomain = subdomain ? `${selectedDomain}: ${subdomain}` : '';
-                                                        setAnnotation({ ...annotation, domain: fullDomain });
+                                                        const domain = e.target.value;
+                                                        setSelectedDomain(domain);
+                                                        setSelectedSubdomain('');
+                                                        setAnnotation({ ...annotation, domain: '' });
                                                     }}
                                                     className="w-full bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 rounded-xl p-2 text-sm focus:ring-1 focus:ring-primary-500"
                                                     style={{ borderRadius: '12px' }}
                                                 >
-                                                    <option value="">Select Subdomain</option>
-                                                    {getSubdomains(selectedDomain).map((subdomain) => (
-                                                        <option key={subdomain} value={subdomain}>
-                                                            {subdomain}
+                                                    <option value="">Select Domain</option>
+                                                    {getDomainNames().map((domain) => (
+                                                        <option key={domain} value={domain}>
+                                                            {getDomainIcon(domain)} {domain}
                                                         </option>
                                                     ))}
                                                 </select>
-                                            )}
 
-                                            {/* Display selected domain/subdomain */}
-                                            {annotation.domain && (
-                                                <div className="p-2 bg-gradient-to-r from-blue-500/10 to-purple-500/10 border border-blue-500/20 rounded-lg">
-                                                    <p className="text-xs text-blue-600 dark:text-blue-400 font-medium">
-                                                        {getDomainIcon(selectedDomain)} {annotation.domain}
-                                                    </p>
-                                                </div>
-                                            )}
-                                        </div>
+                                                {/* Subdomain Dropdown */}
+                                                {selectedDomain && (
+                                                    <select
+                                                        value={selectedSubdomain}
+                                                        onChange={(e) => {
+                                                            const subdomain = e.target.value;
+                                                            setSelectedSubdomain(subdomain);
+                                                            const fullDomain = subdomain ? `${selectedDomain}: ${subdomain}` : '';
+                                                            setAnnotation({ ...annotation, domain: fullDomain });
+                                                        }}
+                                                        className="w-full bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 rounded-xl p-2 text-sm focus:ring-1 focus:ring-primary-500"
+                                                        style={{ borderRadius: '12px' }}
+                                                    >
+                                                        <option value="">Select Subdomain</option>
+                                                        {getSubdomains(selectedDomain).map((subdomain) => (
+                                                            <option key={subdomain} value={subdomain}>
+                                                                {subdomain}
+                                                            </option>
+                                                        ))}
+                                                    </select>
+                                                )}
+
+                                                {/* Display selected domain/subdomain */}
+                                                {annotation.domain && (
+                                                    <div className="p-2 bg-gradient-to-r from-blue-500/10 to-purple-500/10 border border-blue-500/20 rounded-lg">
+                                                        <p className="text-xs text-blue-600 dark:text-blue-400 font-medium">
+                                                            {getDomainIcon(selectedDomain)} {annotation.domain}
+                                                        </p>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        )}
 
                                         {/* NEW FEATURE 1: Effort Tracking */}
-                                        <div className="space-y-3">
-                                            <label className="text-xs font-bold text-slate-500 uppercase block">⏱️ Translation Effort</label>
-                                            <div className="grid grid-cols-2 gap-2">
-                                                {[
-                                                    { value: 'easy', label: 'Easy', desc: '< 5 min', color: 'from-green-500 to-emerald-500' },
-                                                    { value: 'medium', label: 'Medium', desc: '5-15 min', color: 'from-yellow-500 to-orange-500' },
-                                                    { value: 'hard', label: 'Hard', desc: '15-30 min', color: 'from-orange-500 to-red-500' },
-                                                    { value: 'very_hard', label: 'Very Hard', desc: '> 30 min', color: 'from-red-500 to-pink-500' }
-                                                ].map(({ value, label, desc, color }) => (
-                                                    <button
-                                                        key={value}
-                                                        onClick={() => setAnnotation({ ...annotation, translation_effort: value })}
-                                                        className={`p-2 rounded-lg border-2 transition-all text-left ${
-                                                            annotation.translation_effort === value
-                                                                ? `bg-gradient-to-r ${color} text-white border-transparent font-bold`
-                                                                : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 hover:border-primary-500'
-                                                        }`}
-                                                    >
-                                                        <div className="text-xs font-bold">{label}</div>
-                                                        <div className="text-[10px] opacity-75">{desc}</div>
-                                                    </button>
-                                                ))}
+                                        {annotationSettings.translation_effort && (
+                                            <div className="space-y-3">
+                                                <label className="text-xs font-bold text-slate-500 uppercase block">⏱️ Translation Effort</label>
+                                                <div className="grid grid-cols-2 gap-2">
+                                                    {[
+                                                        { value: 'easy', label: 'Easy', desc: '< 5 min', color: 'from-green-500 to-emerald-500' },
+                                                        { value: 'medium', label: 'Medium', desc: '5-15 min', color: 'from-yellow-500 to-orange-500' },
+                                                        { value: 'hard', label: 'Hard', desc: '15-30 min', color: 'from-orange-500 to-red-500' },
+                                                        { value: 'very_hard', label: 'Very Hard', desc: '> 30 min', color: 'from-red-500 to-pink-500' }
+                                                    ].map(({ value, label, desc, color }) => (
+                                                        <button
+                                                            key={value}
+                                                            onClick={() => setAnnotation({ ...annotation, translation_effort: value })}
+                                                            className={`p-2 rounded-lg border-2 transition-all text-left ${
+                                                                annotation.translation_effort === value
+                                                                    ? `bg-gradient-to-r ${color} text-white border-transparent font-bold`
+                                                                    : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 hover:border-primary-500'
+                                                            }`}
+                                                        >
+                                                            <div className="text-xs font-bold">{label}</div>
+                                                            <div className="text-[10px] opacity-75">{desc}</div>
+                                                        </button>
+                                                    ))}
+                                                </div>
                                             </div>
-                                        </div>
+                                        )}
 
-                                        {/* NEW FEATURE 2: Post-Editing Effort (only show if AI translation exists) */}
-                                        {segments[activeSegmentIndex]?.ai_translation && (
+                                        {/* NEW FEATURE 2: Post-Editing Effort (only show if AI translation exists AND feature enabled) */}
+                                        {annotationSettings.post_editing_effort && segments[activeSegmentIndex]?.ai_translation && (
                                             <div className="space-y-3">
                                                 <label className="text-xs font-bold text-slate-500 uppercase block">🤖 Post-Editing Effort</label>
                                                 <div className="grid grid-cols-2 gap-2">
@@ -1805,8 +1829,8 @@ ${segments.map(seg => `      <trans-unit id="${seg.segment_number}">
                                             </div>
                                         )}
 
-                                        {/* NEW FEATURE 3: AI Translation Quality (only show if AI translation exists) */}
-                                        {segments[activeSegmentIndex]?.ai_translation && (
+                                        {/* NEW FEATURE 3: AI Translation Quality (only show if AI translation exists AND feature enabled) */}
+                                        {annotationSettings.ai_quality_rating && segments[activeSegmentIndex]?.ai_translation && (
                                             <div className="space-y-3">
                                                 <label className="text-xs font-bold text-slate-500 uppercase block">🤖 AI Translation Quality</label>
                                                 <div className="flex gap-2 justify-center">
@@ -1857,8 +1881,9 @@ ${segments.map(seg => `      <trans-unit id="${seg.segment_number}">
                                         )}
 
                                         {/* NEW FEATURE 4: Confidence Score */}
-                                        <div className="space-y-3">
-                                            <label className="text-xs font-bold text-slate-500 uppercase block">💪 Your Confidence</label>
+                                        {annotationSettings.confidence_score && (
+                                            <div className="space-y-3">
+                                                <label className="text-xs font-bold text-slate-500 uppercase block">💪 Your Confidence</label>
                                             <div className="flex gap-2 justify-center">
                                                 {[1, 2, 3, 4, 5].map((rating) => (
                                                     <button
@@ -1905,10 +1930,12 @@ ${segments.map(seg => `      <trans-unit id="${seg.segment_number}">
                                                     </div>
                                                 </div>
                                             )}
-                                        </div>
+                                            </div>
+                                        )}
 
                                         {/* Quality Rating */}
-                                        <div className="space-y-3">
+                                        {annotationSettings.quality_rating && (
+                                            <div className="space-y-3">
                                             <label className="text-xs font-bold text-slate-500 uppercase block">Quality Rating</label>
                                             <div className="flex gap-2 justify-center">
                                                 {[1, 2, 3, 4, 5].map((rating) => (
@@ -1931,10 +1958,12 @@ ${segments.map(seg => `      <trans-unit id="${seg.segment_number}">
                                                 <span>Poor</span>
                                                 <span>Excellent</span>
                                             </div>
-                                        </div>
+                                            </div>
+                                        )}
 
                                         {/* Notes */}
-                                        <div className="space-y-3">
+                                        {annotationSettings.notes && (
+                                            <div className="space-y-3">
                                             <label className="text-xs font-bold text-slate-500 uppercase block">Notes</label>
                                             <textarea
                                                 value={annotation.notes}
@@ -1943,7 +1972,8 @@ ${segments.map(seg => `      <trans-unit id="${seg.segment_number}">
                                                 className="w-full bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 rounded-lg p-3 text-sm focus:ring-1 focus:ring-primary-500 resize-none"
                                                 rows="3"
                                             />
-                                        </div>
+                                            </div>
+                                        )}
 
                                         {/* Save Button */}
                                         <button

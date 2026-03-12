@@ -5,10 +5,220 @@ import './DashboardTheme.css';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../context/AuthContext';
 
+// Component for managing annotation settings per project
+const ProjectAnnotationSettings = ({ project, onUpdate }) => {
+    const [isExpanded, setIsExpanded] = useState(false);
+    const [settings, setSettings] = useState(project.annotation_settings || {
+        error_types: true,
+        error_severity: false,
+        domain_classification: true,
+        quality_rating: true,
+        translation_effort: false,
+        post_editing_effort: false,
+        ai_quality_rating: false,
+        confidence_score: false,
+        notes: true
+    });
+    const [saving, setSaving] = useState(false);
+
+    const annotationFeatures = [
+        { key: 'error_types', label: 'Error Types', desc: 'Fluency, Grammar, Terminology, Style, Accuracy', default: true },
+        { key: 'error_severity', label: 'Error Severity', desc: 'Minor, Major, Critical levels for each error', default: false },
+        { key: 'domain_classification', label: 'Domain Classification', desc: 'Domain and subdomain selection', default: true },
+        { key: 'quality_rating', label: 'Quality Rating', desc: '1-5 star overall quality rating', default: true },
+        { key: 'translation_effort', label: 'Translation Effort', desc: 'Easy, Medium, Hard, Very Hard tracking', default: false },
+        { key: 'post_editing_effort', label: 'Post-Editing Effort', desc: 'AI translation editing effort tracking', default: false },
+        { key: 'ai_quality_rating', label: 'AI Quality Rating', desc: '1-5 star AI translation quality + helpfulness', default: false },
+        { key: 'confidence_score', label: 'Confidence Score', desc: 'Translator confidence + uncertainty areas', default: false },
+        { key: 'notes', label: 'Notes Field', desc: 'Free text notes and comments', default: true }
+    ];
+
+    const handleToggle = (key) => {
+        setSettings({ ...settings, [key]: !settings[key] });
+    };
+
+    const handleSave = async () => {
+        setSaving(true);
+        try {
+            const { error } = await supabase
+                .from('projects')
+                .update({ annotation_settings: settings })
+                .eq('id', project.id);
+
+            if (error) {
+                console.error('Error saving annotation settings:', error);
+                alert('Failed to save settings');
+            } else {
+                alert('✓ Annotation settings saved successfully!');
+                if (onUpdate) onUpdate();
+            }
+        } catch (err) {
+            console.error('Save error:', err);
+            alert('Error saving settings');
+        } finally {
+            setSaving(false);
+        }
+    };
+
+    const handleResetToDefaults = () => {
+        const defaults = {
+            error_types: true,
+            error_severity: false,
+            domain_classification: true,
+            quality_rating: true,
+            translation_effort: false,
+            post_editing_effort: false,
+            ai_quality_rating: false,
+            confidence_score: false,
+            notes: true
+        };
+        setSettings(defaults);
+    };
+
+    const enabledCount = Object.values(settings).filter(v => v).length;
+
+    return (
+        <div style={{
+            background: 'rgba(255,255,255,0.02)',
+            border: '1px solid rgba(255,255,255,0.1)',
+            borderRadius: '12px',
+            overflow: 'hidden'
+        }}>
+            {/* Project Header */}
+            <div 
+                onClick={() => setIsExpanded(!isExpanded)}
+                style={{
+                    padding: '1rem 1.5rem',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    background: isExpanded ? 'rgba(102, 126, 234, 0.1)' : 'transparent',
+                    transition: 'all 0.2s'
+                }}
+            >
+                <div>
+                    <h4 style={{ margin: 0, fontSize: '1rem', fontWeight: '600' }}>
+                        {project.name}
+                    </h4>
+                    <p style={{ margin: '0.25rem 0 0 0', fontSize: '0.8rem', color: '#666' }}>
+                        {project.source_language} → {project.target_language} • {enabledCount}/9 features enabled
+                    </p>
+                </div>
+                <div style={{ fontSize: '1.5rem', transition: 'transform 0.2s', transform: isExpanded ? 'rotate(180deg)' : 'rotate(0deg)' }}>
+                    ▼
+                </div>
+            </div>
+
+            {/* Settings Panel */}
+            {isExpanded && (
+                <div style={{ padding: '1.5rem', borderTop: '1px solid rgba(255,255,255,0.1)' }}>
+                    {/* Feature Toggles */}
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '1rem', marginBottom: '1.5rem' }}>
+                        {annotationFeatures.map(({ key, label, desc, default: isDefault }) => (
+                            <div 
+                                key={key}
+                                style={{
+                                    padding: '1rem',
+                                    background: settings[key] ? 'rgba(16, 185, 129, 0.1)' : 'rgba(255,255,255,0.02)',
+                                    border: `2px solid ${settings[key] ? 'rgba(16, 185, 129, 0.5)' : 'rgba(255,255,255,0.1)'}`,
+                                    borderRadius: '8px',
+                                    transition: 'all 0.2s'
+                                }}
+                            >
+                                <label style={{ display: 'flex', alignItems: 'flex-start', gap: '0.75rem', cursor: 'pointer' }}>
+                                    <input
+                                        type="checkbox"
+                                        checked={settings[key]}
+                                        onChange={() => handleToggle(key)}
+                                        style={{
+                                            width: '18px',
+                                            height: '18px',
+                                            marginTop: '2px',
+                                            cursor: 'pointer'
+                                        }}
+                                    />
+                                    <div style={{ flex: 1 }}>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                            <span style={{ fontSize: '0.9rem', fontWeight: '600' }}>{label}</span>
+                                            {isDefault && (
+                                                <span style={{
+                                                    fontSize: '0.65rem',
+                                                    padding: '2px 6px',
+                                                    background: 'rgba(59, 130, 246, 0.2)',
+                                                    color: '#60a5fa',
+                                                    borderRadius: '4px',
+                                                    fontWeight: '600'
+                                                }}>
+                                                    DEFAULT
+                                                </span>
+                                            )}
+                                        </div>
+                                        <p style={{ margin: '0.25rem 0 0 0', fontSize: '0.75rem', color: '#888', lineHeight: '1.4' }}>
+                                            {desc}
+                                        </p>
+                                    </div>
+                                </label>
+                            </div>
+                        ))}
+                    </div>
+
+                    {/* Action Buttons */}
+                    <div style={{ display: 'flex', gap: '1rem', justifyContent: 'flex-end' }}>
+                        <button
+                            onClick={handleResetToDefaults}
+                            style={{
+                                padding: '10px 20px',
+                                background: 'rgba(255,255,255,0.05)',
+                                border: '1px solid rgba(255,255,255,0.2)',
+                                borderRadius: '8px',
+                                color: '#fff',
+                                cursor: 'pointer',
+                                fontSize: '0.9rem',
+                                fontWeight: '600'
+                            }}
+                        >
+                            Reset to Defaults
+                        </button>
+                        <button
+                            onClick={handleSave}
+                            disabled={saving}
+                            style={{
+                                padding: '10px 24px',
+                                background: saving ? '#666' : 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+                                border: 'none',
+                                borderRadius: '8px',
+                                color: '#fff',
+                                cursor: saving ? 'not-allowed' : 'pointer',
+                                fontSize: '0.9rem',
+                                fontWeight: '600',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '0.5rem'
+                            }}
+                        >
+                            {saving ? (
+                                <>
+                                    <span style={{ animation: 'spin 1s linear infinite' }}>⏳</span>
+                                    Saving...
+                                </>
+                            ) : (
+                                <>
+                                    💾 Save Settings
+                                </>
+                            )}
+                        </button>
+                    </div>
+                </div>
+            )}
+        </div>
+    );
+};
+
 const AdminEnhanced = () => {
     const { user } = useAuth();
     const navigate = useNavigate();
-    const [activeTab, setActiveTab] = useState('overview'); // overview, users, jobs, analytics, reports, datasets
+    const [activeTab, setActiveTab] = useState('overview'); // overview, users, jobs, analytics, reports, datasets, annotation-settings
     const [translators, setTranslators] = useState([]);
     const [projects, setProjects] = useState([]);
     const [datasets, setDatasets] = useState([]);
@@ -321,7 +531,7 @@ const AdminEnhanced = () => {
                 borderBottom: '2px solid rgba(255,255,255,0.1)',
                 paddingBottom: '1rem'
             }}>
-                {['overview', 'users', 'jobs', 'datasets', 'analytics', 'reports'].map(tab => (
+                {['overview', 'users', 'jobs', 'datasets', 'analytics', 'reports', 'annotation-settings'].map(tab => (
                     <button
                         key={tab}
                         onClick={() => setActiveTab(tab)}
@@ -337,7 +547,7 @@ const AdminEnhanced = () => {
                             textTransform: 'capitalize'
                         }}
                     >
-                        {tab === 'datasets' ? '🧬 Datasets' : tab}
+                        {tab === 'datasets' ? '🧬 Datasets' : tab === 'annotation-settings' ? '⚙️ Annotation' : tab}
                     </button>
                 ))}
             </div>
@@ -883,6 +1093,50 @@ const AdminEnhanced = () => {
                         </div>
                     </div>
                 </>
+            )}
+
+            {/* Annotation Settings Tab */}
+            {activeTab === 'annotation-settings' && (
+                <div className="dashboard-card">
+                    <div className="card-header">
+                        <h3>⚙️ Annotation Settings per Project</h3>
+                        <p style={{ fontSize: '0.9rem', color: '#666', marginTop: '0.5rem' }}>
+                            Control which annotation features are visible to translators/reviewers on each project
+                        </p>
+                    </div>
+                    <div style={{ padding: '1.5rem' }}>
+                        {/* Info Box */}
+                        <div style={{
+                            padding: '1rem',
+                            background: 'rgba(59, 130, 246, 0.1)',
+                            border: '1px solid rgba(59, 130, 246, 0.3)',
+                            borderRadius: '8px',
+                            marginBottom: '1.5rem'
+                        }}>
+                            <p style={{ fontSize: '0.9rem', color: '#60a5fa', margin: 0 }}>
+                                💡 <strong>Default features</strong> (enabled by default): Error Types, Domain Classification, Quality Rating, Notes<br/>
+                                <strong>Advanced features</strong> (disabled by default): Error Severity, Translation Effort, Post-Editing Effort, AI Quality Rating, Confidence Score
+                            </p>
+                        </div>
+
+                        {/* Projects List */}
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                            {projects.length === 0 ? (
+                                <p style={{ textAlign: 'center', color: '#666', padding: '2rem' }}>
+                                    No projects found
+                                </p>
+                            ) : (
+                                projects.map(project => (
+                                    <ProjectAnnotationSettings 
+                                        key={project.id} 
+                                        project={project}
+                                        onUpdate={fetchAdminData}
+                                    />
+                                ))
+                            )}
+                        </div>
+                    </div>
+                </div>
             )}
 
             {/* Analytics Tab */}
