@@ -266,7 +266,7 @@ const AdminEnhanced = () => {
             setTranslators(profiles || []);
 
             // Fetch all projects with relations
-            const { data: projectsData } = await supabase
+            const { data: projectsData, error: projectsError } = await supabase
                 .from('projects')
                 .select(`
                     *,
@@ -275,6 +275,11 @@ const AdminEnhanced = () => {
                 `)
                 .order('created_at', { ascending: false });
 
+            if (projectsError) {
+                console.error('Error fetching projects:', projectsError);
+            }
+
+            console.log('Fetched projects:', projectsData?.length || 0, 'projects');
             setProjects(projectsData || []);
 
             // Fetch activity log
@@ -1122,9 +1127,35 @@ const AdminEnhanced = () => {
                         {/* Projects List */}
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                             {projects.length === 0 ? (
-                                <p style={{ textAlign: 'center', color: '#666', padding: '2rem' }}>
-                                    No projects found
-                                </p>
+                                <div style={{ 
+                                    textAlign: 'center', 
+                                    color: '#666', 
+                                    padding: '3rem',
+                                    background: 'rgba(255,255,255,0.02)',
+                                    border: '1px solid rgba(255,255,255,0.1)',
+                                    borderRadius: '12px'
+                                }}>
+                                    <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>📋</div>
+                                    <h3 style={{ margin: '0 0 0.5rem 0', color: '#fff' }}>No Projects Found</h3>
+                                    <p style={{ margin: '0 0 1.5rem 0', fontSize: '0.9rem' }}>
+                                        Create your first project to configure annotation settings
+                                    </p>
+                                    <button
+                                        onClick={() => navigate('/dashboard/admin/create-job')}
+                                        style={{
+                                            padding: '12px 24px',
+                                            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                                            color: '#fff',
+                                            border: 'none',
+                                            borderRadius: '8px',
+                                            cursor: 'pointer',
+                                            fontSize: '0.9rem',
+                                            fontWeight: '600'
+                                        }}
+                                    >
+                                        + Create First Project
+                                    </button>
+                                </div>
                             ) : (
                                 projects.map(project => (
                                     <ProjectAnnotationSettings 
