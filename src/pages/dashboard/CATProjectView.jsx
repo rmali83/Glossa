@@ -7,6 +7,8 @@ import SimpleUploadModal from '../../components/SimpleUploadModal';
 import simpleUploadManager from '../../services/simpleUploadManager';
 import { getTextDirection, getTextAlign, isRTL } from '../../data/languageDirections';
 import { translationDomains, getDomainNames, getSubdomains, getDomainIcon } from '../../data/translationDomains';
+import { runQAChecks, getQASummary, autoFixIssues } from '../../services/qaEngine';
+import QAPanel from '../../components/QAPanel';
 import './CATProjectWorkspace.css';
 
 /**
@@ -104,6 +106,10 @@ const CATProjectView = () => {
     const [savingAnnotation, setSavingAnnotation] = useState(false);
     const [selectedDomain, setSelectedDomain] = useState('');
     const [selectedSubdomain, setSelectedSubdomain] = useState('');
+
+    // QA state
+    const [qaIssues, setQaIssues] = useState([]);
+    const [isRunningQA, setIsRunningQA] = useState(false);
 
     const userRole = user?.user_metadata?.user_type || 'Translator';
     const isReviewer = userRole === 'Reviewer';
@@ -273,6 +279,50 @@ const CATProjectView = () => {
             setSavingAnnotation(false);
         }
     };
+    // QA Functions
+    const runQA = () => {
+        if (!segments[activeSegmentIndex]) return;
+
+        setIsRunningQA(true);
+        try {
+            const issues = runQAChecks(
+                segments[activeSegmentIndex].source,
+                segments[activeSegmentIndex].target,
+                {
+                    maxLength: 1000,
+                    warnThreshold: 0.8
+                }
+            );
+            setQaIssues(issues);
+            console.log('QA check complete:', issues.length, 'issues found');
+        } catch (err) {
+            console.error('QA check error:', err);
+        } finally {
+            setIsRunningQA(false);
+        }
+    };
+
+    const handleAutoFix = () => {
+        if (!segments[activeSegmentIndex] || qaIssues.length === 0) return;
+
+        const fixed = autoFixIssues(segments[activeSegmentIndex].target, qaIssues);
+        handleSegmentChange(fixed);
+
+        // Re-run QA after fix
+        setTimeout(() => runQA(), 100);
+    };
+
+    // Run QA automatically when target changes
+    useEffect(() => {
+        if (segments[activeSegmentIndex]?.target) {
+            const timer = setTimeout(() => {
+                runQA();
+            }, 1000); // Debounce 1 second
+
+            return () => clearTimeout(timer);
+        }
+    }, [segments[activeSegmentIndex]?.target]);
+
 
     const handleGenerateAISuggestions = async () => {
         if (!project || !segments[activeSegmentIndex]) return;
