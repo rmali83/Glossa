@@ -1156,26 +1156,37 @@ ${segments.map(seg => `      <trans-unit id="${seg.segment_number}">
                                         CHARS: {activeSegment?.target.length || 0} | WORDS: {activeSegment?.target.split(' ').filter(w => w).length || 0}
                                     </span>
                                 </div>
-                                <div className="flex-1 relative">
-                                    <textarea 
-                                        value={activeSegment?.target || ''}
-                                        onChange={(e) => handleSegmentChange(e.target.value)}
-                                        className="w-full h-full min-h-[200px] p-6 rounded-2xl bg-white dark:bg-slate-900 border-2 border-primary-500/30 focus:border-primary-500 transition-all outline-none text-lg leading-relaxed shadow-xl resize-none font-medium" 
-                                        placeholder="Start translating..."
-                                        dir={getTextDirection(project?.target_language)}
-                                        style={{ textAlign: getTextAlign(project?.target_language) }}
-                                    />
+                                <div className="flex-1 flex flex-col space-y-3">
+                                    <div className="relative">
+                                        <textarea 
+                                            value={activeSegment?.target || ''}
+                                            onChange={(e) => handleSegmentChange(e.target.value)}
+                                            className="w-full h-full min-h-[200px] p-6 rounded-2xl bg-white dark:bg-slate-900 border-2 border-primary-500/30 focus:border-primary-500 transition-all outline-none text-lg leading-relaxed shadow-xl resize-none font-medium" 
+                                            placeholder="Start translating..."
+                                            dir={getTextDirection(project?.target_language)}
+                                            style={{ textAlign: getTextAlign(project?.target_language) }}
+                                        />
+                                        
+                                        {activeSegment?.status === 'confirmed' && (
+                                            <div className="absolute bottom-4 right-4 flex gap-2">
+                                                <div className="px-3 py-1 bg-accent/10 text-accent text-xs rounded-full font-bold flex items-center gap-1">
+                                                    <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7"></path>
+                                                    </svg>
+                                                    Confirmed
+                                                </div>
+                                            </div>
+                                        )}
+                                    </div>
                                     
-                                    {/* QA Warning Badges */}
+                                    {/* QA Warning Badges - Below textarea */}
                                     {qaIssues.length > 0 && (
                                         <div style={{
-                                            position: 'absolute',
-                                            top: '0.5rem',
-                                            right: '0.5rem',
+                                            marginTop: '0.75rem',
                                             display: 'flex',
                                             gap: '0.5rem',
-                                            flexDirection: 'column',
-                                            alignItems: 'flex-end'
+                                            flexWrap: 'wrap',
+                                            alignItems: 'center'
                                         }}>
                                             {qaIssues.slice(0, 3).map((issue, index) => (
                                                 <div
@@ -1188,7 +1199,7 @@ ${segments.map(seg => `      <trans-unit id="${seg.segment_number}">
                                                     title={`${issue.message}\n${issue.suggestion}`}
                                                 >
                                                     <div style={{
-                                                        padding: '0.5rem',
+                                                        padding: '0.5rem 0.75rem',
                                                         background: getSeverityColor(issue.severity) + '20',
                                                         border: `2px solid ${getSeverityColor(issue.severity)}`,
                                                         borderRadius: '8px',
@@ -1207,27 +1218,35 @@ ${segments.map(seg => `      <trans-unit id="${seg.segment_number}">
                                             ))}
                                             {qaIssues.length > 3 && (
                                                 <div style={{
-                                                    padding: '0.25rem 0.5rem',
+                                                    padding: '0.5rem 0.75rem',
                                                     background: 'rgba(100, 116, 139, 0.2)',
                                                     border: '1px solid #64748b',
-                                                    borderRadius: '6px',
-                                                    fontSize: '0.7rem',
+                                                    borderRadius: '8px',
+                                                    fontSize: '0.75rem',
+                                                    fontWeight: '600',
                                                     color: '#94a3b8'
                                                 }}>
-                                                    +{qaIssues.length - 3} more
+                                                    +{qaIssues.length - 3} more issues
                                                 </div>
                                             )}
-                                        </div>
-                                    )}
-                                    
-                                    {activeSegment?.status === 'confirmed' && (
-                                        <div className="absolute bottom-4 right-4 flex gap-2">
-                                            <div className="px-3 py-1 bg-accent/10 text-accent text-xs rounded-full font-bold flex items-center gap-1">
-                                                <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7"></path>
-                                                </svg>
-                                                Confirmed
-                                            </div>
+                                            <button
+                                                onClick={() => setActiveTab('qa')}
+                                                style={{
+                                                    padding: '0.5rem 0.75rem',
+                                                    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                                                    border: 'none',
+                                                    borderRadius: '8px',
+                                                    fontSize: '0.75rem',
+                                                    fontWeight: '600',
+                                                    color: '#fff',
+                                                    cursor: 'pointer',
+                                                    display: 'flex',
+                                                    alignItems: 'center',
+                                                    gap: '0.25rem'
+                                                }}
+                                            >
+                                                View All
+                                            </button>
                                         </div>
                                     )}
                                 </div>
