@@ -6,6 +6,7 @@ import { translateText, generateAISuggestions, checkTranslationQuality } from '.
 import SimpleUploadModal from '../../components/SimpleUploadModal';
 import simpleUploadManager from '../../services/simpleUploadManager';
 import { getTextDirection, getTextAlign, isRTL } from '../../data/languageDirections';
+import { translationDomains, getDomainNames, getSubdomains, getDomainIcon } from '../../data/translationDomains';
 import './CATProjectWorkspace.css';
 
 /**
@@ -101,6 +102,8 @@ const CATProjectView = () => {
         notes: ''
     });
     const [savingAnnotation, setSavingAnnotation] = useState(false);
+    const [selectedDomain, setSelectedDomain] = useState('');
+    const [selectedSubdomain, setSelectedSubdomain] = useState('');
 
     const userRole = user?.user_metadata?.user_type || 'Translator';
     const isReviewer = userRole === 'Reviewer';
@@ -187,6 +190,11 @@ const CATProjectView = () => {
                 .single();
 
             if (!error && data) {
+                // Parse domain string "Domain: Subdomain"
+                const domainParts = data.domain ? data.domain.split(': ') : ['', ''];
+                const domain = domainParts[0] || '';
+                const subdomain = domainParts[1] || '';
+                
                 setAnnotation({
                     error_fluency: data.error_fluency || false,
                     error_grammar: data.error_grammar || false,
@@ -197,6 +205,8 @@ const CATProjectView = () => {
                     quality_rating: data.quality_rating || null,
                     notes: data.notes || ''
                 });
+                setSelectedDomain(domain);
+                setSelectedSubdomain(subdomain);
             } else {
                 // Reset annotation for new segment
                 setAnnotation({
@@ -209,6 +219,8 @@ const CATProjectView = () => {
                     quality_rating: null,
                     notes: ''
                 });
+                setSelectedDomain('');
+                setSelectedSubdomain('');
             }
         } catch (err) {
             console.error('Error fetching annotation:', err);
@@ -1276,36 +1288,56 @@ ${segments.map(seg => `      <trans-unit id="${seg.segment_number}">
                                     {/* Domain Classification */}
                                     <div className="space-y-3">
                                         <label className="text-xs font-bold text-slate-500 uppercase block">Domain / Specialization</label>
+                                        
+                                        {/* Domain Dropdown */}
                                         <select
-                                            value={annotation.domain}
-                                            onChange={(e) => setAnnotation({ ...annotation, domain: e.target.value })}
+                                            value={selectedDomain}
+                                            onChange={(e) => {
+                                                const domain = e.target.value;
+                                                setSelectedDomain(domain);
+                                                setSelectedSubdomain(''); // Reset subdomain when domain changes
+                                                setAnnotation({ ...annotation, domain: '' }); // Clear full domain until subdomain is selected
+                                            }}
                                             className="w-full bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 rounded-lg p-2 text-sm focus:ring-1 focus:ring-primary-500"
                                         >
                                             <option value="">Select Domain</option>
-                                            <option value="Legal">⚖️ Legal Translation</option>
-                                            <option value="Medical">🏥 Medical & Healthcare</option>
-                                            <option value="Technical">⚙️ Technical Translation</option>
-                                            <option value="IT & Software">💻 IT & Software Localization</option>
-                                            <option value="Marketing">🌍 Marketing & Advertising</option>
-                                            <option value="Financial">💰 Financial Translation</option>
-                                            <option value="Business">🏢 Business & Corporate</option>
-                                            <option value="Gaming">🎮 Gaming Localization</option>
-                                            <option value="Audiovisual">🎬 Audiovisual Translation</option>
-                                            <option value="E-commerce">🛒 E-commerce Translation</option>
-                                            <option value="Scientific">🔬 Scientific Translation</option>
-                                            <option value="Educational">🎓 Educational / Academic</option>
-                                            <option value="Government">🏛️ Government & Public Sector</option>
-                                            <option value="Travel">✈️ Travel & Tourism</option>
-                                            <option value="Media">📰 Media & Journalism</option>
-                                            <option value="Religious">⛪ Religious Translation</option>
-                                            <option value="Literary">📚 Literary Translation</option>
-                                            <option value="Automotive">🚗 Automotive Translation</option>
-                                            <option value="Manufacturing">🏭 Manufacturing & Industrial</option>
-                                            <option value="Energy">🌱 Energy & Environment</option>
-                                            <option value="Life Sciences">🧬 Life Sciences</option>
-                                            <option value="Telecom">📡 Telecommunications</option>
-                                            <option value="General">📄 General</option>
+                                            {getDomainNames().map((domain) => (
+                                                <option key={domain} value={domain}>
+                                                    {getDomainIcon(domain)} {domain}
+                                                </option>
+                                            ))}
                                         </select>
+
+                                        {/* Subdomain Dropdown - Only show when domain is selected */}
+                                        {selectedDomain && (
+                                            <select
+                                                value={selectedSubdomain}
+                                                onChange={(e) => {
+                                                    const subdomain = e.target.value;
+                                                    setSelectedSubdomain(subdomain);
+                                                    // Store as "Domain: Subdomain" format
+                                                    const fullDomain = subdomain ? `${selectedDomain}: ${subdomain}` : '';
+                                                    setAnnotation({ ...annotation, domain: fullDomain });
+                                                }}
+                                                className="w-full bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 rounded-lg p-2 text-sm focus:ring-1 focus:ring-primary-500"
+                                            >
+                                                <option value="">Select Subdomain</option>
+                                                {getSubdomains(selectedDomain).map((subdomain) => (
+                                                    <option key={subdomain} value={subdomain}>
+                                                        {subdomain}
+                                                    </option>
+                                                ))}
+                                            </select>
+                                        )}
+
+                                        {/* Display selected domain/subdomain */}
+                                        {annotation.domain && (
+                                            <div className="p-2 bg-gradient-to-r from-blue-500/10 to-purple-500/10 border border-blue-500/20 rounded-lg">
+                                                <p className="text-xs text-blue-600 dark:text-blue-400 font-medium">
+                                                    {getDomainIcon(selectedDomain)} {annotation.domain}
+                                                </p>
+                                            </div>
+                                        )}
                                     </div>
 
                                     {/* Quality Rating */}
