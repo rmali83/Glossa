@@ -11,6 +11,175 @@ import { runQAChecks, getQASummary, autoFixIssues, getSeverityIcon, getSeverityC
 import QAPanel from '../../components/QAPanel';
 import './CATProjectWorkspace.css';
 
+// MQM (Multidimensional Quality Metrics) Evaluation Component
+const MQMEvaluationPanel = ({ annotation, setAnnotation }) => {
+    const mqmCategories = [
+        {
+            name: 'Accuracy',
+            subcategories: [
+                'Addition', 'Omission', 'Mistranslation', 'Untranslated', 'Do not translate'
+            ],
+            color: 'from-red-500 to-red-600'
+        },
+        {
+            name: 'Fluency',
+            subcategories: [
+                'Inconsistency', 'Grammar', 'Register', 'Spelling', 'Typography', 'Locale convention'
+            ],
+            color: 'from-blue-500 to-blue-600'
+        },
+        {
+            name: 'Terminology',
+            subcategories: [
+                'Inconsistent use', 'Wrong term'
+            ],
+            color: 'from-purple-500 to-purple-600'
+        },
+        {
+            name: 'Style',
+            subcategories: [
+                'Awkward', 'Unnatural'
+            ],
+            color: 'from-green-500 to-green-600'
+        },
+        {
+            name: 'Locale Convention',
+            subcategories: [
+                'Address format', 'Date format', 'Currency', 'Telephone format', 'Time format', 'Name format'
+            ],
+            color: 'from-orange-500 to-orange-600'
+        },
+        {
+            name: 'Other',
+            subcategories: [
+                'Non-translation', 'Client style', 'Verity'
+            ],
+            color: 'from-gray-500 to-gray-600'
+        }
+    ];
+
+    const severityLevels = [
+        { value: 'minor', label: 'Minor', penalty: 1, color: 'bg-yellow-500' },
+        { value: 'major', label: 'Major', penalty: 5, color: 'bg-orange-500' },
+        { value: 'critical', label: 'Critical', penalty: 10, color: 'bg-red-500' }
+    ];
+
+    const addMQMError = (category, subcategory, severity) => {
+        const newError = {
+            id: Date.now(),
+            category,
+            subcategory,
+            severity,
+            penalty: severityLevels.find(s => s.value === severity)?.penalty || 1
+        };
+        
+        const updatedErrors = [...(annotation.mqm_errors || []), newError];
+        const totalPenalty = updatedErrors.reduce((sum, error) => sum + error.penalty, 0);
+        
+        setAnnotation({
+            ...annotation,
+            mqm_errors: updatedErrors,
+            mqm_score: Math.max(0, 100 - totalPenalty)
+        });
+    };
+
+    const removeMQMError = (errorId) => {
+        const updatedErrors = (annotation.mqm_errors || []).filter(error => error.id !== errorId);
+        const totalPenalty = updatedErrors.reduce((sum, error) => sum + error.penalty, 0);
+        
+        setAnnotation({
+            ...annotation,
+            mqm_errors: updatedErrors,
+            mqm_score: Math.max(0, 100 - totalPenalty)
+        });
+    };
+
+    const mqmErrors = annotation.mqm_errors || [];
+    const mqmScore = annotation.mqm_score || 100;
+
+    return (
+        <div className="space-y-4">
+            <div className="flex items-center justify-between">
+                <label className="text-xs font-bold text-slate-500 uppercase block">📊 MQM Evaluation</label>
+                <div className="flex items-center gap-2">
+                    <span className="text-xs text-slate-500">Score:</span>
+                    <span className={`px-2 py-1 rounded text-xs font-bold ${
+                        mqmScore >= 85 ? 'bg-green-500 text-white' :
+                        mqmScore >= 70 ? 'bg-yellow-500 text-white' :
+                        'bg-red-500 text-white'
+                    }`}>
+                        {mqmScore}/100
+                    </span>
+                </div>
+            </div>
+
+            {/* Current Errors */}
+            {mqmErrors.length > 0 && (
+                <div className="space-y-2">
+                    <h5 className="text-xs font-semibold text-slate-600 dark:text-slate-400">Current Issues:</h5>
+                    {mqmErrors.map((error) => (
+                        <div key={error.id} className="flex items-center justify-between p-2 bg-slate-50 dark:bg-slate-800 rounded-lg">
+                            <div className="flex items-center gap-2">
+                                <span className={`w-2 h-2 rounded-full ${
+                                    severityLevels.find(s => s.value === error.severity)?.color || 'bg-gray-500'
+                                }`}></span>
+                                <span className="text-xs font-medium">{error.category}</span>
+                                <span className="text-xs text-slate-500">→</span>
+                                <span className="text-xs">{error.subcategory}</span>
+                                <span className="text-xs text-slate-500">({error.severity})</span>
+                                <span className="text-xs font-bold text-red-600">-{error.penalty}</span>
+                            </div>
+                            <button
+                                onClick={() => removeMQMError(error.id)}
+                                className="text-red-500 hover:text-red-700 text-xs"
+                            >
+                                ✕
+                            </button>
+                        </div>
+                    ))}
+                </div>
+            )}
+
+            {/* Add New Error */}
+            <div className="space-y-3">
+                <h5 className="text-xs font-semibold text-slate-600 dark:text-slate-400">Add Issue:</h5>
+                {mqmCategories.map((category) => (
+                    <div key={category.name} className="space-y-2">
+                        <h6 className="text-xs font-medium text-slate-700 dark:text-slate-300">{category.name}</h6>
+                        <div className="grid grid-cols-1 gap-1">
+                            {category.subcategories.map((subcategory) => (
+                                <div key={subcategory} className="flex items-center gap-2">
+                                    <span className="text-xs flex-1">{subcategory}</span>
+                                    <div className="flex gap-1">
+                                        {severityLevels.map((severity) => (
+                                            <button
+                                                key={severity.value}
+                                                onClick={() => addMQMError(category.name, subcategory, severity.value)}
+                                                className={`px-2 py-1 text-[10px] rounded ${severity.color} text-white hover:opacity-80 transition-opacity`}
+                                                title={`${severity.label} (-${severity.penalty} points)`}
+                                            >
+                                                {severity.label}
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                ))}
+            </div>
+
+            {/* MQM Info */}
+            <div className="p-3 bg-blue-500/10 border border-blue-500/20 rounded-lg">
+                <p className="text-xs text-blue-600 dark:text-blue-400">
+                    💡 <strong>MQM Scoring:</strong> Minor (-1), Major (-5), Critical (-10). 
+                    Score ≥85 = Excellent, ≥70 = Good, &lt;70 = Needs Improvement
+                </p>
+            </div>
+        </div>
+    );
+};
+
 /**
  * Highlights placeholders and special codes in text that should not be translated
  * Supports: {0}, {name}, {{var}}, %s, %d, %1$s, <tags>, [0], $var, ${var}, etc.
@@ -102,7 +271,8 @@ const CATProjectView = () => {
         post_editing_effort: false,
         ai_quality_rating: false,
         confidence_score: false,
-        notes: true
+        notes: true,
+        mqm_evaluation: false
     });
 
     // Annotation state
@@ -127,6 +297,9 @@ const CATProjectView = () => {
         // Confidence score
         confidence_score: null,
         uncertain_about: [],
+        // MQM evaluation
+        mqm_errors: [],
+        mqm_score: null,
         // Existing fields
         domain: '',
         quality_rating: null,
@@ -1960,6 +2133,14 @@ ${segments.map(seg => `      <trans-unit id="${seg.segment_number}">
                                                 <span>Excellent</span>
                                             </div>
                                             </div>
+                                        )}
+
+                                        {/* MQM Evaluation */}
+                                        {annotationSettings.mqm_evaluation && (
+                                            <MQMEvaluationPanel 
+                                                annotation={annotation}
+                                                setAnnotation={setAnnotation}
+                                            />
                                         )}
 
                                         {/* Notes */}

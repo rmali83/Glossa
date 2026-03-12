@@ -16,7 +16,8 @@ const GlobalAnnotationSettings = ({ onUpdate }) => {
         post_editing_effort: false,
         ai_quality_rating: false,
         confidence_score: false,
-        notes: true
+        notes: true,
+        mqm_evaluation: false
     });
     const [saving, setSaving] = useState(false);
     const [loading, setLoading] = useState(true);
@@ -84,6 +85,13 @@ const GlobalAnnotationSettings = ({ onUpdate }) => {
             desc: 'Free text notes and comments textarea', 
             default: true,
             icon: '📝'
+        },
+        { 
+            key: 'mqm_evaluation', 
+            label: 'MQM Evaluation', 
+            desc: 'Multidimensional Quality Metrics with error categories, severity, and scoring', 
+            default: false,
+            icon: '📊'
         }
     ];
 
