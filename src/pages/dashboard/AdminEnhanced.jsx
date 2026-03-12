@@ -8,9 +8,17 @@ import { useAuth } from '../../context/AuthContext';
 const AdminEnhanced = () => {
     const { user } = useAuth();
     const navigate = useNavigate();
-    const [activeTab, setActiveTab] = useState('overview'); // overview, users, jobs, analytics, reports
+    const [activeTab, setActiveTab] = useState('overview'); // overview, users, jobs, analytics, reports, datasets
     const [translators, setTranslators] = useState([]);
     const [projects, setProjects] = useState([]);
+    const [datasets, setDatasets] = useState([]);
+    const [datasetStats, setDatasetStats] = useState({
+        total: 0,
+        byDomain: {},
+        byLanguage: {},
+        withErrors: 0,
+        avgQuality: 0
+    });
     const [stats, setStats] = useState({
         totalUsers: 0,
         activeTranslators: 0,
@@ -25,10 +33,16 @@ const AdminEnhanced = () => {
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
     const [filterStatus, setFilterStatus] = useState('all');
+    const [filterDomain, setFilterDomain] = useState('all');
+    const [filterLanguage, setFilterLanguage] = useState('all');
+    const [filterQuality, setFilterQuality] = useState('all');
 
     useEffect(() => {
         fetchAdminData();
-    }, []);
+        if (activeTab === 'datasets') {
+            fetchDatasets();
+        }
+    }, [activeTab]);
 
     const fetchAdminData = async () => {
         setLoading(true);
@@ -85,6 +99,60 @@ const AdminEnhanced = () => {
         }
     };
 
+    const fetchDatasets = async () => {
+        setLoading(true);
+        try {
+            const { data, error } = await supabase
+                .from('dataset_logs')
+                .select('*')
+                .order('created_at', { ascending: false });
+
+            if (error) {
+                console.error('Error fetching datasets:', error);
+                return;
+            }
+
+            setDatasets(data || []);
+
+            // Calculate dataset statistics
+            const total = data?.length || 0;
+            const withErrors = data?.filter(d => d.has_errors).length || 0;
+            
+            // Group by domain
+            const byDomain = {};
+            data?.forEach(d => {
+                if (d.domain) {
+                    byDomain[d.domain] = (byDomain[d.domain] || 0) + 1;
+                }
+            });
+
+            // Group by language pair
+            const byLanguage = {};
+            data?.forEach(d => {
+                const pair = `${d.source_language}-${d.target_language}`;
+                byLanguage[pair] = (byLanguage[pair] || 0) + 1;
+            });
+
+            // Calculate average quality
+            const qualityRatings = data?.filter(d => d.quality_rating).map(d => d.quality_rating) || [];
+            const avgQuality = qualityRatings.length > 0 
+                ? (qualityRatings.reduce((sum, r) => sum + r, 0) / qualityRatings.length).toFixed(2)
+                : 0;
+
+            setDatasetStats({
+                total,
+                byDomain,
+                byLanguage,
+                withErrors,
+                avgQuality
+            });
+        } catch (err) {
+            console.error('Dataset fetch error:', err);
+        } finally {
+            setLoading(false);
+        }
+    };
+
     const handleDeleteAllProjects = async () => {
         if (window.confirm('⚠️ WARNING: This will permanently delete ALL projects. Continue?')) {
             if (window.confirm('🚨 FINAL CONFIRMATION: Delete all projects?')) {
@@ -125,6 +193,12 @@ const AdminEnhanced = () => {
         } else if (type === 'projects') {
             data = projects;
             filename = 'projects_export.json';
+        } else if (type === 'datasets-json') {
+            data = datasets;
+            filename = `glossa_dataset_${new Date().toISOString().split('T')[0]}.json`;
+        } else if (type === 'datasets-csv') {
+            exportDatasetsCSV();
+            return;
         }
         
         const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
@@ -135,10 +209,67 @@ const AdminEnhanced = () => {
         a.click();
     };
 
+    const exportDatasetsCSV = () => {
+        if (datasets.length === 0) {
+            alert('No datasets to export');
+            return;
+        }
+
+        // CSV headers
+        const headers = [
+            'ID',
+            'Source Text',
+            'Source Language',
+            'Target Language',
+            'AI Translation',
+            'Human Translation',
+            'Domain',
+            'Quality Rating',
+            'Has Errors',
+            'Error Types',
+            'Edit Distance',
+            'Created At'
+        ];
+
+        // CSV rows
+        const rows = datasets.map(d => [
+            d.id,
+            `"${(d.source_text || '').replace(/"/g, '""')}"`,
+            d.source_language,
+            d.target_language,
+            `"${(d.ai_translation || '').replace(/"/g, '""')}"`,
+            `"${(d.human_translation || '').replace(/"/g, '""')}"`,
+            d.domain || '',
+            d.quality_rating || '',
+            d.has_errors ? 'Yes' : 'No',
+            `"${(d.error_types || []).join(', ')}"`,
+            d.edit_distance || 0,
+            new Date(d.created_at).toISOString()
+        ]);
+
+        const csvContent = [headers.join(','), ...rows.map(r => r.join(','))].join('\n');
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `glossa_dataset_${new Date().toISOString().split('T')[0]}.csv`;
+        a.click();
+    };
+
     const filteredProjects = projects.filter(p => {
         const matchesSearch = p.name.toLowerCase().includes(searchTerm.toLowerCase());
         const matchesFilter = filterStatus === 'all' || p.status === filterStatus;
         return matchesSearch && matchesFilter;
+    });
+
+    const filteredDatasets = datasets.filter(d => {
+        const matchesSearch = searchTerm === '' || 
+            d.source_text?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            d.human_translation?.toLowerCase().includes(searchTerm.toLowerCase());
+        const matchesDomain = filterDomain === 'all' || d.domain === filterDomain;
+        const matchesLanguage = filterLanguage === 'all' || `${d.source_language}-${d.target_language}` === filterLanguage;
+        const matchesQuality = filterQuality === 'all' || d.quality_rating === parseInt(filterQuality);
+        return matchesSearch && matchesDomain && matchesLanguage && matchesQuality;
     });
 
     if (loading) return <div className="dashboard-page loading-state">Loading Admin Dashboard...</div>;
@@ -190,7 +321,7 @@ const AdminEnhanced = () => {
                 borderBottom: '2px solid rgba(255,255,255,0.1)',
                 paddingBottom: '1rem'
             }}>
-                {['overview', 'users', 'jobs', 'analytics', 'reports'].map(tab => (
+                {['overview', 'users', 'jobs', 'datasets', 'analytics', 'reports'].map(tab => (
                     <button
                         key={tab}
                         onClick={() => setActiveTab(tab)}
@@ -206,7 +337,7 @@ const AdminEnhanced = () => {
                             textTransform: 'capitalize'
                         }}
                     >
-                        {tab}
+                        {tab === 'datasets' ? '🧬 Datasets' : tab}
                     </button>
                 ))}
             </div>
@@ -467,6 +598,291 @@ const AdminEnhanced = () => {
                         </table>
                     </div>
                 </div>
+            )}
+
+            {/* Datasets Tab */}
+            {activeTab === 'datasets' && (
+                <>
+                    {/* Dataset Stats */}
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '20px', marginBottom: '2rem' }}>
+                        <div className="payment-stat-card highlight">
+                            <label>Total Datasets</label>
+                            <h2 className="stat-value">{datasetStats.total}</h2>
+                            <p style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.6)', marginTop: '10px' }}>
+                                Training entries
+                            </p>
+                        </div>
+                        <div className="payment-stat-card">
+                            <label>With Errors</label>
+                            <h2 className="stat-value">{datasetStats.withErrors}</h2>
+                            <p style={{ fontSize: '0.75rem', color: '#666', marginTop: '10px' }}>
+                                {datasetStats.total > 0 ? Math.round((datasetStats.withErrors / datasetStats.total) * 100) : 0}% of total
+                            </p>
+                        </div>
+                        <div className="payment-stat-card">
+                            <label>Avg Quality</label>
+                            <h2 className="stat-value">{datasetStats.avgQuality}</h2>
+                            <p style={{ fontSize: '0.75rem', color: '#666', marginTop: '10px' }}>
+                                Out of 5 stars
+                            </p>
+                        </div>
+                        <div className="payment-stat-card">
+                            <label>Domains</label>
+                            <h2 className="stat-value">{Object.keys(datasetStats.byDomain).length}</h2>
+                            <p style={{ fontSize: '0.75rem', color: '#666', marginTop: '10px' }}>
+                                Unique domains
+                            </p>
+                        </div>
+                    </div>
+
+                    {/* Domain Distribution */}
+                    <div className="dashboard-card" style={{ marginBottom: '2rem' }}>
+                        <div className="card-header">
+                            <h3>Dataset Distribution by Domain</h3>
+                        </div>
+                        <div style={{ padding: '1.5rem' }}>
+                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '15px' }}>
+                                {Object.entries(datasetStats.byDomain)
+                                    .sort((a, b) => b[1] - a[1])
+                                    .slice(0, 9)
+                                    .map(([domain, count]) => (
+                                        <div key={domain} style={{
+                                            padding: '12px',
+                                            background: 'rgba(255,255,255,0.02)',
+                                            borderRadius: '8px',
+                                            display: 'flex',
+                                            justifyContent: 'space-between',
+                                            alignItems: 'center'
+                                        }}>
+                                            <span style={{ fontSize: '0.9rem' }}>{domain}</span>
+                                            <strong style={{ color: '#667eea' }}>{count}</strong>
+                                        </div>
+                                    ))}
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Dataset Table */}
+                    <div className="dashboard-card">
+                        <div className="card-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
+                            <h3>Dataset Management</h3>
+                            <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', flexWrap: 'wrap' }}>
+                                <input
+                                    type="text"
+                                    placeholder="Search datasets..."
+                                    value={searchTerm}
+                                    onChange={(e) => setSearchTerm(e.target.value)}
+                                    style={{
+                                        padding: '8px 16px',
+                                        background: 'rgba(255,255,255,0.05)',
+                                        border: '1px solid rgba(255,255,255,0.1)',
+                                        borderRadius: '8px',
+                                        color: '#fff',
+                                        fontSize: '0.9rem'
+                                    }}
+                                />
+                                <select
+                                    value={filterDomain}
+                                    onChange={(e) => setFilterDomain(e.target.value)}
+                                    style={{
+                                        padding: '8px 16px',
+                                        background: 'rgba(255,255,255,0.05)',
+                                        border: '1px solid rgba(255,255,255,0.1)',
+                                        borderRadius: '8px',
+                                        color: '#fff',
+                                        fontSize: '0.9rem'
+                                    }}
+                                >
+                                    <option value="all">All Domains</option>
+                                    {Object.keys(datasetStats.byDomain).map(domain => (
+                                        <option key={domain} value={domain}>{domain}</option>
+                                    ))}
+                                </select>
+                                <select
+                                    value={filterLanguage}
+                                    onChange={(e) => setFilterLanguage(e.target.value)}
+                                    style={{
+                                        padding: '8px 16px',
+                                        background: 'rgba(255,255,255,0.05)',
+                                        border: '1px solid rgba(255,255,255,0.1)',
+                                        borderRadius: '8px',
+                                        color: '#fff',
+                                        fontSize: '0.9rem'
+                                    }}
+                                >
+                                    <option value="all">All Languages</option>
+                                    {Object.keys(datasetStats.byLanguage).map(pair => (
+                                        <option key={pair} value={pair}>{pair}</option>
+                                    ))}
+                                </select>
+                                <select
+                                    value={filterQuality}
+                                    onChange={(e) => setFilterQuality(e.target.value)}
+                                    style={{
+                                        padding: '8px 16px',
+                                        background: 'rgba(255,255,255,0.05)',
+                                        border: '1px solid rgba(255,255,255,0.1)',
+                                        borderRadius: '8px',
+                                        color: '#fff',
+                                        fontSize: '0.9rem'
+                                    }}
+                                >
+                                    <option value="all">All Quality</option>
+                                    <option value="5">5 Stars</option>
+                                    <option value="4">4 Stars</option>
+                                    <option value="3">3 Stars</option>
+                                    <option value="2">2 Stars</option>
+                                    <option value="1">1 Star</option>
+                                </select>
+                                <button
+                                    onClick={() => exportData('datasets-csv')}
+                                    style={{
+                                        padding: '8px 16px',
+                                        background: '#10b981',
+                                        color: '#fff',
+                                        border: 'none',
+                                        borderRadius: '8px',
+                                        cursor: 'pointer',
+                                        fontWeight: '600'
+                                    }}
+                                >
+                                    📥 Export CSV
+                                </button>
+                                <button
+                                    onClick={() => exportData('datasets-json')}
+                                    style={{
+                                        padding: '8px 16px',
+                                        background: '#667eea',
+                                        color: '#fff',
+                                        border: 'none',
+                                        borderRadius: '8px',
+                                        cursor: 'pointer',
+                                        fontWeight: '600'
+                                    }}
+                                >
+                                    📥 Export JSON
+                                </button>
+                            </div>
+                        </div>
+                        <div className="table-container">
+                            <table className="payment-table">
+                                <thead>
+                                    <tr>
+                                        <th>Source Text</th>
+                                        <th>Languages</th>
+                                        <th>AI Translation</th>
+                                        <th>Human Translation</th>
+                                        <th>Domain</th>
+                                        <th>Quality</th>
+                                        <th>Errors</th>
+                                        <th>Edit Distance</th>
+                                        <th>Date</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {filteredDatasets.length === 0 ? (
+                                        <tr>
+                                            <td colSpan="9" style={{ textAlign: 'center', padding: '2rem', color: '#666' }}>
+                                                {datasets.length === 0 ? 'No datasets captured yet. Start translating in CAT workspace!' : 'No datasets match your filters'}
+                                            </td>
+                                        </tr>
+                                    ) : (
+                                        filteredDatasets.map(dataset => (
+                                            <tr key={dataset.id}>
+                                                <td style={{ maxWidth: '200px' }}>
+                                                    <div style={{ 
+                                                        overflow: 'hidden', 
+                                                        textOverflow: 'ellipsis', 
+                                                        whiteSpace: 'nowrap',
+                                                        fontSize: '0.85rem'
+                                                    }}>
+                                                        {dataset.source_text}
+                                                    </div>
+                                                </td>
+                                                <td style={{ fontSize: '0.8rem' }}>
+                                                    {dataset.source_language} → {dataset.target_language}
+                                                </td>
+                                                <td style={{ maxWidth: '150px' }}>
+                                                    <div style={{ 
+                                                        overflow: 'hidden', 
+                                                        textOverflow: 'ellipsis', 
+                                                        whiteSpace: 'nowrap',
+                                                        fontSize: '0.8rem',
+                                                        color: '#888'
+                                                    }}>
+                                                        {dataset.ai_translation}
+                                                    </div>
+                                                </td>
+                                                <td style={{ maxWidth: '150px' }}>
+                                                    <div style={{ 
+                                                        overflow: 'hidden', 
+                                                        textOverflow: 'ellipsis', 
+                                                        whiteSpace: 'nowrap',
+                                                        fontSize: '0.8rem'
+                                                    }}>
+                                                        {dataset.human_translation}
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <span className="status-pill" style={{ fontSize: '0.75rem' }}>
+                                                        {dataset.domain || 'N/A'}
+                                                    </span>
+                                                </td>
+                                                <td>
+                                                    {dataset.quality_rating ? (
+                                                        <div style={{ display: 'flex', gap: '2px' }}>
+                                                            {[...Array(5)].map((_, i) => (
+                                                                <span key={i} style={{ 
+                                                                    color: i < dataset.quality_rating ? '#fbbf24' : '#333',
+                                                                    fontSize: '0.9rem'
+                                                                }}>★</span>
+                                                            ))}
+                                                        </div>
+                                                    ) : (
+                                                        <span style={{ color: '#666', fontSize: '0.8rem' }}>N/A</span>
+                                                    )}
+                                                </td>
+                                                <td>
+                                                    {dataset.has_errors ? (
+                                                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px' }}>
+                                                            {dataset.error_types?.map(error => (
+                                                                <span key={error} style={{
+                                                                    padding: '2px 6px',
+                                                                    background: '#ef4444',
+                                                                    color: '#fff',
+                                                                    borderRadius: '4px',
+                                                                    fontSize: '0.7rem'
+                                                                }}>
+                                                                    {error}
+                                                                </span>
+                                                            ))}
+                                                        </div>
+                                                    ) : (
+                                                        <span style={{ color: '#10b981', fontSize: '0.8rem' }}>✓ Clean</span>
+                                                    )}
+                                                </td>
+                                                <td style={{ textAlign: 'center' }}>
+                                                    {dataset.edit_distance || 0}
+                                                </td>
+                                                <td style={{ fontSize: '0.75rem', color: '#666' }}>
+                                                    {new Date(dataset.created_at).toLocaleDateString()}
+                                                </td>
+                                            </tr>
+                                        ))
+                                    )}
+                                </tbody>
+                            </table>
+                        </div>
+                        <div style={{ padding: '1rem', borderTop: '1px solid rgba(255,255,255,0.1)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                            <span style={{ fontSize: '0.85rem', color: '#666' }}>
+                                Showing {filteredDatasets.length} of {datasets.length} datasets
+                            </span>
+                            <span style={{ fontSize: '0.85rem', color: '#666' }}>
+                                💡 Datasets are automatically captured when translators edit AI translations
+                            </span>
+                        </div>
+                    </div>
+                </>
             )}
 
             {/* Analytics Tab */}
