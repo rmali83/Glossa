@@ -1060,10 +1060,10 @@ ${segments.map(seg => `      <trans-unit id="${seg.segment_number}">
                     </div>
                 </header>
 
-                {/* Tabs Navigation - Below Header (2 rows) */}
-<div className="bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 px-6 py-2">
-                    <div className="max-w-7xl mx-auto space-y-2">
-                        {/* Upper Row: Tool Tabs */}
+                {/* Tabs Navigation - Below Header */}
+                <div className="bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 px-6 py-2">
+                    <div className="max-w-7xl mx-auto">
+                        {/* Tool Tabs */}
                         <div className="flex gap-2">
                             <button 
                                 onClick={() => setActiveTab('tm')}
@@ -1143,37 +1143,6 @@ ${segments.map(seg => `      <trans-unit id="${seg.segment_number}">
                                         {qaIssues.length}
                                     </span>
                                 )}
-                            </button>
-                        </div>
-
-                        {/* Lower Row: Action Buttons */}
-                        <div className="flex gap-2">
-                            <button 
-                                onClick={handleApplyMT}
-                                disabled={!mtSuggestion || isTranslating}
-                                className="flex items-center gap-1.5 px-3 py-1.5 bg-purple-600 hover:bg-purple-700 text-white rounded-lg text-[10px] font-bold transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
-                                title="Apply AI Translation"
-                            >
-                                <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 24 24">
-                                    <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"/>
-                                </svg>
-                                AI Translate
-                            </button>
-                            <div className="flex items-center gap-1.5 px-3 py-1.5 bg-green-600/10 text-green-600 dark:text-green-400 rounded-lg text-[10px] font-bold">
-                                <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
-                                </svg>
-                                Auto-saved
-                            </div>
-                            <button 
-                                onClick={() => fetchSegments()}
-                                className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-400 rounded-lg text-[10px] font-bold transition-all"
-                                title="Refresh segments"
-                            >
-                                <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
-                                </svg>
-                                Sync
                             </button>
                         </div>
                     </div>
@@ -1372,54 +1341,54 @@ ${segments.map(seg => `      <trans-unit id="${seg.segment_number}">
                             </div>
 
                             {/* Editor Controls */}
-                            <div className="flex items-center justify-between py-4">
-                                <div className="flex gap-2">
+                            <div className="flex items-center justify-between py-2">
+                                <div className="flex gap-1.5">
                                     <button 
                                         onClick={handlePreviousSegment}
                                         disabled={activeSegmentIndex === 0}
-                                        className="p-3 bg-slate-100 dark:bg-slate-800 rounded-xl hover:bg-slate-200 dark:hover:bg-slate-700 transition-all disabled:opacity-50" 
+                                        className="p-2 bg-slate-100 dark:bg-slate-800 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-700 transition-all disabled:opacity-50" 
                                         title="Previous Segment (Alt + Up)"
                                     >
-                                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 15l7-7 7 7"></path>
                                         </svg>
                                     </button>
                                     <button 
                                         onClick={handleNextSegment}
                                         disabled={activeSegmentIndex === segments.length - 1}
-                                        className="p-3 bg-slate-100 dark:bg-slate-800 rounded-xl hover:bg-slate-200 dark:hover:bg-slate-700 transition-all disabled:opacity-50" 
+                                        className="p-2 bg-slate-100 dark:bg-slate-800 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-700 transition-all disabled:opacity-50" 
                                         title="Next Segment (Alt + Down)"
                                     >
-                                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path>
                                         </svg>
                                     </button>
                                     <button 
                                         onClick={handleApplyMT}
                                         disabled={!mtSuggestion || isTranslating}
-                                        className="px-4 py-3 bg-purple-600 hover:bg-purple-700 text-white rounded-xl font-bold text-sm transition-all disabled:opacity-50 flex items-center gap-2" 
+                                        className="px-3 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg font-bold text-[10px] transition-all disabled:opacity-50 flex items-center gap-1.5" 
                                         title="Apply AI Translation"
                                     >
-                                        <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                                        <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 24 24">
                                             <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"/>
                                         </svg>
                                         AI Translate
                                     </button>
                                 </div>
 
-                                <div className="flex gap-3">
+                                <div className="flex gap-2">
                                     <button 
                                         onClick={handleDraft}
-                                        className="px-6 py-3 border border-slate-300 dark:border-slate-700 rounded-xl font-bold text-sm hover:bg-slate-50 dark:hover:bg-slate-800 transition-all"
+                                        className="px-4 py-2 border border-slate-300 dark:border-slate-700 rounded-lg font-bold text-[10px] hover:bg-slate-50 dark:hover:bg-slate-800 transition-all"
                                     >
                                         Draft
                                     </button>
                                     <button 
                                         onClick={handleConfirmAndNext}
-                                        className="px-10 py-3 bg-primary-600 hover:bg-primary-700 text-white rounded-xl font-bold text-sm shadow-lg shadow-primary-500/30 transition-all flex items-center gap-2"
+                                        className="px-5 py-2 bg-primary-600 hover:bg-primary-700 text-white rounded-lg font-bold text-[10px] shadow-lg shadow-primary-500/30 transition-all flex items-center gap-1.5"
                                     >
                                         Confirm & Next
-                                        <kbd className="hidden md:inline-block text-[10px] opacity-70 bg-white/20 px-1.5 py-0.5 rounded">Ctrl+Enter</kbd>
+                                        <kbd className="hidden md:inline-block text-[9px] opacity-70 bg-white/20 px-1 py-0.5 rounded">Ctrl+Enter</kbd>
                                     </button>
                                 </div>
                             </div>
