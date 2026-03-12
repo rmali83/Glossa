@@ -1408,8 +1408,9 @@ ${segments.map(seg => `      <trans-unit id="${seg.segment_number}">
                         )}
                     </section>
 
-                    {/* Right Panel: Productivity Tools */}
-                    <aside className="w-[20%] border-l border-slate-200 dark:border-slate-800 flex flex-col bg-slate-50 dark:bg-slate-900 transition-all">
+                    {/* Right Panel: Hidden - Tabs moved to top */}
+                    <aside className="hidden">
+                    </aside>
                         <div className="flex border-b border-slate-200 dark:border-slate-800">
                             <button 
                                 onClick={() => setActiveTab('tm')}
@@ -1814,7 +1815,6 @@ ${segments.map(seg => `      <trans-unit id="${seg.segment_number}">
                                 <kbd className="dark:text-slate-300">Ctrl+Ins</kbd>
                             </div>
                         </div>
-                    </aside>
                 </main>
 
                 {/* Upload Modal */}
