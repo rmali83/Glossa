@@ -1066,7 +1066,7 @@ ${segments.map(seg => `      <trans-unit id="${seg.segment_number}">
                         {/* Tool Tabs */}
                         <div className="flex gap-2">
                             <button 
-                                onClick={() => setActiveTab('tm')}
+                                onClick={() => setActiveTab(activeTab === 'tm' ? null : 'tm')}
                                 className={`flex items-center gap-1.5 px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider rounded-lg transition-all ${
                                     activeTab === 'tm' 
                                         ? 'bg-gradient-to-r from-blue-600 to-blue-700 text-white shadow-md' 
@@ -1079,7 +1079,7 @@ ${segments.map(seg => `      <trans-unit id="${seg.segment_number}">
                                 TM
                             </button>
                             <button 
-                                onClick={() => setActiveTab('glossary')}
+                                onClick={() => setActiveTab(activeTab === 'glossary' ? null : 'glossary')}
                                 className={`flex items-center gap-1.5 px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider rounded-lg transition-all ${
                                     activeTab === 'glossary' 
                                         ? 'bg-gradient-to-r from-purple-600 to-purple-700 text-white shadow-md' 
@@ -1092,7 +1092,7 @@ ${segments.map(seg => `      <trans-unit id="${seg.segment_number}">
                                 Glossary
                             </button>
                             <button 
-                                onClick={() => setActiveTab('ai')}
+                                onClick={() => setActiveTab(activeTab === 'ai' ? null : 'ai')}
                                 className={`flex items-center gap-1.5 px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider rounded-lg transition-all ${
                                     activeTab === 'ai' 
                                         ? 'bg-gradient-to-r from-pink-600 to-pink-700 text-white shadow-md' 
@@ -1105,7 +1105,7 @@ ${segments.map(seg => `      <trans-unit id="${seg.segment_number}">
                                 AI
                             </button>
                             <button 
-                                onClick={() => setActiveTab('annotation')}
+                                onClick={() => setActiveTab(activeTab === 'annotation' ? null : 'annotation')}
                                 className={`flex items-center gap-1.5 px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider rounded-lg transition-all ${
                                     activeTab === 'annotation' 
                                         ? 'bg-gradient-to-r from-green-600 to-green-700 text-white shadow-md' 
@@ -1118,7 +1118,7 @@ ${segments.map(seg => `      <trans-unit id="${seg.segment_number}">
                                 Annotate
                             </button>
                             <button 
-                                onClick={() => setActiveTab('qa')}
+                                onClick={() => setActiveTab(activeTab === 'qa' ? null : 'qa')}
                                 className={`flex items-center gap-1.5 px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider rounded-lg transition-all ${
                                     activeTab === 'qa' 
                                         ? 'bg-gradient-to-r from-orange-600 to-orange-700 text-white shadow-md' 
@@ -1408,7 +1408,357 @@ ${segments.map(seg => `      <trans-unit id="${seg.segment_number}">
                         )}
                     </section>
 
-                    {/* Right Panel: Removed - Tabs moved to top */}
+                    {/* Slide-out Panel for Tools */}
+                    {activeTab && (
+                        <aside 
+                            className="w-[400px] border-l border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 flex flex-col shadow-2xl animate-slide-in"
+                            style={{
+                                animation: 'slideIn 0.3s ease-out'
+                            }}
+                        >
+                            {/* Panel Header */}
+                            <div className="p-4 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between">
+                                <h3 className="text-sm font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300">
+                                    {activeTab === 'tm' && '📁 Translation Memory'}
+                                    {activeTab === 'glossary' && '📚 Glossary'}
+                                    {activeTab === 'ai' && '✨ AI Suggestions'}
+                                    {activeTab === 'annotation' && '📝 Annotation'}
+                                    {activeTab === 'qa' && '✓ Quality Assurance'}
+                                </h3>
+                                <button 
+                                    onClick={() => setActiveTab(null)}
+                                    className="p-1.5 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors"
+                                    title="Close panel"
+                                >
+                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path>
+                                    </svg>
+                                </button>
+                            </div>
+
+                            {/* Panel Content */}
+                            <div className="flex-1 overflow-y-auto p-4 space-y-6">
+                                {activeTab === 'tm' && (
+                                    <div className="space-y-4">
+                                        {tmMatches.length > 0 ? (
+                                            tmMatches.map((tm, index) => (
+                                                <div key={tm.id} className="space-y-3">
+                                                    <div className="flex justify-between items-center">
+                                                        <h4 className="text-xs font-bold text-slate-500 uppercase">TM Match #{index + 1}</h4>
+                                                        <span className="text-[10px] px-1.5 py-0.5 bg-primary-500/20 text-primary-500 rounded font-bold">
+                                                            {Math.floor(Math.random() * 20) + 80}%
+                                                        </span>
+                                                    </div>
+                                                    <div 
+                                                        onClick={() => {
+                                                            handleSegmentChange(tm.target_text);
+                                                        }}
+                                                        className="p-3 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm cursor-pointer hover:border-primary-500 transition-colors group"
+                                                    >
+                                                        <p className="text-xs text-slate-400 mb-2 italic">{tm.source_text}</p>
+                                                        <p className="text-sm font-medium">{tm.target_text}</p>
+                                                        <div className="mt-2 flex justify-end">
+                                                            <span className="text-[9px] text-slate-400 group-hover:text-primary-500 transition-colors">Click to Apply</span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            ))
+                                        ) : (
+                                            <div className="text-center py-8 text-slate-400 text-sm">
+                                                <p>No translation memory matches found.</p>
+                                                <p className="text-xs mt-2">Your translations will be added to TM automatically.</p>
+                                            </div>
+                                        )}
+
+                                        <div className="space-y-3 pt-4 border-t border-slate-200 dark:border-slate-800">
+                                            <div className="flex justify-between items-center">
+                                                <h4 className="text-xs font-bold text-slate-500 uppercase">Neural MT</h4>
+                                                <span className="text-[10px] text-slate-400 font-mono">
+                                                    {mtSuggestion?.engine || 'MyMemory'}
+                                                </span>
+                                            </div>
+                                            {isTranslating ? (
+                                                <div className="p-3 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm">
+                                                    <p className="text-sm text-slate-400">Translating...</p>
+                                                </div>
+                                            ) : mtSuggestion ? (
+                                                <div 
+                                                    onClick={handleApplyMT}
+                                                    className="p-3 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm cursor-pointer hover:border-primary-500 transition-colors group"
+                                                >
+                                                    <p className="text-sm">{mtSuggestion.translation}</p>
+                                                    <div className="mt-2 flex justify-end">
+                                                        <span className="text-[9px] text-slate-400 group-hover:text-primary-500 transition-colors">Click to Apply</span>
+                                                    </div>
+                                                </div>
+                                            ) : (
+                                                <div className="p-3 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm">
+                                                    <p className="text-sm text-slate-400">No MT suggestion available</p>
+                                                </div>
+                                            )}
+                                        </div>
+                                    </div>
+                                )}
+
+                                {activeTab === 'glossary' && (
+                                    <div className="space-y-4">
+                                        <h4 className="text-xs font-bold text-slate-500 uppercase">Detected Terms</h4>
+                                        {glossaryTerms.length > 0 ? (
+                                            <div className="divide-y divide-slate-200 dark:divide-slate-800">
+                                                {glossaryTerms.map((term) => (
+                                                    <div key={term.id} className="py-3 flex justify-between items-start group cursor-pointer">
+                                                        <div>
+                                                            <p className="text-sm font-bold">{term.term}</p>
+                                                            <p className="text-xs text-primary-500">{term.translation}</p>
+                                                            {term.description && (
+                                                                <p className="text-xs text-slate-400 mt-1">{term.description}</p>
+                                                            )}
+                                                        </div>
+                                                        <button 
+                                                            onClick={() => {
+                                                                const currentText = activeSegment?.target || '';
+                                                                handleSegmentChange(currentText + ' ' + term.translation);
+                                                            }}
+                                                            className="opacity-0 group-hover:opacity-100 p-1 text-slate-400 hover:text-primary-500"
+                                                        >
+                                                            <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                                                                <path d="M19 13H13V19H11V13H5V11H11V5H13V11H19V13Z"/>
+                                                            </svg>
+                                                        </button>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        ) : (
+                                            <div className="text-center py-8 text-slate-400 text-sm">
+                                                <p>No glossary terms available.</p>
+                                                <p className="text-xs mt-2">Add terms in the glossary management section.</p>
+                                            </div>
+                                        )}
+                                    </div>
+                                )}
+
+                                {activeTab === 'ai' && (
+                                    <div className="space-y-4">
+                                        <div className="space-y-4">
+                                            <label className="text-xs font-bold text-slate-500 uppercase block">Refine with AI</label>
+                                            <select 
+                                                value={selectedTone}
+                                                onChange={(e) => setSelectedTone(e.target.value)}
+                                                className="w-full bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 rounded-lg p-2 text-xs focus:ring-1 focus:ring-primary-500"
+                                            >
+                                                <option value="professional">Professional Tone</option>
+                                                <option value="casual">Casual / Informal</option>
+                                                <option value="formal">Formal / Academic</option>
+                                                <option value="marketing">Marketing / Creative</option>
+                                            </select>
+                                            <button 
+                                                onClick={handleGenerateAISuggestions}
+                                                disabled={isTranslating}
+                                                className="w-full py-2 bg-gradient-to-r from-purple-600 to-primary-600 text-white rounded-lg text-xs font-bold shadow-lg shadow-primary-500/10 hover:shadow-primary-500/30 transition-all disabled:opacity-50"
+                                            >
+                                                {isTranslating ? 'Generating...' : 'Generate Suggestions'}
+                                            </button>
+                                        </div>
+
+                                        {aiSuggestions.length > 0 && (
+                                            <div className="space-y-3 pt-4 border-t border-slate-200 dark:border-slate-800">
+                                                {aiSuggestions.map((suggestion, index) => (
+                                                    <div key={index} className="p-3 bg-primary-500/5 dark:bg-primary-500/10 border border-primary-500/20 rounded-xl space-y-2">
+                                                        <div className="flex justify-between items-center">
+                                                            <p className="text-xs text-slate-500 font-medium">{suggestion.tone}:</p>
+                                                            <span className="text-[9px] text-slate-400">{suggestion.description}</span>
+                                                        </div>
+                                                        <p className="text-sm">{suggestion.text}</p>
+                                                        <button 
+                                                            onClick={() => handleSegmentChange(suggestion.text)}
+                                                            className="w-full py-1.5 mt-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-[10px] font-bold hover:bg-slate-50"
+                                                        >
+                                                            Apply This Version
+                                                        </button>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        )}
+
+                                        {aiSuggestions.length === 0 && !isTranslating && (
+                                            <div className="text-center py-8 text-slate-400 text-sm">
+                                                <svg className="w-12 h-12 mx-auto mb-3 opacity-50" fill="currentColor" viewBox="0 0 24 24">
+                                                    <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"/>
+                                                </svg>
+                                                <p>Click "Generate Suggestions" to get AI-powered alternatives</p>
+                                            </div>
+                                        )}
+                                    </div>
+                                )}
+
+                                {activeTab === 'qa' && (
+                                    <QAPanel 
+                                        issues={qaIssues}
+                                        onRunQA={runQA}
+                                        onAutoFix={handleAutoFix}
+                                        isRunning={isRunningQA}
+                                    />
+                                )}
+
+                                {activeTab === 'annotation' && (
+                                    <div className="space-y-4">
+                                        <h4 className="text-xs font-bold text-slate-500 uppercase">Quality Annotation</h4>
+                                        
+                                        {/* Error Types */}
+                                        <div className="space-y-3">
+                                            <label className="text-xs font-bold text-slate-500 uppercase block">Error Types</label>
+                                            <div className="space-y-2">
+                                                {[
+                                                    { key: 'error_fluency', label: 'Fluency', icon: '💬', color: 'bg-blue-500' },
+                                                    { key: 'error_grammar', label: 'Grammar', icon: '📝', color: 'bg-red-500' },
+                                                    { key: 'error_terminology', label: 'Terminology', icon: '📚', color: 'bg-purple-500' },
+                                                    { key: 'error_style', label: 'Style', icon: '🎨', color: 'bg-pink-500' },
+                                                    { key: 'error_accuracy', label: 'Accuracy', icon: '🎯', color: 'bg-green-500' }
+                                                ].map(({ key, label, icon, color }) => (
+                                                    <label key={key} className="flex items-center gap-3 p-3 bg-white dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700 cursor-pointer hover:border-primary-500 transition-colors">
+                                                        <input
+                                                            type="checkbox"
+                                                            checked={annotation[key]}
+                                                            onChange={(e) => setAnnotation({ ...annotation, [key]: e.target.checked })}
+                                                            className="w-4 h-4 rounded border-slate-300 text-primary-600 focus:ring-primary-500"
+                                                        />
+                                                        <span className="text-lg">{icon}</span>
+                                                        <span className="text-sm font-medium flex-1">{label}</span>
+                                                        {annotation[key] && (
+                                                            <span className={`w-2 h-2 rounded-full ${color}`}></span>
+                                                        )}
+                                                    </label>
+                                                ))}
+                                            </div>
+                                        </div>
+
+                                        {/* Domain Classification */}
+                                        <div className="space-y-3">
+                                            <label className="text-xs font-bold text-slate-500 uppercase block">Domain / Specialization</label>
+                                            
+                                            {/* Domain Dropdown */}
+                                            <select
+                                                value={selectedDomain}
+                                                onChange={(e) => {
+                                                    const domain = e.target.value;
+                                                    setSelectedDomain(domain);
+                                                    setSelectedSubdomain('');
+                                                    setAnnotation({ ...annotation, domain: '' });
+                                                }}
+                                                className="w-full bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 rounded-lg p-2 text-sm focus:ring-1 focus:ring-primary-500"
+                                            >
+                                                <option value="">Select Domain</option>
+                                                {getDomainNames().map((domain) => (
+                                                    <option key={domain} value={domain}>
+                                                        {getDomainIcon(domain)} {domain}
+                                                    </option>
+                                                ))}
+                                            </select>
+
+                                            {/* Subdomain Dropdown */}
+                                            {selectedDomain && (
+                                                <select
+                                                    value={selectedSubdomain}
+                                                    onChange={(e) => {
+                                                        const subdomain = e.target.value;
+                                                        setSelectedSubdomain(subdomain);
+                                                        const fullDomain = subdomain ? `${selectedDomain}: ${subdomain}` : '';
+                                                        setAnnotation({ ...annotation, domain: fullDomain });
+                                                    }}
+                                                    className="w-full bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 rounded-lg p-2 text-sm focus:ring-1 focus:ring-primary-500"
+                                                >
+                                                    <option value="">Select Subdomain</option>
+                                                    {getSubdomains(selectedDomain).map((subdomain) => (
+                                                        <option key={subdomain} value={subdomain}>
+                                                            {subdomain}
+                                                        </option>
+                                                    ))}
+                                                </select>
+                                            )}
+
+                                            {/* Display selected domain/subdomain */}
+                                            {annotation.domain && (
+                                                <div className="p-2 bg-gradient-to-r from-blue-500/10 to-purple-500/10 border border-blue-500/20 rounded-lg">
+                                                    <p className="text-xs text-blue-600 dark:text-blue-400 font-medium">
+                                                        {getDomainIcon(selectedDomain)} {annotation.domain}
+                                                    </p>
+                                                </div>
+                                            )}
+                                        </div>
+
+                                        {/* Quality Rating */}
+                                        <div className="space-y-3">
+                                            <label className="text-xs font-bold text-slate-500 uppercase block">Quality Rating</label>
+                                            <div className="flex gap-2 justify-center">
+                                                {[1, 2, 3, 4, 5].map((rating) => (
+                                                    <button
+                                                        key={rating}
+                                                        onClick={() => setAnnotation({ ...annotation, quality_rating: rating })}
+                                                        className={`w-10 h-10 rounded-lg border-2 transition-all ${
+                                                            annotation.quality_rating === rating
+                                                                ? 'border-yellow-500 bg-yellow-500/20 scale-110'
+                                                                : 'border-slate-300 dark:border-slate-700 hover:border-yellow-500'
+                                                        }`}
+                                                    >
+                                                        <svg className={`w-6 h-6 mx-auto ${annotation.quality_rating >= rating ? 'text-yellow-500' : 'text-slate-300'}`} fill="currentColor" viewBox="0 0 24 24">
+                                                            <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"/>
+                                                        </svg>
+                                                    </button>
+                                                ))}
+                                            </div>
+                                            <div className="flex justify-between text-[10px] text-slate-400 px-1">
+                                                <span>Poor</span>
+                                                <span>Excellent</span>
+                                            </div>
+                                        </div>
+
+                                        {/* Notes */}
+                                        <div className="space-y-3">
+                                            <label className="text-xs font-bold text-slate-500 uppercase block">Notes</label>
+                                            <textarea
+                                                value={annotation.notes}
+                                                onChange={(e) => setAnnotation({ ...annotation, notes: e.target.value })}
+                                                placeholder="Add any additional comments..."
+                                                className="w-full bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 rounded-lg p-3 text-sm focus:ring-1 focus:ring-primary-500 resize-none"
+                                                rows="3"
+                                            />
+                                        </div>
+
+                                        {/* Save Button */}
+                                        <button
+                                            onClick={saveAnnotation}
+                                            disabled={savingAnnotation}
+                                            className="w-full py-3 bg-gradient-to-r from-green-600 to-emerald-600 text-white rounded-lg text-sm font-bold shadow-lg shadow-green-500/20 hover:shadow-green-500/40 transition-all disabled:opacity-50 flex items-center justify-center gap-2"
+                                        >
+                                            {savingAnnotation ? (
+                                                <>
+                                                    <svg className="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
+                                                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                                    </svg>
+                                                    Saving...
+                                                </>
+                                            ) : (
+                                                <>
+                                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
+                                                    </svg>
+                                                    Save Annotation
+                                                </>
+                                            )}
+                                        </button>
+
+                                        {/* Info Box */}
+                                        <div className="p-3 bg-blue-500/10 border border-blue-500/20 rounded-lg">
+                                            <p className="text-xs text-blue-600 dark:text-blue-400">
+                                                💡 Annotations help improve AI translation quality and are used for training datasets.
+                                            </p>
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+                        </aside>
+                    )}
                 </main>
 
                 {/* Upload Modal */}
