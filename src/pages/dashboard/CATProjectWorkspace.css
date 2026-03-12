@@ -91,3 +91,33 @@
 .dark .dark\:hover\:bg-slate-700:hover { background-color: #334155; }
 .dark .dark\:hover\:text-slate-200:hover { color: #e2e8f0; }
 .dark .dark\:hover\:text-slate-300:hover { color: #cbd5e1; }
+
+/* QA Warning Badge Hover Effect */
+.qa-warning-badge {
+    transition: transform 0.2s ease;
+}
+
+.qa-warning-badge:hover {
+    transform: scale(1.05);
+    z-index: 10;
+}
+
+.qa-warning-badge:hover::after {
+    content: attr(title);
+    position: absolute;
+    right: 100%;
+    top: 50%;
+    transform: translateY(-50%);
+    margin-right: 0.5rem;
+    padding: 0.75rem;
+    background: rgba(15, 23, 42, 0.95);
+    color: #fff;
+    border-radius: 8px;
+    font-size: 0.75rem;
+    white-space: pre-line;
+    max-width: 300px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    z-index: 1000;
+    pointer-events: none;
+}

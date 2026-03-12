@@ -7,7 +7,7 @@ import SimpleUploadModal from '../../components/SimpleUploadModal';
 import simpleUploadManager from '../../services/simpleUploadManager';
 import { getTextDirection, getTextAlign, isRTL } from '../../data/languageDirections';
 import { translationDomains, getDomainNames, getSubdomains, getDomainIcon } from '../../data/translationDomains';
-import { runQAChecks, getQASummary, autoFixIssues } from '../../services/qaEngine';
+import { runQAChecks, getQASummary, autoFixIssues, getSeverityIcon, getSeverityColor } from '../../services/qaEngine';
 import QAPanel from '../../components/QAPanel';
 import './CATProjectWorkspace.css';
 
@@ -665,6 +665,23 @@ const CATProjectView = () => {
     };
 
     const handleConfirmAndNext = async () => {
+        // Check for QA errors before confirming
+        const errorCount = qaIssues.filter(i => i.severity === 'error').length;
+        
+        if (errorCount > 0) {
+            const confirmed = window.confirm(
+                `⚠️ This segment has ${errorCount} QA error(s).\n\n` +
+                `Errors:\n${qaIssues.filter(i => i.severity === 'error').map(i => `• ${i.message}`).join('\n')}\n\n` +
+                `Do you want to confirm anyway?`
+            );
+            
+            if (!confirmed) {
+                // Switch to QA tab to show issues
+                setActiveTab('qa');
+                return;
+            }
+        }
+        
         const newSegments = [...segments];
         newSegments[activeSegmentIndex].status = 'confirmed';
         setSegments(newSegments);
@@ -1149,6 +1166,60 @@ ${segments.map(seg => `      <trans-unit id="${seg.segment_number}">
                                         style={{ textAlign: getTextAlign(project?.target_language) }}
                                     />
                                     
+                                    {/* QA Warning Badges */}
+                                    {qaIssues.length > 0 && (
+                                        <div style={{
+                                            position: 'absolute',
+                                            top: '0.5rem',
+                                            right: '0.5rem',
+                                            display: 'flex',
+                                            gap: '0.5rem',
+                                            flexDirection: 'column',
+                                            alignItems: 'flex-end'
+                                        }}>
+                                            {qaIssues.slice(0, 3).map((issue, index) => (
+                                                <div
+                                                    key={index}
+                                                    style={{
+                                                        position: 'relative',
+                                                        cursor: 'pointer'
+                                                    }}
+                                                    className="qa-warning-badge"
+                                                    title={`${issue.message}\n${issue.suggestion}`}
+                                                >
+                                                    <div style={{
+                                                        padding: '0.5rem',
+                                                        background: getSeverityColor(issue.severity) + '20',
+                                                        border: `2px solid ${getSeverityColor(issue.severity)}`,
+                                                        borderRadius: '8px',
+                                                        display: 'flex',
+                                                        alignItems: 'center',
+                                                        gap: '0.5rem',
+                                                        fontSize: '0.75rem',
+                                                        fontWeight: '600',
+                                                        color: getSeverityColor(issue.severity),
+                                                        boxShadow: `0 2px 8px ${getSeverityColor(issue.severity)}40`
+                                                    }}>
+                                                        <span style={{ fontSize: '1rem' }}>{getSeverityIcon(issue.severity)}</span>
+                                                        <span>{issue.type.replace(/_/g, ' ')}</span>
+                                                    </div>
+                                                </div>
+                                            ))}
+                                            {qaIssues.length > 3 && (
+                                                <div style={{
+                                                    padding: '0.25rem 0.5rem',
+                                                    background: 'rgba(100, 116, 139, 0.2)',
+                                                    border: '1px solid #64748b',
+                                                    borderRadius: '6px',
+                                                    fontSize: '0.7rem',
+                                                    color: '#94a3b8'
+                                                }}>
+                                                    +{qaIssues.length - 3} more
+                                                </div>
+                                            )}
+                                        </div>
+                                    )}
+                                    
                                     {activeSegment?.status === 'confirmed' && (
                                         <div className="absolute bottom-4 right-4 flex gap-2">
                                             <div className="px-3 py-1 bg-accent/10 text-accent text-xs rounded-full font-bold flex items-center gap-1">
@@ -1269,7 +1340,32 @@ ${segments.map(seg => `      <trans-unit id="${seg.segment_number}">
                                 <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path>
                                 </svg>
+                                Annotate
+                            </button>
+                            <button 
+                                onClick={() => setActiveTab('qa')}
+                                className={`flex-1 py-4 text-[10px] font-bold uppercase tracking-widest border-b-2 flex items-center justify-center gap-1 ${
+                                    activeTab === 'qa' ? 'border-primary-500 text-primary-500' : 'border-transparent text-slate-400 hover:text-slate-600 dark:hover:text-slate-200'
+                                }`}
+                            >
+                                <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                </svg>
                                 QA
+                                {qaIssues.length > 0 && (
+                                    <span style={{
+                                        background: qaIssues.some(i => i.severity === 'error') ? '#ef4444' : '#f59e0b',
+                                        color: '#fff',
+                                        fontSize: '0.6rem',
+                                        padding: '0.1rem 0.3rem',
+                                        borderRadius: '9999px',
+                                        fontWeight: 'bold',
+                                        minWidth: '1rem',
+                                        textAlign: 'center'
+                                    }}>
+                                        {qaIssues.length}
+                                    </span>
+                                )}
                             </button>
                         </div>
 
@@ -1425,6 +1521,15 @@ ${segments.map(seg => `      <trans-unit id="${seg.segment_number}">
                                         </div>
                                     )}
                                 </div>
+                            )}
+
+                            {activeTab === 'qa' && (
+                                <QAPanel 
+                                    issues={qaIssues}
+                                    onRunQA={runQA}
+                                    onAutoFix={handleAutoFix}
+                                    isRunning={isRunningQA}
+                                />
                             )}
 
                             {activeTab === 'annotation' && (
