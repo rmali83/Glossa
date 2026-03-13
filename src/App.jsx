@@ -18,13 +18,10 @@ import Jobs from './pages/dashboard/Jobs';
 import Payments from './pages/dashboard/Payments';
 import Settings from './pages/dashboard/Settings';
 import Messages from './pages/dashboard/Messages';
-import Admin from './pages/dashboard/Admin';
 import AdminEnhanced from './pages/dashboard/AdminEnhanced';
 import CreateJob from './pages/dashboard/CreateJob';
 import JobManagement from './pages/dashboard/JobManagement';
 import TranslatorProfile from './pages/dashboard/TranslatorProfile';
-import UserManagement from './pages/dashboard/UserManagement';
-import UserProfile from './pages/dashboard/UserProfile';
 import Onboarding from './pages/Onboarding';
 import GlossaCAT from './pages/dashboard/GlossaCAT';
 import CATProjectView from './pages/dashboard/CATProjectView';
@@ -83,8 +80,6 @@ function App() {
                 <Route path="/settings" element={<Settings />} />
                 <Route path="/admin" element={<AdminEnhanced />} />
                 <Route path="/admin/create-job" element={<CreateJob />} />
-                <Route path="/user-management" element={<UserManagement />} />
-                <Route path="/users/:userId" element={<UserProfile />} />
                 <Route path="/cat" element={<GlossaCAT />} />
                 <Route path="/cat/:projectId" element={<CATProjectView />} />
               </Routes>

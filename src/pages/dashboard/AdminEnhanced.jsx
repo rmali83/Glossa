@@ -588,6 +588,11 @@ const AdminEnhanced = () => {
     const [filterDomain, setFilterDomain] = useState('all');
     const [filterLanguage, setFilterLanguage] = useState('all');
     const [filterQuality, setFilterQuality] = useState('all');
+    
+    // Enhanced user management states
+    const [userFilterTab, setUserFilterTab] = useState('all');
+    const [userSearchQuery, setUserSearchQuery] = useState('');
+    const [showCreateUserModal, setShowCreateUserModal] = useState(false);
 
     useEffect(() => {
         fetchAdminData();
@@ -878,6 +883,30 @@ const AdminEnhanced = () => {
         return matchesSearch && matchesDomain && matchesLanguage && matchesQuality;
     });
 
+    // Enhanced user filtering
+    const filteredUsersEnhanced = translators.filter(user => {
+        const matchesSearch = user.full_name?.toLowerCase().includes(userSearchQuery.toLowerCase()) ||
+                            user.email?.toLowerCase().includes(userSearchQuery.toLowerCase());
+        
+        const matchesTab = userFilterTab === 'all' || 
+                          (userFilterTab === 'translators' && (user.user_type === 'Freelance Translator' || user.user_type === 'Translator')) ||
+                          (userFilterTab === 'reviewers' && user.user_type === 'Reviewer') ||
+                          (userFilterTab === 'agencies' && user.user_type === 'Agencies');
+
+        return matchesSearch && matchesTab;
+    });
+
+    // Helper function for user status colors
+    const getUserStatusColor = (userType) => {
+        switch (userType) {
+            case 'Agencies': return '#10b981';
+            case 'Reviewer': return '#3b82f6';
+            case 'Freelance Translator':
+            case 'Translator': return '#f59e0b';
+            default: return '#6b7280';
+        }
+    };
+
     if (loading) return <div className="dashboard-page loading-state">Loading Admin Dashboard...</div>;
 
     return (
@@ -927,7 +956,7 @@ const AdminEnhanced = () => {
                 borderBottom: '2px solid rgba(255,255,255,0.1)',
                 paddingBottom: '1rem'
             }}>
-                {['overview', 'users', 'jobs', 'datasets', 'analytics', 'tm', 'user-management', 'reports', 'annotation-settings'].map(tab => (
+                {['overview', 'users', 'jobs', 'datasets', 'analytics', 'tm', 'reports', 'annotation-settings'].map(tab => (
                     <button
                         key={tab}
                         onClick={() => setActiveTab(tab)}
@@ -946,7 +975,7 @@ const AdminEnhanced = () => {
                         {tab === 'datasets' ? '🧬 Datasets' : 
                          tab === 'annotation-settings' ? '⚙️ Annotation' : 
                          tab === 'tm' ? '🔄 TM' : 
-                         tab === 'user-management' ? '👥 Users' : 
+                         tab === 'users' ? '👥 Users' : 
                          tab}
                     </button>
                 ))}
@@ -1024,72 +1053,281 @@ const AdminEnhanced = () => {
                 </>
             )}
 
-            {/* Users Tab */}
+            {/* Users Tab - Enhanced */}
             {activeTab === 'users' && (
-                <div className="dashboard-card">
-                    <div className="card-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                        <h3>User Management</h3>
-                        <button
-                            onClick={() => exportData('users')}
-                            style={{
-                                padding: '8px 16px',
-                                background: '#667eea',
-                                color: '#fff',
-                                border: 'none',
-                                borderRadius: '8px',
-                                cursor: 'pointer'
-                            }}
-                        >
-                            📥 Export Users
-                        </button>
+                <div>
+                    {/* Enhanced User Management Header */}
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
+                        <div>
+                            <h2 style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#fff', margin: 0 }}>
+                                👥 User Management
+                            </h2>
+                            <p style={{ color: '#888', marginTop: '0.5rem' }}>
+                                Manage translators, reviewers, and team members
+                            </p>
+                        </div>
+                        <div style={{ display: 'flex', gap: '1rem' }}>
+                            <button
+                                onClick={() => exportData('users')}
+                                style={{
+                                    padding: '12px 24px',
+                                    background: 'rgba(102, 126, 234, 0.2)',
+                                    color: '#667eea',
+                                    border: '1px solid rgba(102, 126, 234, 0.3)',
+                                    borderRadius: '12px',
+                                    fontSize: '1rem',
+                                    fontWeight: '600',
+                                    cursor: 'pointer'
+                                }}
+                            >
+                                📥 Export Users
+                            </button>
+                            <button
+                                onClick={() => setShowCreateUserModal(true)}
+                                style={{
+                                    padding: '12px 24px',
+                                    background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+                                    color: '#fff',
+                                    border: 'none',
+                                    borderRadius: '12px',
+                                    fontSize: '1rem',
+                                    fontWeight: '600',
+                                    cursor: 'pointer',
+                                    boxShadow: '0 4px 15px rgba(16, 185, 129, 0.4)',
+                                    transition: 'all 0.3s ease'
+                                }}
+                            >
+                                + Add User
+                            </button>
+                        </div>
                     </div>
-                    <div className="table-container">
-                        <table className="payment-table">
-                            <thead>
-                                <tr>
-                                    <th>Name</th>
-                                    <th>Email</th>
-                                    <th>Type</th>
-                                    <th>Language Pairs</th>
-                                    <th>Rate</th>
-                                    <th>Status</th>
-                                    <th>Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {translators.map(t => (
-                                    <tr key={t.id}>
-                                        <td><strong>{t.full_name}</strong></td>
-                                        <td style={{ fontSize: '0.85rem', color: '#666' }}>{t.email}</td>
-                                        <td><span className="status-pill">{t.user_type}</span></td>
-                                        <td style={{ fontSize: '0.8rem' }}>{t.language_pairs?.join(', ') || 'N/A'}</td>
-                                        <td>${t.rate}/hr</td>
-                                        <td>
-                                            <span className={`status-pill ${t.status === 'suspended' ? 'draft' : 'completed'}`}>
-                                                {t.status || 'active'}
-                                            </span>
-                                        </td>
-                                        <td>
-                                            <button
-                                                onClick={() => handleSuspendUser(t.id)}
-                                                style={{
-                                                    padding: '4px 12px',
-                                                    background: '#ef4444',
-                                                    color: '#fff',
-                                                    border: 'none',
-                                                    borderRadius: '6px',
-                                                    fontSize: '0.8rem',
-                                                    cursor: 'pointer'
-                                                }}
-                                            >
-                                                Suspend
-                                            </button>
-                                        </td>
-                                    </tr>
+
+                    {/* Enhanced Stats Cards */}
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '1.5rem', marginBottom: '2rem' }}>
+                        <div className="dashboard-card" style={{ padding: '1.5rem', textAlign: 'center' }}>
+                            <div style={{ fontSize: '2rem', fontWeight: 'bold', color: '#10b981' }}>
+                                {translators.length}
+                            </div>
+                            <div style={{ fontSize: '0.9rem', color: '#666', marginTop: '0.5rem' }}>
+                                Total Users
+                            </div>
+                        </div>
+                        <div className="dashboard-card" style={{ padding: '1.5rem', textAlign: 'center' }}>
+                            <div style={{ fontSize: '2rem', fontWeight: 'bold', color: '#f59e0b' }}>
+                                {translators.filter(t => t.user_type === 'Freelance Translator' || t.user_type === 'Translator').length}
+                            </div>
+                            <div style={{ fontSize: '0.9rem', color: '#666', marginTop: '0.5rem' }}>
+                                Translators
+                            </div>
+                        </div>
+                        <div className="dashboard-card" style={{ padding: '1.5rem', textAlign: 'center' }}>
+                            <div style={{ fontSize: '2rem', fontWeight: 'bold', color: '#3b82f6' }}>
+                                {translators.filter(t => t.user_type === 'Reviewer').length}
+                            </div>
+                            <div style={{ fontSize: '0.9rem', color: '#666', marginTop: '0.5rem' }}>
+                                Reviewers
+                            </div>
+                        </div>
+                        <div className="dashboard-card" style={{ padding: '1.5rem', textAlign: 'center' }}>
+                            <div style={{ fontSize: '2rem', fontWeight: 'bold', color: '#8b5cf6' }}>
+                                {translators.filter(t => t.user_type === 'Agencies').length}
+                            </div>
+                            <div style={{ fontSize: '0.9rem', color: '#666', marginTop: '0.5rem' }}>
+                                Agencies
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Enhanced Filters and Search */}
+                    <div className="dashboard-card" style={{ marginBottom: '2rem' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1.5rem' }}>
+                            {/* User Type Tabs */}
+                            <div style={{ display: 'flex', gap: '1rem' }}>
+                                {[
+                                    { key: 'all', label: 'All Users', count: translators.length },
+                                    { key: 'translators', label: 'Translators', count: translators.filter(t => t.user_type === 'Freelance Translator' || t.user_type === 'Translator').length },
+                                    { key: 'reviewers', label: 'Reviewers', count: translators.filter(t => t.user_type === 'Reviewer').length },
+                                    { key: 'agencies', label: 'Agencies', count: translators.filter(t => t.user_type === 'Agencies').length }
+                                ].map(tab => (
+                                    <button
+                                        key={tab.key}
+                                        onClick={() => setUserFilterTab(tab.key)}
+                                        style={{
+                                            padding: '8px 16px',
+                                            background: userFilterTab === tab.key ? 'rgba(16, 185, 129, 0.2)' : 'transparent',
+                                            color: userFilterTab === tab.key ? '#10b981' : '#888',
+                                            border: `1px solid ${userFilterTab === tab.key ? '#10b981' : 'rgba(255,255,255,0.1)'}`,
+                                            borderRadius: '8px',
+                                            fontSize: '0.9rem',
+                                            cursor: 'pointer',
+                                            transition: 'all 0.2s'
+                                        }}
+                                    >
+                                        {tab.label} ({tab.count})
+                                    </button>
                                 ))}
-                            </tbody>
-                        </table>
+                            </div>
+
+                            {/* Search */}
+                            <div style={{ position: 'relative' }}>
+                                <input
+                                    type="text"
+                                    placeholder="Search users..."
+                                    value={userSearchQuery}
+                                    onChange={(e) => setUserSearchQuery(e.target.value)}
+                                    style={{
+                                        padding: '10px 40px 10px 16px',
+                                        background: 'rgba(255,255,255,0.05)',
+                                        border: '1px solid rgba(255,255,255,0.1)',
+                                        borderRadius: '8px',
+                                        color: '#fff',
+                                        fontSize: '0.9rem',
+                                        width: '300px'
+                                    }}
+                                />
+                                <svg 
+                                    style={{ position: 'absolute', right: '12px', top: '50%', transform: 'translateY(-50%)', width: '16px', height: '16px', color: '#666' }}
+                                    fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                                >
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                                </svg>
+                            </div>
+                        </div>
                     </div>
+
+                    {/* Enhanced Users Table */}
+                    <div className="dashboard-card">
+                        <div className="card-header">
+                            <h3>Users ({filteredUsersEnhanced.length})</h3>
+                        </div>
+                        <div className="table-container">
+                            <table className="payment-table">
+                                <thead>
+                                    <tr>
+                                        <th>User</th>
+                                        <th>Role</th>
+                                        <th>Languages</th>
+                                        <th>Projects</th>
+                                        <th>Experience</th>
+                                        <th>Status</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {filteredUsersEnhanced.length === 0 ? (
+                                        <tr>
+                                            <td colSpan="7" style={{ textAlign: 'center', padding: '2rem', color: '#666' }}>
+                                                No users found matching your criteria.
+                                            </td>
+                                        </tr>
+                                    ) : (
+                                        filteredUsersEnhanced.map(user => (
+                                            <tr key={user.id}>
+                                                <td>
+                                                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                                                        <div style={{
+                                                            width: '40px',
+                                                            height: '40px',
+                                                            borderRadius: '50%',
+                                                            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                                                            display: 'flex',
+                                                            alignItems: 'center',
+                                                            justifyContent: 'center',
+                                                            color: '#fff',
+                                                            fontWeight: 'bold',
+                                                            fontSize: '1.1rem'
+                                                        }}>
+                                                            {user.full_name?.charAt(0) || 'U'}
+                                                        </div>
+                                                        <div>
+                                                            <div style={{ fontWeight: '600', color: '#fff' }}>
+                                                                {user.full_name || 'Unnamed User'}
+                                                            </div>
+                                                            <div style={{ fontSize: '0.8rem', color: '#888' }}>
+                                                                {user.email}
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <span 
+                                                        className="status-pill"
+                                                        style={{ 
+                                                            backgroundColor: getUserStatusColor(user.user_type) + '20',
+                                                            color: getUserStatusColor(user.user_type),
+                                                            border: `1px solid ${getUserStatusColor(user.user_type)}40`
+                                                        }}
+                                                    >
+                                                        {user.user_type || 'Unknown'}
+                                                    </span>
+                                                </td>
+                                                <td style={{ fontSize: '0.8rem', color: '#ccc' }}>
+                                                    {user.language_pairs?.slice(0, 2).join(', ') || 'Not specified'}
+                                                    {user.language_pairs?.length > 2 && (
+                                                        <span style={{ color: '#666' }}> +{user.language_pairs.length - 2} more</span>
+                                                    )}
+                                                </td>
+                                                <td style={{ fontSize: '0.9rem', color: '#fff' }}>
+                                                    {projects.filter(p => p.translator_id === user.id || p.reviewer_id === user.id).length}
+                                                </td>
+                                                <td style={{ fontSize: '0.8rem', color: '#ccc' }}>
+                                                    {user.years_experience || 'Not specified'}
+                                                </td>
+                                                <td>
+                                                    <span className={`status-pill ${user.status === 'suspended' ? 'draft' : 'completed'}`}>
+                                                        {user.status || 'Active'}
+                                                    </span>
+                                                </td>
+                                                <td>
+                                                    <div style={{ display: 'flex', gap: '8px' }}>
+                                                        <button
+                                                            onClick={() => alert(`View user: ${user.full_name}\nEmail: ${user.email}\nType: ${user.user_type}`)}
+                                                            style={{
+                                                                padding: '6px 12px',
+                                                                background: 'rgba(59, 130, 246, 0.2)',
+                                                                color: '#60a5fa',
+                                                                border: '1px solid rgba(59, 130, 246, 0.3)',
+                                                                borderRadius: '6px',
+                                                                fontSize: '0.8rem',
+                                                                cursor: 'pointer'
+                                                            }}
+                                                        >
+                                                            View
+                                                        </button>
+                                                        <button
+                                                            onClick={() => handleSuspendUser(user.id)}
+                                                            style={{
+                                                                padding: '6px 12px',
+                                                                background: 'rgba(239, 68, 68, 0.2)',
+                                                                color: '#f87171',
+                                                                border: '1px solid rgba(239, 68, 68, 0.3)',
+                                                                borderRadius: '6px',
+                                                                fontSize: '0.8rem',
+                                                                cursor: 'pointer'
+                                                            }}
+                                                        >
+                                                            Suspend
+                                                        </button>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        ))
+                                    )}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    {/* Create User Modal */}
+                    {showCreateUserModal && (
+                        <CreateUserModal 
+                            onClose={() => setShowCreateUserModal(false)}
+                            onSuccess={() => {
+                                setShowCreateUserModal(false);
+                                fetchAdminData();
+                            }}
+                        />
+                    )}
                 </div>
             )}
 
@@ -1599,239 +1837,6 @@ const AdminEnhanced = () => {
                 </>
             )}
 
-            {/* User Management Tab */}
-            {activeTab === 'user-management' && (
-                <div>
-                    <div style={{ marginBottom: '2rem' }}>
-                        <h2 style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#fff', marginBottom: '0.5rem' }}>
-                            👥 User Management & Permissions
-                        </h2>
-                        <p style={{ color: '#666', fontSize: '0.9rem' }}>
-                            Manage team members, roles, permissions, and performance tracking
-                        </p>
-                    </div>
-                    
-                    {/* User Stats */}
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '1.5rem', marginBottom: '2rem' }}>
-                        <div className="dashboard-card" style={{ padding: '1.5rem', textAlign: 'center' }}>
-                            <div style={{ fontSize: '2rem', fontWeight: 'bold', color: '#10b981' }}>
-                                {translators.length}
-                            </div>
-                            <div style={{ fontSize: '0.9rem', color: '#666', marginTop: '0.5rem' }}>
-                                Total Users
-                            </div>
-                        </div>
-                        <div className="dashboard-card" style={{ padding: '1.5rem', textAlign: 'center' }}>
-                            <div style={{ fontSize: '2rem', fontWeight: 'bold', color: '#f59e0b' }}>
-                                {translators.filter(t => t.user_type === 'Freelance Translator' || t.user_type === 'Translator').length}
-                            </div>
-                            <div style={{ fontSize: '0.9rem', color: '#666', marginTop: '0.5rem' }}>
-                                Translators
-                            </div>
-                        </div>
-                        <div className="dashboard-card" style={{ padding: '1.5rem', textAlign: 'center' }}>
-                            <div style={{ fontSize: '2rem', fontWeight: 'bold', color: '#3b82f6' }}>
-                                {translators.filter(t => t.user_type === 'Reviewer').length}
-                            </div>
-                            <div style={{ fontSize: '0.9rem', color: '#666', marginTop: '0.5rem' }}>
-                                Reviewers
-                            </div>
-                        </div>
-                        <div className="dashboard-card" style={{ padding: '1.5rem', textAlign: 'center' }}>
-                            <div style={{ fontSize: '2rem', fontWeight: 'bold', color: '#8b5cf6' }}>
-                                {translators.filter(t => t.user_type === 'Agencies').length}
-                            </div>
-                            <div style={{ fontSize: '0.9rem', color: '#666', marginTop: '0.5rem' }}>
-                                Agencies
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* Quick Actions */}
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1.5rem', marginBottom: '2rem' }}>
-                        <button
-                            onClick={() => navigate('/dashboard/user-management')}
-                            style={{
-                                padding: '1.5rem',
-                                background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
-                                color: '#fff',
-                                border: 'none',
-                                borderRadius: '12px',
-                                cursor: 'pointer',
-                                textAlign: 'left',
-                                boxShadow: '0 4px 15px rgba(16, 185, 129, 0.3)'
-                            }}
-                        >
-                            <div style={{ fontSize: '1.5rem', marginBottom: '0.5rem' }}>👥</div>
-                            <h4 style={{ margin: '0 0 0.5rem 0', fontSize: '1.1rem', fontWeight: '600' }}>
-                                Manage Users
-                            </h4>
-                            <p style={{ margin: 0, fontSize: '0.8rem', opacity: 0.9 }}>
-                                View, edit, and manage all platform users
-                            </p>
-                        </button>
-
-                        <button
-                            onClick={() => {
-                                // Create new user functionality
-                                alert('Create user functionality - would open modal or navigate to form');
-                            }}
-                            style={{
-                                padding: '1.5rem',
-                                background: 'linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)',
-                                color: '#fff',
-                                border: 'none',
-                                borderRadius: '12px',
-                                cursor: 'pointer',
-                                textAlign: 'left',
-                                boxShadow: '0 4px 15px rgba(59, 130, 246, 0.3)'
-                            }}
-                        >
-                            <div style={{ fontSize: '1.5rem', marginBottom: '0.5rem' }}>➕</div>
-                            <h4 style={{ margin: '0 0 0.5rem 0', fontSize: '1.1rem', fontWeight: '600' }}>
-                                Add New User
-                            </h4>
-                            <p style={{ margin: 0, fontSize: '0.8rem', opacity: 0.9 }}>
-                                Create translator, reviewer, or admin accounts
-                            </p>
-                        </button>
-
-                        <button
-                            onClick={() => {
-                                // Performance analytics functionality
-                                alert('Performance analytics - would show detailed user performance metrics');
-                            }}
-                            style={{
-                                padding: '1.5rem',
-                                background: 'linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%)',
-                                color: '#fff',
-                                border: 'none',
-                                borderRadius: '12px',
-                                cursor: 'pointer',
-                                textAlign: 'left',
-                                boxShadow: '0 4px 15px rgba(139, 92, 246, 0.3)'
-                            }}
-                        >
-                            <div style={{ fontSize: '1.5rem', marginBottom: '0.5rem' }}>📊</div>
-                            <h4 style={{ margin: '0 0 0.5rem 0', fontSize: '1.1rem', fontWeight: '600' }}>
-                                Performance Analytics
-                            </h4>
-                            <p style={{ margin: 0, fontSize: '0.8rem', opacity: 0.9 }}>
-                                View team performance metrics and insights
-                            </p>
-                        </button>
-                    </div>
-
-                    {/* Recent Users Table */}
-                    <div className="dashboard-card">
-                        <div className="card-header">
-                            <h3>Recent Users</h3>
-                            <button
-                                onClick={() => navigate('/dashboard/user-management')}
-                                style={{
-                                    padding: '8px 16px',
-                                    background: 'rgba(59, 130, 246, 0.2)',
-                                    color: '#60a5fa',
-                                    border: '1px solid rgba(59, 130, 246, 0.3)',
-                                    borderRadius: '6px',
-                                    fontSize: '0.8rem',
-                                    cursor: 'pointer'
-                                }}
-                            >
-                                View All
-                            </button>
-                        </div>
-                        <div className="table-container">
-                            <table className="payment-table">
-                                <thead>
-                                    <tr>
-                                        <th>User</th>
-                                        <th>Role</th>
-                                        <th>Languages</th>
-                                        <th>Projects</th>
-                                        <th>Status</th>
-                                        <th>Actions</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {translators.slice(0, 5).map(user => (
-                                        <tr key={user.id}>
-                                            <td>
-                                                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                                                    <div style={{
-                                                        width: '32px',
-                                                        height: '32px',
-                                                        borderRadius: '50%',
-                                                        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                                                        display: 'flex',
-                                                        alignItems: 'center',
-                                                        justifyContent: 'center',
-                                                        color: '#fff',
-                                                        fontWeight: 'bold',
-                                                        fontSize: '0.9rem'
-                                                    }}>
-                                                        {user.full_name?.charAt(0) || 'U'}
-                                                    </div>
-                                                    <div>
-                                                        <div style={{ fontWeight: '600', color: '#fff', fontSize: '0.9rem' }}>
-                                                            {user.full_name || 'Unnamed User'}
-                                                        </div>
-                                                        <div style={{ fontSize: '0.7rem', color: '#888' }}>
-                                                            {user.email}
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </td>
-                                            <td>
-                                                <span 
-                                                    className="status-pill"
-                                                    style={{ 
-                                                        fontSize: '0.7rem',
-                                                        padding: '4px 8px'
-                                                    }}
-                                                >
-                                                    {user.user_type || 'Unknown'}
-                                                </span>
-                                            </td>
-                                            <td style={{ fontSize: '0.7rem', color: '#ccc' }}>
-                                                {user.language_pairs?.slice(0, 1).join(', ') || 'Not specified'}
-                                                {user.language_pairs?.length > 1 && (
-                                                    <span style={{ color: '#666' }}> +{user.language_pairs.length - 1}</span>
-                                                )}
-                                            </td>
-                                            <td style={{ fontSize: '0.8rem', color: '#fff' }}>
-                                                {projects.filter(p => p.translator_id === user.id || p.reviewer_id === user.id).length}
-                                            </td>
-                                            <td>
-                                                <span className="status-pill completed" style={{ fontSize: '0.7rem', padding: '4px 8px' }}>
-                                                    Active
-                                                </span>
-                                            </td>
-                                            <td>
-                                                <button
-                                                    onClick={() => navigate(`/dashboard/users/${user.id}`)}
-                                                    style={{
-                                                        padding: '4px 8px',
-                                                        background: 'rgba(59, 130, 246, 0.2)',
-                                                        color: '#60a5fa',
-                                                        border: '1px solid rgba(59, 130, 246, 0.3)',
-                                                        borderRadius: '4px',
-                                                        fontSize: '0.7rem',
-                                                        cursor: 'pointer'
-                                                    }}
-                                                >
-                                                    View
-                                                </button>
-                                            </td>
-                                        </tr>
-                                    ))}
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-            )}
-
             {/* TM Management Tab */}
             {activeTab === 'tm' && (
                 <div>
@@ -1917,6 +1922,180 @@ const AdminEnhanced = () => {
                     </div>
                 </div>
             )}
+        </div>
+    );
+};
+
+// Create User Modal Component
+const CreateUserModal = ({ onClose, onSuccess }) => {
+    const [formData, setFormData] = useState({
+        email: '',
+        password: '',
+        fullName: '',
+        userType: 'Freelance Translator',
+        languagePairs: [],
+        experienceLevel: 'Intermediate'
+    });
+    const [loading, setLoading] = useState(false);
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        setLoading(true);
+
+        try {
+            // Create user account
+            const { data: authData, error: authError } = await supabase.auth.admin.createUser({
+                email: formData.email,
+                password: formData.password,
+                user_metadata: {
+                    full_name: formData.fullName,
+                    user_type: formData.userType
+                }
+            });
+
+            if (authError) throw authError;
+
+            // Update profile
+            if (authData.user) {
+                const { error: profileError } = await supabase
+                    .from('profiles')
+                    .update({
+                        language_pairs: formData.languagePairs,
+                        years_experience: formData.experienceLevel
+                    })
+                    .eq('id', authData.user.id);
+
+                if (profileError) throw profileError;
+            }
+
+            alert('User created successfully!');
+            onSuccess();
+        } catch (err) {
+            console.error('Error creating user:', err);
+            alert('Error creating user: ' + err.message);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    return (
+        <div style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            background: 'rgba(0,0,0,0.8)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 1000
+        }}>
+            <div style={{
+                background: '#1a1a1a',
+                padding: '2rem',
+                borderRadius: '12px',
+                width: '500px',
+                maxWidth: '90vw'
+            }}>
+                <h3 style={{ marginBottom: '1.5rem', color: '#fff' }}>Create New User</h3>
+                
+                <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                    <input
+                        type="email"
+                        placeholder="Email"
+                        value={formData.email}
+                        onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                        required
+                        style={{
+                            padding: '12px',
+                            background: 'rgba(255,255,255,0.05)',
+                            border: '1px solid rgba(255,255,255,0.1)',
+                            borderRadius: '8px',
+                            color: '#fff'
+                        }}
+                    />
+                    
+                    <input
+                        type="password"
+                        placeholder="Password"
+                        value={formData.password}
+                        onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                        required
+                        style={{
+                            padding: '12px',
+                            background: 'rgba(255,255,255,0.05)',
+                            border: '1px solid rgba(255,255,255,0.1)',
+                            borderRadius: '8px',
+                            color: '#fff'
+                        }}
+                    />
+                    
+                    <input
+                        type="text"
+                        placeholder="Full Name"
+                        value={formData.fullName}
+                        onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
+                        required
+                        style={{
+                            padding: '12px',
+                            background: 'rgba(255,255,255,0.05)',
+                            border: '1px solid rgba(255,255,255,0.1)',
+                            borderRadius: '8px',
+                            color: '#fff'
+                        }}
+                    />
+                    
+                    <select
+                        value={formData.userType}
+                        onChange={(e) => setFormData({ ...formData, userType: e.target.value })}
+                        style={{
+                            padding: '12px',
+                            background: 'rgba(255,255,255,0.05)',
+                            border: '1px solid rgba(255,255,255,0.1)',
+                            borderRadius: '8px',
+                            color: '#fff'
+                        }}
+                    >
+                        <option value="Freelance Translator">Freelance Translator</option>
+                        <option value="Reviewer">Reviewer</option>
+                        <option value="Agencies">Agency</option>
+                    </select>
+
+                    <div style={{ display: 'flex', gap: '1rem', marginTop: '1.5rem' }}>
+                        <button
+                            type="button"
+                            onClick={onClose}
+                            style={{
+                                flex: 1,
+                                padding: '12px',
+                                background: 'rgba(255,255,255,0.1)',
+                                color: '#fff',
+                                border: '1px solid rgba(255,255,255,0.2)',
+                                borderRadius: '8px',
+                                cursor: 'pointer'
+                            }}
+                        >
+                            Cancel
+                        </button>
+                        <button
+                            type="submit"
+                            disabled={loading}
+                            style={{
+                                flex: 1,
+                                padding: '12px',
+                                background: loading ? '#666' : 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+                                color: '#fff',
+                                border: 'none',
+                                borderRadius: '8px',
+                                cursor: loading ? 'not-allowed' : 'pointer'
+                            }}
+                        >
+                            {loading ? 'Creating...' : 'Create User'}
+                        </button>
+                    </div>
+                </form>
+            </div>
         </div>
     );
 };
