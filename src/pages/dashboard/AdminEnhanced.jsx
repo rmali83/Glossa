@@ -1491,7 +1491,7 @@ const AdminEnhanced = () => {
                             📊 Analytics Dashboard
                         </h2>
                         <p style={{ color: '#666', fontSize: '0.9rem' }}>
-                            Comprehensive insights into translation quality, productivity, and error patterns
+                            Comprehensive insights into translation quality, productivity, and error patterns (v2.0)
                         </p>
                     </div>
 
