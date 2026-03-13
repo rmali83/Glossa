@@ -7,6 +7,7 @@ import { useAuth } from '../../context/AuthContext';
 import SimpleQualityChart from '../../components/SimpleQualityChart';
 import SimpleErrorChart from '../../components/SimpleErrorChart';
 import TMManagement from '../../components/TMManagement';
+import emailService from '../../services/emailService';
 
 // Component for managing global annotation settings for the entire workspace
 const GlobalAnnotationSettings = ({ onUpdate }) => {
@@ -797,6 +798,25 @@ const AdminEnhanced = () => {
         }
     };
 
+    const handleSendWelcomeEmail = async (user) => {
+        try {
+            const emailResult = await emailService.sendWelcomeEmail({
+                email: user.email,
+                fullName: user.full_name,
+                tempPassword: 'Please reset your password',
+                userType: user.user_type
+            });
+
+            if (emailResult.success) {
+                alert('✅ Welcome email sent successfully to ' + user.email);
+            } else {
+                alert('❌ Failed to send email: ' + emailResult.error);
+            }
+        } catch (err) {
+            alert('❌ Error sending email: ' + err.message);
+        }
+    };
+
     const exportData = (type) => {
         let data, filename;
         if (type === 'users') {
@@ -1294,6 +1314,20 @@ const AdminEnhanced = () => {
                                                             }}
                                                         >
                                                             View
+                                                        </button>
+                                                        <button
+                                                            onClick={() => handleSendWelcomeEmail(user)}
+                                                            style={{
+                                                                padding: '6px 12px',
+                                                                background: 'rgba(16, 185, 129, 0.2)',
+                                                                color: '#10b981',
+                                                                border: '1px solid rgba(16, 185, 129, 0.3)',
+                                                                borderRadius: '6px',
+                                                                fontSize: '0.8rem',
+                                                                cursor: 'pointer'
+                                                            }}
+                                                        >
+                                                            📧 Email
                                                         </button>
                                                         <button
                                                             onClick={() => handleSuspendUser(user.id)}
@@ -1991,7 +2025,20 @@ const CreateUserModal = ({ onClose, onSuccess }) => {
                 }
             }
 
-            alert('✅ User created successfully!\n\n📧 The user has been sent a confirmation email and will need to verify their account.\n🔑 Temporary password: TempPassword123!\n\nNote: Ask the user to check their email and reset their password after first login.');
+            // Send welcome email
+            const emailResult = await emailService.sendWelcomeEmail({
+                email: formData.email,
+                fullName: formData.fullName,
+                tempPassword: formData.password,
+                userType: formData.userType
+            });
+
+            if (emailResult.success) {
+                alert('✅ User created successfully!\n\n📧 Welcome email sent to user\n🔑 Temporary password: ' + formData.password + '\n\nNote: User should check email and reset password after first login.');
+            } else {
+                alert('✅ User created successfully!\n\n⚠️ Email sending failed: ' + emailResult.error + '\n🔑 Temporary password: ' + formData.password + '\n\nNote: Please manually inform the user of their login credentials.');
+            }
+            
             onSuccess();
         } catch (err) {
             console.error('Error creating user:', err);
