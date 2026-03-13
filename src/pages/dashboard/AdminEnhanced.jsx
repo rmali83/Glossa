@@ -1931,6 +1931,7 @@ const AdminEnhanced = () => {
 const CreateUserModal = ({ onClose, onSuccess }) => {
     const [formData, setFormData] = useState({
         email: '',
+        password: 'TempPassword123!', // Default temporary password
         fullName: '',
         userType: 'Freelance Translator',
         languagePairs: [],
@@ -1943,30 +1944,28 @@ const CreateUserModal = ({ onClose, onSuccess }) => {
         setLoading(true);
 
         try {
-            // First, let's try to insert with minimal required fields
-            // We'll only use fields that definitely exist in the profiles table
-            
-            const { data: profileData, error: profileError } = await supabase
-                .from('profiles')
-                .insert([{
-                    id: crypto.randomUUID(),
-                    email: formData.email,
-                    full_name: formData.fullName,
-                    user_type: formData.userType
-                }])
-                .select()
-                .single();
+            // Create a user using the sign-up method which works without admin privileges
+            // This creates both the auth user and triggers the profile creation
+            const { data: authData, error: authError } = await supabase.auth.signUp({
+                email: formData.email,
+                password: 'TempPassword123!', // Temporary password - user will need to reset
+                options: {
+                    data: {
+                        full_name: formData.fullName,
+                        user_type: formData.userType
+                    }
+                }
+            });
 
-            if (profileError) {
-                // Check if it's a duplicate email error
-                if (profileError.code === '23505') {
+            if (authError) {
+                if (authError.message.includes('already registered')) {
                     throw new Error('A user with this email already exists');
                 }
-                throw profileError;
+                throw authError;
             }
 
-            // If the insert was successful, try to update with additional fields if they exist
-            if (profileData && (formData.languagePairs.length > 0 || formData.experienceLevel)) {
+            // If user creation was successful, update the profile with additional data
+            if (authData.user) {
                 const updateData = {};
                 if (formData.languagePairs.length > 0) {
                     updateData.language_pairs = formData.languagePairs;
@@ -1974,15 +1973,25 @@ const CreateUserModal = ({ onClose, onSuccess }) => {
                 if (formData.experienceLevel) {
                     updateData.years_experience = formData.experienceLevel;
                 }
+                if (formData.fullName) {
+                    updateData.full_name = formData.fullName;
+                }
+                if (formData.userType) {
+                    updateData.user_type = formData.userType;
+                }
 
-                // Try to update additional fields (ignore errors if columns don't exist)
-                await supabase
+                // Update the profile with additional information
+                const { error: updateError } = await supabase
                     .from('profiles')
                     .update(updateData)
-                    .eq('id', profileData.id);
+                    .eq('id', authData.user.id);
+
+                if (updateError) {
+                    console.warn('Could not update profile with additional data:', updateError);
+                }
             }
 
-            alert('✅ User profile created successfully!\n\nNote: This creates a user profile. In production, you would send an invitation email for the user to complete registration.');
+            alert('✅ User created successfully!\n\n📧 The user has been sent a confirmation email and will need to verify their account.\n🔑 Temporary password: TempPassword123!\n\nNote: Ask the user to check their email and reset their password after first login.');
             onSuccess();
         } catch (err) {
             console.error('Error creating user:', err);
@@ -2044,6 +2053,23 @@ const CreateUserModal = ({ onClose, onSuccess }) => {
                             color: '#fff'
                         }}
                     />
+
+                    <input
+                        type="password"
+                        placeholder="Temporary Password (default: TempPassword123!)"
+                        value={formData.password}
+                        onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                        style={{
+                            padding: '12px',
+                            background: 'rgba(255,255,255,0.05)',
+                            border: '1px solid rgba(255,255,255,0.1)',
+                            borderRadius: '8px',
+                            color: '#fff'
+                        }}
+                    />
+                    <p style={{ fontSize: '0.8rem', color: '#888', margin: '0 0 1rem 0' }}>
+                        💡 User will receive a confirmation email and should reset this password after first login.
+                    </p>
                     
                     <select
                         value={formData.userType}
