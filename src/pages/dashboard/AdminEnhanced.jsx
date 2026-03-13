@@ -1218,16 +1218,16 @@ const AdminEnhanced = () => {
                             <h3>Users ({filteredUsersEnhanced.length})</h3>
                         </div>
                         <div className="table-container">
-                            <table className="payment-table">
+                            <table className="payment-table" style={{ tableLayout: 'fixed', width: '100%' }}>
                                 <thead>
                                     <tr>
-                                        <th>User</th>
-                                        <th>Role</th>
-                                        <th>Languages</th>
-                                        <th>Projects</th>
-                                        <th>Experience</th>
-                                        <th>Status</th>
-                                        <th>Actions</th>
+                                        <th style={{ width: '25%', textAlign: 'left' }}>User</th>
+                                        <th style={{ width: '12%', textAlign: 'center' }}>Role</th>
+                                        <th style={{ width: '15%', textAlign: 'center' }}>Languages</th>
+                                        <th style={{ width: '8%', textAlign: 'center' }}>Projects</th>
+                                        <th style={{ width: '12%', textAlign: 'center' }}>Experience</th>
+                                        <th style={{ width: '8%', textAlign: 'center' }}>Status</th>
+                                        <th style={{ width: '20%', textAlign: 'center' }}>Actions</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -1240,7 +1240,7 @@ const AdminEnhanced = () => {
                                     ) : (
                                         filteredUsersEnhanced.map(user => (
                                             <tr key={user.id}>
-                                                <td>
+                                                <td style={{ width: '25%' }}>
                                                     <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                                                         <div style={{
                                                             width: '40px',
@@ -1266,7 +1266,7 @@ const AdminEnhanced = () => {
                                                         </div>
                                                     </div>
                                                 </td>
-                                                <td>
+                                                <td style={{ width: '12%', textAlign: 'center' }}>
                                                     <span 
                                                         className="status-pill"
                                                         style={{ 
@@ -1278,24 +1278,24 @@ const AdminEnhanced = () => {
                                                         {user.user_type || 'Unknown'}
                                                     </span>
                                                 </td>
-                                                <td style={{ fontSize: '0.8rem', color: '#ccc' }}>
+                                                <td style={{ width: '15%', fontSize: '0.8rem', color: '#ccc', textAlign: 'center' }}>
                                                     {user.language_pairs?.slice(0, 2).join(', ') || 'Not specified'}
                                                     {user.language_pairs?.length > 2 && (
                                                         <span style={{ color: '#666' }}> +{user.language_pairs.length - 2} more</span>
                                                     )}
                                                 </td>
-                                                <td style={{ fontSize: '0.9rem', color: '#fff' }}>
+                                                <td style={{ width: '8%', fontSize: '0.9rem', color: '#fff', textAlign: 'center' }}>
                                                     {projects.filter(p => p.translator_id === user.id || p.reviewer_id === user.id).length}
                                                 </td>
-                                                <td style={{ fontSize: '0.8rem', color: '#ccc' }}>
+                                                <td style={{ width: '12%', fontSize: '0.8rem', color: '#ccc', textAlign: 'center' }}>
                                                     {user.years_experience || 'Not specified'}
                                                 </td>
-                                                <td>
+                                                <td style={{ width: '8%', textAlign: 'center' }}>
                                                     <span className={`status-pill ${user.status === 'suspended' ? 'draft' : 'completed'}`}>
                                                         {user.status || 'Active'}
                                                     </span>
                                                 </td>
-                                                <td>
+                                                <td style={{ width: '20%' }}>
                                                     <div style={{ display: 'flex', gap: '8px' }}>
                                                         <button
                                                             onClick={() => alert(`View user: ${user.full_name}\nEmail: ${user.email}\nType: ${user.user_type}`)}
