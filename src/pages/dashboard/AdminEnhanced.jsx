@@ -927,7 +927,7 @@ const AdminEnhanced = () => {
                 borderBottom: '2px solid rgba(255,255,255,0.1)',
                 paddingBottom: '1rem'
             }}>
-                {['overview', 'users', 'jobs', 'datasets', 'analytics', 'tm', 'reports', 'annotation-settings'].map(tab => (
+                {['overview', 'users', 'jobs', 'datasets', 'analytics', 'tm', 'user-management', 'reports', 'annotation-settings'].map(tab => (
                     <button
                         key={tab}
                         onClick={() => setActiveTab(tab)}
@@ -943,7 +943,11 @@ const AdminEnhanced = () => {
                             textTransform: 'capitalize'
                         }}
                     >
-                        {tab === 'datasets' ? '🧬 Datasets' : tab === 'annotation-settings' ? '⚙️ Annotation' : tab === 'tm' ? '🔄 TM' : tab}
+                        {tab === 'datasets' ? '🧬 Datasets' : 
+                         tab === 'annotation-settings' ? '⚙️ Annotation' : 
+                         tab === 'tm' ? '🔄 TM' : 
+                         tab === 'user-management' ? '👥 Users' : 
+                         tab}
                     </button>
                 ))}
             </div>
@@ -1593,6 +1597,239 @@ const AdminEnhanced = () => {
                         </div>
                     </div>
                 </>
+            )}
+
+            {/* User Management Tab */}
+            {activeTab === 'user-management' && (
+                <div>
+                    <div style={{ marginBottom: '2rem' }}>
+                        <h2 style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#fff', marginBottom: '0.5rem' }}>
+                            👥 User Management & Permissions
+                        </h2>
+                        <p style={{ color: '#666', fontSize: '0.9rem' }}>
+                            Manage team members, roles, permissions, and performance tracking
+                        </p>
+                    </div>
+                    
+                    {/* User Stats */}
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '1.5rem', marginBottom: '2rem' }}>
+                        <div className="dashboard-card" style={{ padding: '1.5rem', textAlign: 'center' }}>
+                            <div style={{ fontSize: '2rem', fontWeight: 'bold', color: '#10b981' }}>
+                                {translators.length}
+                            </div>
+                            <div style={{ fontSize: '0.9rem', color: '#666', marginTop: '0.5rem' }}>
+                                Total Users
+                            </div>
+                        </div>
+                        <div className="dashboard-card" style={{ padding: '1.5rem', textAlign: 'center' }}>
+                            <div style={{ fontSize: '2rem', fontWeight: 'bold', color: '#f59e0b' }}>
+                                {translators.filter(t => t.user_type === 'Freelance Translator' || t.user_type === 'Translator').length}
+                            </div>
+                            <div style={{ fontSize: '0.9rem', color: '#666', marginTop: '0.5rem' }}>
+                                Translators
+                            </div>
+                        </div>
+                        <div className="dashboard-card" style={{ padding: '1.5rem', textAlign: 'center' }}>
+                            <div style={{ fontSize: '2rem', fontWeight: 'bold', color: '#3b82f6' }}>
+                                {translators.filter(t => t.user_type === 'Reviewer').length}
+                            </div>
+                            <div style={{ fontSize: '0.9rem', color: '#666', marginTop: '0.5rem' }}>
+                                Reviewers
+                            </div>
+                        </div>
+                        <div className="dashboard-card" style={{ padding: '1.5rem', textAlign: 'center' }}>
+                            <div style={{ fontSize: '2rem', fontWeight: 'bold', color: '#8b5cf6' }}>
+                                {translators.filter(t => t.user_type === 'Agencies').length}
+                            </div>
+                            <div style={{ fontSize: '0.9rem', color: '#666', marginTop: '0.5rem' }}>
+                                Agencies
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Quick Actions */}
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1.5rem', marginBottom: '2rem' }}>
+                        <button
+                            onClick={() => navigate('/dashboard/user-management')}
+                            style={{
+                                padding: '1.5rem',
+                                background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+                                color: '#fff',
+                                border: 'none',
+                                borderRadius: '12px',
+                                cursor: 'pointer',
+                                textAlign: 'left',
+                                boxShadow: '0 4px 15px rgba(16, 185, 129, 0.3)'
+                            }}
+                        >
+                            <div style={{ fontSize: '1.5rem', marginBottom: '0.5rem' }}>👥</div>
+                            <h4 style={{ margin: '0 0 0.5rem 0', fontSize: '1.1rem', fontWeight: '600' }}>
+                                Manage Users
+                            </h4>
+                            <p style={{ margin: 0, fontSize: '0.8rem', opacity: 0.9 }}>
+                                View, edit, and manage all platform users
+                            </p>
+                        </button>
+
+                        <button
+                            onClick={() => {
+                                // Create new user functionality
+                                alert('Create user functionality - would open modal or navigate to form');
+                            }}
+                            style={{
+                                padding: '1.5rem',
+                                background: 'linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)',
+                                color: '#fff',
+                                border: 'none',
+                                borderRadius: '12px',
+                                cursor: 'pointer',
+                                textAlign: 'left',
+                                boxShadow: '0 4px 15px rgba(59, 130, 246, 0.3)'
+                            }}
+                        >
+                            <div style={{ fontSize: '1.5rem', marginBottom: '0.5rem' }}>➕</div>
+                            <h4 style={{ margin: '0 0 0.5rem 0', fontSize: '1.1rem', fontWeight: '600' }}>
+                                Add New User
+                            </h4>
+                            <p style={{ margin: 0, fontSize: '0.8rem', opacity: 0.9 }}>
+                                Create translator, reviewer, or admin accounts
+                            </p>
+                        </button>
+
+                        <button
+                            onClick={() => {
+                                // Performance analytics functionality
+                                alert('Performance analytics - would show detailed user performance metrics');
+                            }}
+                            style={{
+                                padding: '1.5rem',
+                                background: 'linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%)',
+                                color: '#fff',
+                                border: 'none',
+                                borderRadius: '12px',
+                                cursor: 'pointer',
+                                textAlign: 'left',
+                                boxShadow: '0 4px 15px rgba(139, 92, 246, 0.3)'
+                            }}
+                        >
+                            <div style={{ fontSize: '1.5rem', marginBottom: '0.5rem' }}>📊</div>
+                            <h4 style={{ margin: '0 0 0.5rem 0', fontSize: '1.1rem', fontWeight: '600' }}>
+                                Performance Analytics
+                            </h4>
+                            <p style={{ margin: 0, fontSize: '0.8rem', opacity: 0.9 }}>
+                                View team performance metrics and insights
+                            </p>
+                        </button>
+                    </div>
+
+                    {/* Recent Users Table */}
+                    <div className="dashboard-card">
+                        <div className="card-header">
+                            <h3>Recent Users</h3>
+                            <button
+                                onClick={() => navigate('/dashboard/user-management')}
+                                style={{
+                                    padding: '8px 16px',
+                                    background: 'rgba(59, 130, 246, 0.2)',
+                                    color: '#60a5fa',
+                                    border: '1px solid rgba(59, 130, 246, 0.3)',
+                                    borderRadius: '6px',
+                                    fontSize: '0.8rem',
+                                    cursor: 'pointer'
+                                }}
+                            >
+                                View All
+                            </button>
+                        </div>
+                        <div className="table-container">
+                            <table className="payment-table">
+                                <thead>
+                                    <tr>
+                                        <th>User</th>
+                                        <th>Role</th>
+                                        <th>Languages</th>
+                                        <th>Projects</th>
+                                        <th>Status</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {translators.slice(0, 5).map(user => (
+                                        <tr key={user.id}>
+                                            <td>
+                                                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                                                    <div style={{
+                                                        width: '32px',
+                                                        height: '32px',
+                                                        borderRadius: '50%',
+                                                        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                                                        display: 'flex',
+                                                        alignItems: 'center',
+                                                        justifyContent: 'center',
+                                                        color: '#fff',
+                                                        fontWeight: 'bold',
+                                                        fontSize: '0.9rem'
+                                                    }}>
+                                                        {user.full_name?.charAt(0) || 'U'}
+                                                    </div>
+                                                    <div>
+                                                        <div style={{ fontWeight: '600', color: '#fff', fontSize: '0.9rem' }}>
+                                                            {user.full_name || 'Unnamed User'}
+                                                        </div>
+                                                        <div style={{ fontSize: '0.7rem', color: '#888' }}>
+                                                            {user.email}
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <span 
+                                                    className="status-pill"
+                                                    style={{ 
+                                                        fontSize: '0.7rem',
+                                                        padding: '4px 8px'
+                                                    }}
+                                                >
+                                                    {user.user_type || 'Unknown'}
+                                                </span>
+                                            </td>
+                                            <td style={{ fontSize: '0.7rem', color: '#ccc' }}>
+                                                {user.language_pairs?.slice(0, 1).join(', ') || 'Not specified'}
+                                                {user.language_pairs?.length > 1 && (
+                                                    <span style={{ color: '#666' }}> +{user.language_pairs.length - 1}</span>
+                                                )}
+                                            </td>
+                                            <td style={{ fontSize: '0.8rem', color: '#fff' }}>
+                                                {projects.filter(p => p.translator_id === user.id || p.reviewer_id === user.id).length}
+                                            </td>
+                                            <td>
+                                                <span className="status-pill completed" style={{ fontSize: '0.7rem', padding: '4px 8px' }}>
+                                                    Active
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <button
+                                                    onClick={() => navigate(`/dashboard/users/${user.id}`)}
+                                                    style={{
+                                                        padding: '4px 8px',
+                                                        background: 'rgba(59, 130, 246, 0.2)',
+                                                        color: '#60a5fa',
+                                                        border: '1px solid rgba(59, 130, 246, 0.3)',
+                                                        borderRadius: '4px',
+                                                        fontSize: '0.7rem',
+                                                        cursor: 'pointer'
+                                                    }}
+                                                >
+                                                    View
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
             )}
 
             {/* TM Management Tab */}
