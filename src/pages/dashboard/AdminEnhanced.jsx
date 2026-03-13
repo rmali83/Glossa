@@ -4,9 +4,9 @@ import './DashboardPages.css';
 import './DashboardTheme.css';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../context/AuthContext';
-import QualityTrendsChart from '../../components/QualityTrendsChart';
-import ErrorAnalysisChart from '../../components/ErrorAnalysisChart';
-import ProductivityMetrics from '../../components/ProductivityMetrics';
+import SimpleQualityChart from '../../components/SimpleQualityChart';
+import SimpleErrorChart from '../../components/SimpleErrorChart';
+import SimpleProductivityChart from '../../components/SimpleProductivityChart';
 
 // Component for managing global annotation settings for the entire workspace
 const GlobalAnnotationSettings = ({ onUpdate }) => {
@@ -1526,61 +1526,16 @@ const AdminEnhanced = () => {
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '2rem', marginBottom: '2rem' }}>
                         {/* Quality Trends Chart */}
                         <div style={{ minHeight: '350px' }}>
-                            {annotations.length > 0 ? (
-                                <QualityTrendsChart data={annotations} />
-                            ) : (
-                                <div className="dashboard-card">
-                                    <div className="card-header">
-                                        <h3>📈 Quality Trends (Last 7 Days)</h3>
-                                    </div>
-                                    <div style={{ padding: '2rem', textAlign: 'center', color: '#666' }}>
-                                        <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>📊</div>
-                                        <p>No annotation data available yet.</p>
-                                        <p style={{ fontSize: '0.85rem', marginTop: '1rem' }}>
-                                            Quality trends will appear here once translators start using the CAT workspace and annotation system.
-                                        </p>
-                                    </div>
-                                </div>
-                            )}
+                            <SimpleQualityChart data={annotations} />
                         </div>
                         
                         {/* Error Analysis and Productivity Charts */}
                         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '2rem' }}>
                             <div style={{ minHeight: '350px' }}>
-                                {annotations.length > 0 ? (
-                                    <ErrorAnalysisChart data={annotations} />
-                                ) : (
-                                    <div className="dashboard-card">
-                                        <div className="card-header">
-                                            <h3>🎯 Error Type Distribution</h3>
-                                        </div>
-                                        <div style={{ padding: '2rem', textAlign: 'center', color: '#666' }}>
-                                            <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>✨</div>
-                                            <p>No error data available yet.</p>
-                                            <p style={{ fontSize: '0.85rem', marginTop: '1rem' }}>
-                                                Error analysis will show here once annotations with error types are created.
-                                            </p>
-                                        </div>
-                                    </div>
-                                )}
+                                <SimpleErrorChart data={annotations} />
                             </div>
                             <div style={{ minHeight: '350px' }}>
-                                {projects.length > 0 && annotations.length > 0 ? (
-                                    <ProductivityMetrics projects={projects} annotations={annotations} />
-                                ) : (
-                                    <div className="dashboard-card">
-                                        <div className="card-header">
-                                            <h3>⚡ Translator Productivity</h3>
-                                        </div>
-                                        <div style={{ padding: '2rem', textAlign: 'center', color: '#666' }}>
-                                            <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>📊</div>
-                                            <p>No productivity data available yet.</p>
-                                            <p style={{ fontSize: '0.85rem', marginTop: '1rem' }}>
-                                                Translator metrics will appear here once projects are completed and annotated.
-                                            </p>
-                                        </div>
-                                    </div>
-                                )}
+                                <SimpleProductivityChart projects={projects} annotations={annotations} />
                             </div>
                         </div>
                     </div>
