@@ -619,6 +619,7 @@ const AdminEnhanced = () => {
                 console.error('Error fetching profiles:', profilesError);
             }
             setTranslators(profiles || []);
+            console.log('Fetched profiles:', profiles?.length || 0, 'users');
 
             // Fetch all projects with relations and error handling
             const { data: projectsData, error: projectsError } = await supabase
@@ -1930,7 +1931,6 @@ const AdminEnhanced = () => {
 const CreateUserModal = ({ onClose, onSuccess }) => {
     const [formData, setFormData] = useState({
         email: '',
-        password: '',
         fullName: '',
         userType: 'Freelance Translator',
         languagePairs: [],
@@ -1943,36 +1943,40 @@ const CreateUserModal = ({ onClose, onSuccess }) => {
         setLoading(true);
 
         try {
-            // Create user account
-            const { data: authData, error: authError } = await supabase.auth.admin.createUser({
-                email: formData.email,
-                password: formData.password,
-                user_metadata: {
+            // For now, we'll create a profile entry directly since admin.createUser requires service role
+            // In a production environment, you'd want to use proper admin API or invite system
+            
+            // Generate a temporary user ID (in production, this would come from auth)
+            const tempUserId = crypto.randomUUID();
+            
+            // Insert directly into profiles table
+            const { data: profileData, error: profileError } = await supabase
+                .from('profiles')
+                .insert([{
+                    id: tempUserId,
+                    email: formData.email,
                     full_name: formData.fullName,
-                    user_type: formData.userType
+                    user_type: formData.userType,
+                    language_pairs: formData.languagePairs.length > 0 ? formData.languagePairs : null,
+                    years_experience: formData.experienceLevel,
+                    created_at: new Date().toISOString()
+                }])
+                .select()
+                .single();
+
+            if (profileError) {
+                // Check if it's a duplicate email error
+                if (profileError.code === '23505') {
+                    throw new Error('A user with this email already exists');
                 }
-            });
-
-            if (authError) throw authError;
-
-            // Update profile
-            if (authData.user) {
-                const { error: profileError } = await supabase
-                    .from('profiles')
-                    .update({
-                        language_pairs: formData.languagePairs,
-                        years_experience: formData.experienceLevel
-                    })
-                    .eq('id', authData.user.id);
-
-                if (profileError) throw profileError;
+                throw profileError;
             }
 
-            alert('User created successfully!');
+            alert('✅ User profile created successfully!\n\nNote: This creates a user profile. In production, you would send an invitation email for the user to complete registration.');
             onSuccess();
         } catch (err) {
             console.error('Error creating user:', err);
-            alert('Error creating user: ' + err.message);
+            alert('❌ Error creating user: ' + err.message);
         } finally {
             setLoading(false);
         }
@@ -2017,21 +2021,6 @@ const CreateUserModal = ({ onClose, onSuccess }) => {
                     />
                     
                     <input
-                        type="password"
-                        placeholder="Password"
-                        value={formData.password}
-                        onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                        required
-                        style={{
-                            padding: '12px',
-                            background: 'rgba(255,255,255,0.05)',
-                            border: '1px solid rgba(255,255,255,0.1)',
-                            borderRadius: '8px',
-                            color: '#fff'
-                        }}
-                    />
-                    
-                    <input
                         type="text"
                         placeholder="Full Name"
                         value={formData.fullName}
@@ -2060,6 +2049,40 @@ const CreateUserModal = ({ onClose, onSuccess }) => {
                         <option value="Freelance Translator">Freelance Translator</option>
                         <option value="Reviewer">Reviewer</option>
                         <option value="Agencies">Agency</option>
+                    </select>
+
+                    <input
+                        type="text"
+                        placeholder="Language Pairs (e.g., EN-ES, FR-EN)"
+                        value={formData.languagePairs.join(', ')}
+                        onChange={(e) => setFormData({ 
+                            ...formData, 
+                            languagePairs: e.target.value.split(',').map(pair => pair.trim()).filter(pair => pair) 
+                        })}
+                        style={{
+                            padding: '12px',
+                            background: 'rgba(255,255,255,0.05)',
+                            border: '1px solid rgba(255,255,255,0.1)',
+                            borderRadius: '8px',
+                            color: '#fff'
+                        }}
+                    />
+
+                    <select
+                        value={formData.experienceLevel}
+                        onChange={(e) => setFormData({ ...formData, experienceLevel: e.target.value })}
+                        style={{
+                            padding: '12px',
+                            background: 'rgba(255,255,255,0.05)',
+                            border: '1px solid rgba(255,255,255,0.1)',
+                            borderRadius: '8px',
+                            color: '#fff'
+                        }}
+                    >
+                        <option value="Beginner">Beginner (0-2 years)</option>
+                        <option value="Intermediate">Intermediate (2-5 years)</option>
+                        <option value="Advanced">Advanced (5-10 years)</option>
+                        <option value="Expert">Expert (10+ years)</option>
                     </select>
 
                     <div style={{ display: 'flex', gap: '1rem', marginTop: '1.5rem' }}>
