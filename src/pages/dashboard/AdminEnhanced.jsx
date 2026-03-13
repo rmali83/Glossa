@@ -4,6 +4,9 @@ import './DashboardPages.css';
 import './DashboardTheme.css';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../context/AuthContext';
+import QualityTrendsChart from '../../components/QualityTrendsChart';
+import ErrorAnalysisChart from '../../components/ErrorAnalysisChart';
+import ProductivityMetrics from '../../components/ProductivityMetrics';
 
 // Component for managing global annotation settings for the entire workspace
 const GlobalAnnotationSettings = ({ onUpdate }) => {
@@ -560,6 +563,7 @@ const AdminEnhanced = () => {
     const [translators, setTranslators] = useState([]);
     const [projects, setProjects] = useState([]);
     const [datasets, setDatasets] = useState([]);
+    const [annotations, setAnnotations] = useState([]);
     const [datasetStats, setDatasetStats] = useState({
         total: 0,
         byDomain: {},
@@ -589,6 +593,9 @@ const AdminEnhanced = () => {
         fetchAdminData();
         if (activeTab === 'datasets') {
             fetchDatasets();
+        }
+        if (activeTab === 'analytics') {
+            fetchAnnotations();
         }
     }, [activeTab]);
 
@@ -701,6 +708,28 @@ const AdminEnhanced = () => {
             });
         } catch (err) {
             console.error('Dataset fetch error:', err);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const fetchAnnotations = async () => {
+        setLoading(true);
+        try {
+            const { data, error } = await supabase
+                .from('annotations')
+                .select('*')
+                .order('created_at', { ascending: false })
+                .limit(1000); // Get last 1000 annotations for analytics
+
+            if (error) {
+                console.error('Error fetching annotations:', error);
+                return;
+            }
+
+            setAnnotations(data || []);
+        } catch (err) {
+            console.error('Annotations fetch error:', err);
         } finally {
             setLoading(false);
         }
@@ -1455,57 +1484,82 @@ const AdminEnhanced = () => {
 
             {/* Analytics Tab */}
             {activeTab === 'analytics' && (
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '20px' }}>
-                    <div className="dashboard-card">
-                        <div className="card-header">
-                            <h3>Project Status Distribution</h3>
-                        </div>
-                        <div style={{ padding: '2rem', textAlign: 'center' }}>
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
-                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                    <span>Completed</span>
-                                    <div style={{ flex: 1, margin: '0 15px', height: '20px', background: 'rgba(255,255,255,0.05)', borderRadius: '10px', overflow: 'hidden' }}>
-                                        <div style={{ width: `${(stats.completedProjects / stats.totalProjects) * 100}%`, height: '100%', background: '#10b981' }}></div>
-                                    </div>
-                                    <strong>{stats.completedProjects}</strong>
-                                </div>
-                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                    <span>In Progress</span>
-                                    <div style={{ flex: 1, margin: '0 15px', height: '20px', background: 'rgba(255,255,255,0.05)', borderRadius: '10px', overflow: 'hidden' }}>
-                                        <div style={{ width: `${(stats.inProgressProjects / stats.totalProjects) * 100}%`, height: '100%', background: '#3b82f6' }}></div>
-                                    </div>
-                                    <strong>{stats.inProgressProjects}</strong>
-                                </div>
-                            </div>
+                <>
+                    {/* Analytics Header */}
+                    <div style={{ marginBottom: '2rem' }}>
+                        <h2 style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#fff', marginBottom: '0.5rem' }}>
+                            📊 Analytics Dashboard
+                        </h2>
+                        <p style={{ color: '#666', fontSize: '0.9rem' }}>
+                            Comprehensive insights into translation quality, productivity, and error patterns
+                        </p>
+                    </div>
+
+                    {/* Charts Grid */}
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '2rem', marginBottom: '2rem' }}>
+                        {/* Quality Trends Chart */}
+                        <QualityTrendsChart data={annotations} />
+                        
+                        {/* Error Analysis and Productivity Charts */}
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '2rem' }}>
+                            <ErrorAnalysisChart data={annotations} />
+                            <ProductivityMetrics projects={projects} annotations={annotations} />
                         </div>
                     </div>
 
-                    <div className="dashboard-card">
-                        <div className="card-header">
-                            <h3>Revenue Overview</h3>
-                        </div>
-                        <div style={{ padding: '2rem', textAlign: 'center' }}>
-                            <h2 style={{ fontSize: '3rem', color: '#10b981', marginBottom: '1rem' }}>
-                                ${stats.totalRevenue.toLocaleString()}
-                            </h2>
-                            <p style={{ color: '#666' }}>Total Platform Revenue</p>
-                            <div style={{ marginTop: '2rem', display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '15px' }}>
-                                <div>
-                                    <p style={{ fontSize: '0.85rem', color: '#666' }}>Avg per Project</p>
-                                    <strong style={{ fontSize: '1.5rem', color: '#fff' }}>
-                                        ${stats.totalProjects > 0 ? (stats.totalRevenue / stats.totalProjects).toFixed(2) : '0.00'}
-                                    </strong>
+                    {/* Summary Stats */}
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '20px' }}>
+                        <div className="dashboard-card">
+                            <div className="card-header">
+                                <h3>Project Status Distribution</h3>
+                            </div>
+                            <div style={{ padding: '2rem', textAlign: 'center' }}>
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                        <span>Completed</span>
+                                        <div style={{ flex: 1, margin: '0 15px', height: '20px', background: 'rgba(255,255,255,0.05)', borderRadius: '10px', overflow: 'hidden' }}>
+                                            <div style={{ width: `${stats.totalProjects > 0 ? (stats.completedProjects / stats.totalProjects) * 100 : 0}%`, height: '100%', background: '#10b981' }}></div>
+                                        </div>
+                                        <strong>{stats.completedProjects}</strong>
+                                    </div>
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                        <span>In Progress</span>
+                                        <div style={{ flex: 1, margin: '0 15px', height: '20px', background: 'rgba(255,255,255,0.05)', borderRadius: '10px', overflow: 'hidden' }}>
+                                            <div style={{ width: `${stats.totalProjects > 0 ? (stats.inProgressProjects / stats.totalProjects) * 100 : 0}%`, height: '100%', background: '#3b82f6' }}></div>
+                                        </div>
+                                        <strong>{stats.inProgressProjects}</strong>
+                                    </div>
                                 </div>
-                                <div>
-                                    <p style={{ fontSize: '0.85rem', color: '#666' }}>Avg per Word</p>
-                                    <strong style={{ fontSize: '1.5rem', color: '#fff' }}>
-                                        ${stats.totalWords > 0 ? (stats.totalRevenue / stats.totalWords).toFixed(3) : '0.000'}
-                                    </strong>
+                            </div>
+                        </div>
+
+                        <div className="dashboard-card">
+                            <div className="card-header">
+                                <h3>Revenue Overview</h3>
+                            </div>
+                            <div style={{ padding: '2rem', textAlign: 'center' }}>
+                                <h2 style={{ fontSize: '3rem', color: '#10b981', marginBottom: '1rem' }}>
+                                    ${stats.totalRevenue.toLocaleString()}
+                                </h2>
+                                <p style={{ color: '#666' }}>Total Platform Revenue</p>
+                                <div style={{ marginTop: '2rem', display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '15px' }}>
+                                    <div>
+                                        <p style={{ fontSize: '0.85rem', color: '#666' }}>Avg per Project</p>
+                                        <strong style={{ fontSize: '1.5rem', color: '#fff' }}>
+                                            ${stats.totalProjects > 0 ? (stats.totalRevenue / stats.totalProjects).toFixed(2) : '0.00'}
+                                        </strong>
+                                    </div>
+                                    <div>
+                                        <p style={{ fontSize: '0.85rem', color: '#666' }}>Avg per Word</p>
+                                        <strong style={{ fontSize: '1.5rem', color: '#fff' }}>
+                                            ${stats.totalWords > 0 ? (stats.totalRevenue / stats.totalWords).toFixed(3) : '0.000'}
+                                        </strong>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
-                </div>
+                </>
             )}
 
             {/* Reports Tab */}
