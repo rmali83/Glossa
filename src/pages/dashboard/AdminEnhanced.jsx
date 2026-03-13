@@ -613,14 +613,14 @@ const AdminEnhanced = () => {
             // Fetch all profiles with error handling
             const { data: profiles, error: profilesError } = await supabase
                 .from('profiles')
-                .select('*')
-                .order('created_at', { ascending: false });
+                .select('*');
             
             if (profilesError) {
                 console.error('Error fetching profiles:', profilesError);
             }
             setTranslators(profiles || []);
             console.log('Fetched profiles:', profiles?.length || 0, 'users');
+            console.log('Profile data sample:', profiles?.[0]); // Log first profile to see structure
 
             // Fetch all projects with relations and error handling
             const { data: projectsData, error: projectsError } = await supabase
@@ -629,8 +629,7 @@ const AdminEnhanced = () => {
                     *,
                     translator:translator_id(full_name, email),
                     reviewer:reviewer_id(full_name, email)
-                `)
-                .order('created_at', { ascending: false });
+                `);
 
             if (projectsError) {
                 console.error('Error fetching projects:', projectsError);
@@ -643,7 +642,6 @@ const AdminEnhanced = () => {
             const { data: activities, error: activitiesError } = await supabase
                 .from('activity_log')
                 .select('*')
-                .order('created_at', { ascending: false })
                 .limit(20);
             
             if (activitiesError) {
@@ -1088,6 +1086,21 @@ const AdminEnhanced = () => {
                             </p>
                         </div>
                         <div style={{ display: 'flex', gap: '1rem' }}>
+                            <button
+                                onClick={() => fetchAdminData()}
+                                style={{
+                                    padding: '12px 24px',
+                                    background: 'rgba(59, 130, 246, 0.2)',
+                                    color: '#60a5fa',
+                                    border: '1px solid rgba(59, 130, 246, 0.3)',
+                                    borderRadius: '12px',
+                                    fontSize: '1rem',
+                                    fontWeight: '600',
+                                    cursor: 'pointer'
+                                }}
+                            >
+                                🔄 Refresh Data
+                            </button>
                             <button
                                 onClick={() => exportData('users')}
                                 style={{
