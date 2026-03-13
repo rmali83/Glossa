@@ -1391,8 +1391,8 @@ const AdminEnhanced = () => {
                         </div>
                     </div>
 
-                    {/* Create User Modal */}
-                    {showCreateUserModal && (
+                    {/* Create User Modal - Temporarily Disabled for Testing */}
+                    {false && showCreateUserModal && (
                         <CreateUserModal 
                             onClose={() => setShowCreateUserModal(false)}
                             onSuccess={() => {
@@ -1823,80 +1823,70 @@ const AdminEnhanced = () => {
 
             {/* Analytics Tab */}
             {activeTab === 'analytics' && (
-                <>
-                    {/* Analytics Header */}
+                <div>
                     <div style={{ marginBottom: '2rem' }}>
                         <h2 style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#fff', marginBottom: '0.5rem' }}>
-                            📊 Analytics Dashboard v2.1
+                            📊 Analytics Dashboard
                         </h2>
                         <p style={{ color: '#666', fontSize: '0.9rem' }}>
-                            Comprehensive insights into translation quality, productivity, and error patterns
+                            Translation quality insights and performance metrics
                         </p>
-                        <div style={{ fontSize: '0.8rem', color: '#888', marginTop: '0.5rem' }}>
-                            Data loaded: {annotations.length} annotations, {projects.length} projects
-                        </div>
                     </div>
 
-                    {/* Empty State or Charts */}
-                    {annotations.length === 0 && projects.length === 0 ? (
-                        <div style={{ 
-                            textAlign: 'center', 
-                            padding: '4rem 2rem',
-                            background: 'rgba(255,255,255,0.02)',
-                            borderRadius: '12px',
-                            border: '1px solid rgba(255,255,255,0.1)'
-                        }}>
-                            <div style={{ fontSize: '4rem', marginBottom: '1rem' }}>📊</div>
-                            <h3 style={{ color: '#fff', marginBottom: '1rem' }}>No Analytics Data Available</h3>
-                            <p style={{ color: '#888', marginBottom: '2rem', maxWidth: '500px', margin: '0 auto 2rem auto' }}>
-                                Analytics will appear here once you have translation projects and quality annotations. 
-                                Start by creating projects and having translators complete work with quality assessments.
-                            </p>
-                            
-                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1.5rem', marginTop: '2rem' }}>
-                                <div style={{ 
-                                    padding: '1.5rem', 
-                                    background: 'rgba(16, 185, 129, 0.1)', 
-                                    borderRadius: '8px',
-                                    border: '1px solid rgba(16, 185, 129, 0.3)'
-                                }}>
-                                    <div style={{ fontSize: '2rem', marginBottom: '0.5rem' }}>📈</div>
-                                    <h4 style={{ color: '#10b981', margin: '0 0 0.5rem 0' }}>Quality Trends</h4>
-                                    <p style={{ fontSize: '0.8rem', color: '#888', margin: 0 }}>
-                                        Track translation quality over time with detailed metrics
-                                    </p>
-                                </div>
-                                
-                                <div style={{ 
-                                    padding: '1.5rem', 
-                                    background: 'rgba(239, 68, 68, 0.1)', 
-                                    borderRadius: '8px',
-                                    border: '1px solid rgba(239, 68, 68, 0.3)'
-                                }}>
-                                    <div style={{ fontSize: '2rem', marginBottom: '0.5rem' }}>🔍</div>
-                                    <h4 style={{ color: '#ef4444', margin: '0 0 0.5rem 0' }}>Error Analysis</h4>
-                                    <p style={{ fontSize: '0.8rem', color: '#888', margin: 0 }}>
-                                        Identify common error patterns and improvement areas
-                                    </p>
-                                </div>
-                                
-                                <div style={{ 
-                                    padding: '1.5rem', 
-                                    background: 'rgba(59, 130, 246, 0.1)', 
-                                    borderRadius: '8px',
-                                    border: '1px solid rgba(59, 130, 246, 0.3)'
-                                }}>
-                                    <div style={{ fontSize: '2rem', marginBottom: '0.5rem' }}>⚡</div>
-                                    <h4 style={{ color: '#3b82f6', margin: '0 0 0.5rem 0' }}>Productivity</h4>
-                                    <p style={{ fontSize: '0.8rem', color: '#888', margin: 0 }}>
-                                        Monitor translator performance and project timelines
-                                    </p>
-                                </div>
+                    {annotations && annotations.length > 0 ? (
+                        <div>
+                            {/* Analytics Charts */}
+                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '1.5rem', marginBottom: '2rem' }}>
+                                <SimpleQualityChart data={annotations} />
+                                <SimpleErrorChart data={annotations} />
                             </div>
 
-                            <div style={{ marginTop: '2rem' }}>
+                            {/* Analytics Stats */}
+                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '1rem' }}>
+                                <div className="dashboard-card" style={{ padding: '1.5rem', textAlign: 'center' }}>
+                                    <h4 style={{ color: '#10b981', marginBottom: '1rem' }}>Total Annotations</h4>
+                                    <div style={{ fontSize: '2rem', fontWeight: 'bold', color: '#fff' }}>
+                                        {annotations.length}
+                                    </div>
+                                </div>
+                                <div className="dashboard-card" style={{ padding: '1.5rem', textAlign: 'center' }}>
+                                    <h4 style={{ color: '#3b82f6', marginBottom: '1rem' }}>Avg Quality</h4>
+                                    <div style={{ fontSize: '2rem', fontWeight: 'bold', color: '#fff' }}>
+                                        {annotations.filter(a => a.quality_rating).length > 0 
+                                            ? (annotations.filter(a => a.quality_rating).reduce((sum, a) => sum + a.quality_rating, 0) / annotations.filter(a => a.quality_rating).length).toFixed(1)
+                                            : 'N/A'
+                                        }
+                                    </div>
+                                </div>
+                                <div className="dashboard-card" style={{ padding: '1.5rem', textAlign: 'center' }}>
+                                    <h4 style={{ color: '#f59e0b', marginBottom: '1rem' }}>Projects</h4>
+                                    <div style={{ fontSize: '2rem', fontWeight: 'bold', color: '#fff' }}>
+                                        {projects.length}
+                                    </div>
+                                </div>
+                                <div className="dashboard-card" style={{ padding: '1.5rem', textAlign: 'center' }}>
+                                    <h4 style={{ color: '#ef4444', marginBottom: '1rem' }}>Error Rate</h4>
+                                    <div style={{ fontSize: '2rem', fontWeight: 'bold', color: '#fff' }}>
+                                        {annotations.length > 0 
+                                            ? Math.round((annotations.filter(a => a.error_fluency || a.error_grammar || a.error_terminology || a.error_style || a.error_accuracy).length / annotations.length) * 100)
+                                            : 0
+                                        }%
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    ) : (
+                        <div className="dashboard-card">
+                            <div style={{ textAlign: 'center', padding: '4rem 2rem' }}>
+                                <div style={{ fontSize: '4rem', marginBottom: '1rem' }}>📊</div>
+                                <h3 style={{ color: '#fff', marginBottom: '1rem' }}>No Analytics Data Yet</h3>
+                                <p style={{ color: '#888', marginBottom: '2rem', maxWidth: '500px', margin: '0 auto 2rem' }}>
+                                    Analytics will appear here once you have translation projects with quality annotations. 
+                                    Start by creating projects and adding quality ratings to see insights.
+                                </p>
+                                
                                 <button
-                                    onClick={() => setActiveTab('jobs')}
+                                    onClick={generateSampleAnalyticsData}
                                     style={{
                                         padding: '12px 24px',
                                         background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
@@ -1906,105 +1896,20 @@ const AdminEnhanced = () => {
                                         fontSize: '1rem',
                                         fontWeight: '600',
                                         cursor: 'pointer',
-                                        marginRight: '1rem'
+                                        boxShadow: '0 4px 12px rgba(16, 185, 129, 0.3)'
                                     }}
                                 >
-                                    📋 View Projects
+                                    🧪 Generate Sample Analytics Data
                                 </button>
-                                <button
-                                    onClick={() => generateSampleAnalyticsData()}
-                                    style={{
-                                        padding: '12px 24px',
-                                        background: 'rgba(59, 130, 246, 0.2)',
-                                        color: '#60a5fa',
-                                        border: '1px solid rgba(59, 130, 246, 0.3)',
-                                        borderRadius: '8px',
-                                        fontSize: '1rem',
-                                        fontWeight: '600',
-                                        cursor: 'pointer'
-                                    }}
-                                >
-                                    🧪 Load Sample Data
-                                </button>
-                            </div>
-                        </div>
-                    ) : (
-                        <>
-                            {/* Charts Grid */}
-                            <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '2rem', marginBottom: '2rem' }}>
-                                {/* Quality Trends Chart */}
-                                <div style={{ minHeight: '350px' }}>
-                                    <SimpleQualityChart data={annotations} />
-                                </div>
                                 
-                                {/* Error Analysis and Productivity Charts */}
-                                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '2rem' }}>
-                                    <div style={{ minHeight: '350px' }}>
-                                        <SimpleErrorChart data={annotations} />
-                                    </div>
-                                    <div style={{ minHeight: '350px' }}>
-                                        <SimpleProductivityChart projects={projects} annotations={annotations} />
-                                    </div>
+                                <div style={{ marginTop: '1.5rem', fontSize: '0.9rem', color: '#666' }}>
+                                    Current data: {annotations?.length || 0} annotations, {projects?.length || 0} projects
                                 </div>
                             </div>
-                        </>
+                        </div>
                     )}
-
-                    {/* Summary Stats */}
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '20px' }}>
-                        <div className="dashboard-card">
-                            <div className="card-header">
-                                <h3>Project Status Distribution</h3>
-                            </div>
-                            <div style={{ padding: '2rem', textAlign: 'center' }}>
-                                <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
-                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                        <span>Completed</span>
-                                        <div style={{ flex: 1, margin: '0 15px', height: '20px', background: 'rgba(255,255,255,0.05)', borderRadius: '10px', overflow: 'hidden' }}>
-                                            <div style={{ width: `${stats.totalProjects > 0 ? (stats.completedProjects / stats.totalProjects) * 100 : 0}%`, height: '100%', background: '#10b981' }}></div>
-                                        </div>
-                                        <strong>{stats.completedProjects}</strong>
-                                    </div>
-                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                        <span>In Progress</span>
-                                        <div style={{ flex: 1, margin: '0 15px', height: '20px', background: 'rgba(255,255,255,0.05)', borderRadius: '10px', overflow: 'hidden' }}>
-                                            <div style={{ width: `${stats.totalProjects > 0 ? (stats.inProgressProjects / stats.totalProjects) * 100 : 0}%`, height: '100%', background: '#3b82f6' }}></div>
-                                        </div>
-                                        <strong>{stats.inProgressProjects}</strong>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div className="dashboard-card">
-                            <div className="card-header">
-                                <h3>Revenue Overview</h3>
-                            </div>
-                            <div style={{ padding: '2rem', textAlign: 'center' }}>
-                                <h2 style={{ fontSize: '3rem', color: '#10b981', marginBottom: '1rem' }}>
-                                    ${stats.totalRevenue.toLocaleString()}
-                                </h2>
-                                <p style={{ color: '#666' }}>Total Platform Revenue</p>
-                                <div style={{ marginTop: '2rem', display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '15px' }}>
-                                    <div>
-                                        <p style={{ fontSize: '0.85rem', color: '#666' }}>Avg per Project</p>
-                                        <strong style={{ fontSize: '1.5rem', color: '#fff' }}>
-                                            ${stats.totalProjects > 0 ? (stats.totalRevenue / stats.totalProjects).toFixed(2) : '0.00'}
-                                        </strong>
-                                    </div>
-                                    <div>
-                                        <p style={{ fontSize: '0.85rem', color: '#666' }}>Avg per Word</p>
-                                        <strong style={{ fontSize: '1.5rem', color: '#fff' }}>
-                                            ${stats.totalWords > 0 ? (stats.totalRevenue / stats.totalWords).toFixed(3) : '0.000'}
-                                        </strong>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </>
+                </div>
             )}
-
             {/* TM Management Tab */}
             {activeTab === 'tm' && (
                 <div>
