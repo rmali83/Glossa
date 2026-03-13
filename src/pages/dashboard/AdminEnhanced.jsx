@@ -1488,10 +1488,10 @@ const AdminEnhanced = () => {
                     {/* Analytics Header */}
                     <div style={{ marginBottom: '2rem' }}>
                         <h2 style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#fff', marginBottom: '0.5rem' }}>
-                            📊 Analytics Dashboard
+                            📊 Analytics Dashboard v2.1
                         </h2>
                         <p style={{ color: '#666', fontSize: '0.9rem' }}>
-                            Comprehensive insights into translation quality, productivity, and error patterns (v2.0)
+                            Comprehensive insights into translation quality, productivity, and error patterns - UPDATED
                         </p>
                     </div>
 
