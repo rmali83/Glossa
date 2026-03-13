@@ -1485,7 +1485,6 @@ const AdminEnhanced = () => {
             {/* Analytics Tab */}
             {activeTab === 'analytics' && (
                 <>
-                    {console.log('Analytics tab rendering with annotations:', annotations.length)}
                     {/* Analytics Header */}
                     <div style={{ marginBottom: '2rem' }}>
                         <h2 style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#fff', marginBottom: '0.5rem' }}>
@@ -1499,10 +1498,7 @@ const AdminEnhanced = () => {
                     {/* Charts Grid */}
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '2rem', marginBottom: '2rem' }}>
                         {/* Quality Trends Chart */}
-                        <div style={{ padding: '1rem', background: 'rgba(255,0,0,0.1)', border: '2px solid red' }}>
-                            <p style={{ color: 'red' }}>DEBUG: Chart should appear here. Annotations: {annotations.length}</p>
-                            <QualityTrendsChart data={annotations} />
-                        </div>
+                        <QualityTrendsChart data={annotations} />
                         
                         {/* Error Analysis and Productivity Charts */}
                         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '2rem' }}>
