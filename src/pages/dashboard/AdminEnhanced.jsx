@@ -813,6 +813,48 @@ const AdminEnhanced = () => {
         }
     };
 
+    const generateSampleAnalyticsData = async () => {
+        try {
+            // Generate sample annotation data for analytics
+            const sampleAnnotations = [
+                {
+                    id: 1,
+                    quality_rating: 4,
+                    error_types: ['Grammar'],
+                    domain: 'Technology',
+                    created_at: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString()
+                },
+                {
+                    id: 2,
+                    quality_rating: 5,
+                    error_types: [],
+                    domain: 'Medical',
+                    created_at: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString()
+                },
+                {
+                    id: 3,
+                    quality_rating: 3,
+                    error_types: ['Terminology', 'Style'],
+                    domain: 'Legal',
+                    created_at: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString()
+                },
+                {
+                    id: 4,
+                    quality_rating: 4,
+                    error_types: ['Fluency'],
+                    domain: 'Technology',
+                    created_at: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString()
+                }
+            ];
+
+            // Set sample data temporarily (in a real app, this would be saved to database)
+            setAnnotations(sampleAnnotations);
+            alert('✅ Sample analytics data loaded! You can now see the charts and metrics.');
+        } catch (err) {
+            alert('❌ Error loading sample data: ' + err.message);
+        }
+    };
+
     const exportData = (type) => {
         let data, filename;
         if (type === 'users') {
@@ -1788,30 +1830,125 @@ const AdminEnhanced = () => {
                             📊 Analytics Dashboard v2.1
                         </h2>
                         <p style={{ color: '#666', fontSize: '0.9rem' }}>
-                            Comprehensive insights into translation quality, productivity, and error patterns - UPDATED
+                            Comprehensive insights into translation quality, productivity, and error patterns
                         </p>
                         <div style={{ fontSize: '0.8rem', color: '#888', marginTop: '0.5rem' }}>
                             Data loaded: {annotations.length} annotations, {projects.length} projects
                         </div>
                     </div>
 
-                    {/* Charts Grid */}
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '2rem', marginBottom: '2rem' }}>
-                        {/* Quality Trends Chart */}
-                        <div style={{ minHeight: '350px' }}>
-                            <SimpleQualityChart data={annotations} />
-                        </div>
-                        
-                        {/* Error Analysis and Productivity Charts */}
-                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '2rem' }}>
-                            <div style={{ minHeight: '350px' }}>
-                                <SimpleErrorChart data={annotations} />
+                    {/* Empty State or Charts */}
+                    {annotations.length === 0 && projects.length === 0 ? (
+                        <div style={{ 
+                            textAlign: 'center', 
+                            padding: '4rem 2rem',
+                            background: 'rgba(255,255,255,0.02)',
+                            borderRadius: '12px',
+                            border: '1px solid rgba(255,255,255,0.1)'
+                        }}>
+                            <div style={{ fontSize: '4rem', marginBottom: '1rem' }}>📊</div>
+                            <h3 style={{ color: '#fff', marginBottom: '1rem' }}>No Analytics Data Available</h3>
+                            <p style={{ color: '#888', marginBottom: '2rem', maxWidth: '500px', margin: '0 auto 2rem auto' }}>
+                                Analytics will appear here once you have translation projects and quality annotations. 
+                                Start by creating projects and having translators complete work with quality assessments.
+                            </p>
+                            
+                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1.5rem', marginTop: '2rem' }}>
+                                <div style={{ 
+                                    padding: '1.5rem', 
+                                    background: 'rgba(16, 185, 129, 0.1)', 
+                                    borderRadius: '8px',
+                                    border: '1px solid rgba(16, 185, 129, 0.3)'
+                                }}>
+                                    <div style={{ fontSize: '2rem', marginBottom: '0.5rem' }}>📈</div>
+                                    <h4 style={{ color: '#10b981', margin: '0 0 0.5rem 0' }}>Quality Trends</h4>
+                                    <p style={{ fontSize: '0.8rem', color: '#888', margin: 0 }}>
+                                        Track translation quality over time with detailed metrics
+                                    </p>
+                                </div>
+                                
+                                <div style={{ 
+                                    padding: '1.5rem', 
+                                    background: 'rgba(239, 68, 68, 0.1)', 
+                                    borderRadius: '8px',
+                                    border: '1px solid rgba(239, 68, 68, 0.3)'
+                                }}>
+                                    <div style={{ fontSize: '2rem', marginBottom: '0.5rem' }}>🔍</div>
+                                    <h4 style={{ color: '#ef4444', margin: '0 0 0.5rem 0' }}>Error Analysis</h4>
+                                    <p style={{ fontSize: '0.8rem', color: '#888', margin: 0 }}>
+                                        Identify common error patterns and improvement areas
+                                    </p>
+                                </div>
+                                
+                                <div style={{ 
+                                    padding: '1.5rem', 
+                                    background: 'rgba(59, 130, 246, 0.1)', 
+                                    borderRadius: '8px',
+                                    border: '1px solid rgba(59, 130, 246, 0.3)'
+                                }}>
+                                    <div style={{ fontSize: '2rem', marginBottom: '0.5rem' }}>⚡</div>
+                                    <h4 style={{ color: '#3b82f6', margin: '0 0 0.5rem 0' }}>Productivity</h4>
+                                    <p style={{ fontSize: '0.8rem', color: '#888', margin: 0 }}>
+                                        Monitor translator performance and project timelines
+                                    </p>
+                                </div>
                             </div>
-                            <div style={{ minHeight: '350px' }}>
-                                <SimpleProductivityChart projects={projects} annotations={annotations} />
+
+                            <div style={{ marginTop: '2rem' }}>
+                                <button
+                                    onClick={() => setActiveTab('jobs')}
+                                    style={{
+                                        padding: '12px 24px',
+                                        background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+                                        color: '#fff',
+                                        border: 'none',
+                                        borderRadius: '8px',
+                                        fontSize: '1rem',
+                                        fontWeight: '600',
+                                        cursor: 'pointer',
+                                        marginRight: '1rem'
+                                    }}
+                                >
+                                    📋 View Projects
+                                </button>
+                                <button
+                                    onClick={() => generateSampleAnalyticsData()}
+                                    style={{
+                                        padding: '12px 24px',
+                                        background: 'rgba(59, 130, 246, 0.2)',
+                                        color: '#60a5fa',
+                                        border: '1px solid rgba(59, 130, 246, 0.3)',
+                                        borderRadius: '8px',
+                                        fontSize: '1rem',
+                                        fontWeight: '600',
+                                        cursor: 'pointer'
+                                    }}
+                                >
+                                    🧪 Load Sample Data
+                                </button>
                             </div>
                         </div>
-                    </div>
+                    ) : (
+                        <>
+                            {/* Charts Grid */}
+                            <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '2rem', marginBottom: '2rem' }}>
+                                {/* Quality Trends Chart */}
+                                <div style={{ minHeight: '350px' }}>
+                                    <SimpleQualityChart data={annotations} />
+                                </div>
+                                
+                                {/* Error Analysis and Productivity Charts */}
+                                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '2rem' }}>
+                                    <div style={{ minHeight: '350px' }}>
+                                        <SimpleErrorChart data={annotations} />
+                                    </div>
+                                    <div style={{ minHeight: '350px' }}>
+                                        <SimpleProductivityChart projects={projects} annotations={annotations} />
+                                    </div>
+                                </div>
+                            </div>
+                        </>
+                    )}
 
                     {/* Summary Stats */}
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '20px' }}>
