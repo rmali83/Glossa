@@ -439,6 +439,9 @@ const CATProjectView = () => {
                     // Confidence
                     confidence_score: data.confidence_score || null,
                     uncertain_about: data.uncertain_about || [],
+                    // MQM evaluation
+                    mqm_errors: data.mqm_errors || [],
+                    mqm_score: data.mqm_score || 100,
                     // Existing fields
                     domain: data.domain || '',
                     quality_rating: data.quality_rating || null,
@@ -465,6 +468,9 @@ const CATProjectView = () => {
                     ai_helpfulness: '',
                     confidence_score: null,
                     uncertain_about: [],
+                    // MQM evaluation
+                    mqm_errors: [],
+                    mqm_score: 100,
                     domain: '',
                     quality_rating: null,
                     notes: ''
