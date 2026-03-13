@@ -619,8 +619,6 @@ const AdminEnhanced = () => {
                 console.error('Error fetching profiles:', profilesError);
             }
             setTranslators(profiles || []);
-            console.log('Fetched profiles:', profiles?.length || 0, 'users');
-            console.log('Profile data sample:', profiles?.[0]); // Log first profile to see structure
 
             // Fetch all projects with relations and error handling
             const { data: projectsData, error: projectsError } = await supabase
@@ -1086,21 +1084,6 @@ const AdminEnhanced = () => {
                             </p>
                         </div>
                         <div style={{ display: 'flex', gap: '1rem' }}>
-                            <button
-                                onClick={() => fetchAdminData()}
-                                style={{
-                                    padding: '12px 24px',
-                                    background: 'rgba(59, 130, 246, 0.2)',
-                                    color: '#60a5fa',
-                                    border: '1px solid rgba(59, 130, 246, 0.3)',
-                                    borderRadius: '12px',
-                                    fontSize: '1rem',
-                                    fontWeight: '600',
-                                    cursor: 'pointer'
-                                }}
-                            >
-                                🔄 Refresh Data
-                            </button>
                             <button
                                 onClick={() => exportData('users')}
                                 style={{
