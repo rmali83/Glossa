@@ -489,29 +489,70 @@ const CATProjectView = () => {
         
         setSavingAnnotation(true);
         try {
+            // Ensure MQM data is properly formatted
+            const mqmErrors = Array.isArray(annotation.mqm_errors) ? annotation.mqm_errors : [];
+            const mqmScore = typeof annotation.mqm_score === 'number' ? annotation.mqm_score : 100;
+
             const annotationData = {
                 segment_id: segments[activeSegmentIndex].id,
                 project_id: projectId,
                 annotator_id: user.id,
-                ...annotation
+                // Basic error flags
+                error_fluency: annotation.error_fluency || false,
+                error_grammar: annotation.error_grammar || false,
+                error_terminology: annotation.error_terminology || false,
+                error_style: annotation.error_style || false,
+                error_accuracy: annotation.error_accuracy || false,
+                // Severity levels
+                error_fluency_severity: annotation.error_fluency_severity || null,
+                error_grammar_severity: annotation.error_grammar_severity || null,
+                error_terminology_severity: annotation.error_terminology_severity || null,
+                error_style_severity: annotation.error_style_severity || null,
+                error_accuracy_severity: annotation.error_accuracy_severity || null,
+                // Effort tracking
+                translation_effort: annotation.translation_effort || null,
+                post_editing_effort: annotation.post_editing_effort || null,
+                // AI quality
+                ai_translation_quality: annotation.ai_translation_quality || null,
+                ai_helpfulness: annotation.ai_helpfulness || null,
+                // Confidence
+                confidence_score: annotation.confidence_score || null,
+                uncertain_about: Array.isArray(annotation.uncertain_about) ? annotation.uncertain_about : [],
+                // MQM evaluation
+                mqm_errors: mqmErrors,
+                mqm_score: mqmScore,
+                // Basic fields
+                domain: annotation.domain || null,
+                quality_rating: annotation.quality_rating || null,
+                notes: annotation.notes || null
             };
 
-            const { error } = await supabase
+            // Debug logging
+            console.log('Saving annotation data:', annotationData);
+            console.log('MQM errors:', mqmErrors);
+            console.log('MQM score:', mqmScore);
+
+            const { data, error } = await supabase
                 .from('annotations')
                 .upsert(annotationData, {
                     onConflict: 'segment_id,annotator_id'
-                });
+                })
+                .select();
 
             if (error) {
-                console.error('Error saving annotation:', error);
-                alert('Failed to save annotation');
+                console.error('Supabase error details:', error);
+                console.error('Error code:', error.code);
+                console.error('Error message:', error.message);
+                console.error('Error details:', error.details);
+                alert(`Failed to save annotation: ${error.message}`);
             } else {
-                console.log('Annotation saved successfully');
+                console.log('Annotation saved successfully:', data);
                 // Optionally show success message
             }
         } catch (err) {
             console.error('Save annotation error:', err);
-            alert('Error saving annotation');
+            console.error('Error stack:', err.stack);
+            alert(`Error saving annotation: ${err.message}`);
         } finally {
             setSavingAnnotation(false);
         }
