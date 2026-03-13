@@ -1,110 +1,118 @@
--- Check migration status and database readiness for MQM
--- Run this to verify all migrations have been applied correctly
+-- Check Translation Memory table structure and fix issues
+-- Run this in Supabase SQL Editor to diagnose and fix the TM setup
 
--- 1. Check if annotations table exists and has all required columns
+-- Step 1: Check if translation_memory table exists and its structure
 SELECT 
-    table_name,
-    column_name,
-    data_type,
+    column_name, 
+    data_type, 
     is_nullable,
     column_default
 FROM information_schema.columns 
-WHERE table_name = 'annotations' 
-AND table_schema = 'public'
+WHERE table_name = 'translation_memory' 
 ORDER BY ordinal_position;
 
--- 2. Check if MQM-specific columns exist
-SELECT 
-    CASE 
-        WHEN EXISTS (
-            SELECT 1 FROM information_schema.columns 
-            WHERE table_name = 'annotations' 
-            AND column_name = 'mqm_errors'
-        ) THEN '✅ mqm_errors column exists'
-        ELSE '❌ mqm_errors column missing'
-    END as mqm_errors_status,
-    
-    CASE 
-        WHEN EXISTS (
-            SELECT 1 FROM information_schema.columns 
-            WHERE table_name = 'annotations' 
-            AND column_name = 'mqm_score'
-        ) THEN '✅ mqm_score column exists'
-        ELSE '❌ mqm_score column missing'
-    END as mqm_score_status;
+-- Step 2: Check if the table exists at all
+SELECT EXISTS (
+    SELECT FROM information_schema.tables 
+    WHERE table_name = 'translation_memory'
+) as table_exists;
 
--- 3. Check if MQM indexes exist
-SELECT 
-    indexname,
-    indexdef
-FROM pg_indexes 
-WHERE tablename = 'annotations' 
-AND (indexname LIKE '%mqm%' OR indexdef LIKE '%mqm%');
-
--- 4. Check if MQM functions exist
-SELECT 
-    routine_name,
-    routine_type,
-    data_type as return_type
-FROM information_schema.routines 
-WHERE routine_schema = 'public' 
-AND routine_name LIKE '%mqm%'
-ORDER BY routine_name;
-
--- 5. Check current annotation data
-SELECT 
-    COUNT(*) as total_annotations,
-    COUNT(CASE WHEN mqm_score IS NOT NULL THEN 1 END) as annotations_with_mqm,
-    COUNT(CASE WHEN mqm_errors IS NOT NULL AND jsonb_array_length(mqm_errors) > 0 THEN 1 END) as annotations_with_errors,
-    AVG(mqm_score) as avg_mqm_score
-FROM annotations;
-
--- 6. Check if we can insert MQM data (test)
--- This will show if constraints and data types are working
-SELECT 
-    CASE 
-        WHEN EXISTS (
-            SELECT 1 FROM information_schema.check_constraints 
-            WHERE constraint_name LIKE '%mqm_score%'
-        ) THEN '✅ MQM score constraints exist'
-        ELSE '❌ MQM score constraints missing'
-    END as constraint_status;
-
--- 7. Test MQM functions (if they exist)
-DO $$
+-- Step 3: If table doesn't exist, create it with correct structure
+DO $
 BEGIN
-    IF EXISTS (SELECT 1 FROM information_schema.routines WHERE routine_name = 'get_mqm_statistics') THEN
-        RAISE NOTICE '✅ Testing get_mqm_statistics function...';
-        PERFORM get_mqm_statistics();
-        RAISE NOTICE '✅ get_mqm_statistics function works';
+    IF NOT EXISTS (SELECT FROM information_schema.tables WHERE table_name = 'translation_memory') THEN
+        CREATE TABLE translation_memory (
+            id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+            source_text TEXT NOT NULL,
+            target_text TEXT NOT NULL,
+            source_language VARCHAR(10) NOT NULL,
+            target_language VARCHAR(10) NOT NULL,
+            domain VARCHAR(100),
+            project_id UUID REFERENCES projects(id) ON DELETE SET NULL,
+            created_by UUID REFERENCES profiles(id) ON DELETE SET NULL,
+            quality_score INTEGER DEFAULT 0,
+            usage_count INTEGER DEFAULT 0,
+            last_used_at TIMESTAMP WITH TIME ZONE,
+            created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+            updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+        );
+        
+        RAISE NOTICE 'Created translation_memory table';
     ELSE
-        RAISE NOTICE '❌ get_mqm_statistics function not found';
+        RAISE NOTICE 'translation_memory table already exists';
     END IF;
-EXCEPTION
-    WHEN OTHERS THEN
-        RAISE NOTICE '❌ Error testing MQM functions: %', SQLERRM;
-END $$;
+END $;
 
--- 8. Show sample MQM data structure (if any exists)
-SELECT 
-    id,
-    segment_id,
-    mqm_score,
-    jsonb_pretty(mqm_errors) as mqm_errors_formatted,
-    created_at
-FROM annotations 
-WHERE mqm_errors IS NOT NULL 
-AND jsonb_array_length(mqm_errors) > 0
-LIMIT 3;
+-- Step 4: Add missing columns if they don't exist
+DO $
+BEGIN
+    -- Add quality_score if missing
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'translation_memory' AND column_name = 'quality_score') THEN
+        ALTER TABLE translation_memory ADD COLUMN quality_score INTEGER DEFAULT 0;
+        RAISE NOTICE 'Added quality_score column';
+    END IF;
+    
+    -- Add usage_count if missing
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'translation_memory' AND column_name = 'usage_count') THEN
+        ALTER TABLE translation_memory ADD COLUMN usage_count INTEGER DEFAULT 0;
+        RAISE NOTICE 'Added usage_count column';
+    END IF;
+    
+    -- Add last_used_at if missing
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'translation_memory' AND column_name = 'last_used_at') THEN
+        ALTER TABLE translation_memory ADD COLUMN last_used_at TIMESTAMP WITH TIME ZONE;
+        RAISE NOTICE 'Added last_used_at column';
+    END IF;
+    
+    -- Add domain if missing
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'translation_memory' AND column_name = 'domain') THEN
+        ALTER TABLE translation_memory ADD COLUMN domain VARCHAR(100);
+        RAISE NOTICE 'Added domain column';
+    END IF;
+    
+    -- Add created_by if missing
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'translation_memory' AND column_name = 'created_by') THEN
+        ALTER TABLE translation_memory ADD COLUMN created_by UUID REFERENCES profiles(id) ON DELETE SET NULL;
+        RAISE NOTICE 'Added created_by column';
+    END IF;
+    
+    -- Add project_id if missing
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'translation_memory' AND column_name = 'project_id') THEN
+        ALTER TABLE translation_memory ADD COLUMN project_id UUID REFERENCES projects(id) ON DELETE SET NULL;
+        RAISE NOTICE 'Added project_id column';
+    END IF;
+END $;
 
--- 9. Migration readiness summary
+-- Step 5: Create indexes for performance
+CREATE INDEX IF NOT EXISTS idx_tm_languages ON translation_memory(source_language, target_language);
+CREATE INDEX IF NOT EXISTS idx_tm_domain ON translation_memory(domain);
+CREATE INDEX IF NOT EXISTS idx_tm_quality ON translation_memory(quality_score DESC);
+CREATE INDEX IF NOT EXISTS idx_tm_usage ON translation_memory(usage_count DESC);
+
+-- Step 6: Enable RLS
+ALTER TABLE translation_memory ENABLE ROW LEVEL SECURITY;
+
+-- Step 7: Create RLS policies
+DROP POLICY IF EXISTS "Users can read translation memory" ON translation_memory;
+CREATE POLICY "Users can read translation memory" ON translation_memory
+    FOR SELECT USING (true);
+
+DROP POLICY IF EXISTS "Users can insert their TM entries" ON translation_memory;
+CREATE POLICY "Users can insert their TM entries" ON translation_memory
+    FOR INSERT WITH CHECK (auth.uid() = created_by OR created_by IS NULL);
+
+DROP POLICY IF EXISTS "Users can update their TM entries" ON translation_memory;
+CREATE POLICY "Users can update their TM entries" ON translation_memory
+    FOR UPDATE USING (auth.uid() = created_by OR created_by IS NULL);
+
+-- Step 8: Show final table structure
 SELECT 
-    '🎯 MIGRATION STATUS SUMMARY' as status,
-    CASE 
-        WHEN (
-            SELECT COUNT(*) FROM information_schema.columns 
-            WHERE table_name = 'annotations' 
-            AND column_name IN ('mqm_errors', 'mqm_score')
-        ) = 2 THEN '✅ READY FOR PRODUCTION'
-        ELSE '❌ MIGRATION NEEDED'
-    END as readiness;
+    column_name, 
+    data_type, 
+    is_nullable,
+    column_default
+FROM information_schema.columns 
+WHERE table_name = 'translation_memory' 
+ORDER BY ordinal_position;
+
+RAISE NOTICE 'Translation Memory table setup complete!';

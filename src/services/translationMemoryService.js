@@ -21,8 +21,8 @@ export class TranslationMemoryService {
             
             const { data, error } = await supabase.rpc('find_tm_matches', {
                 p_source_text: sourceText,
-                p_source_language: sourceLanguage,
-                p_target_language: targetLanguage,
+                p_source_lang: sourceLanguage,
+                p_target_lang: targetLanguage,
                 p_min_match_percentage: minMatchPercentage,
                 p_limit: limit
             });
@@ -80,8 +80,8 @@ export class TranslationMemoryService {
             const { data, error } = await supabase.rpc('upsert_tm_entry', {
                 p_source_text: sourceText,
                 p_target_text: targetText,
-                p_source_language: sourceLanguage,
-                p_target_language: targetLanguage,
+                p_source_lang: sourceLanguage,
+                p_target_lang: targetLanguage,
                 p_domain: domain,
                 p_project_id: projectId,
                 p_created_by: createdBy,
@@ -146,10 +146,10 @@ export class TranslationMemoryService {
 
             // Calculate statistics
             const totalEntries = data.length;
-            const languagePairs = new Set(data.map(entry => `${entry.source_language}-${entry.target_language}`)).size;
+            const languagePairs = new Set(data.map(entry => `${entry.source_lang}-${entry.target_lang}`)).size;
             const domains = new Set(data.filter(entry => entry.domain).map(entry => entry.domain)).size;
             const avgQuality = data.length > 0 
-                ? (data.reduce((sum, entry) => sum + entry.quality_score, 0) / data.length).toFixed(1)
+                ? (data.reduce((sum, entry) => sum + (entry.quality_score || 0), 0) / data.length).toFixed(1)
                 : 0;
 
             return {
@@ -251,11 +251,11 @@ export class TranslationMemoryService {
             }
 
             if (sourceLanguage) {
-                query = query.eq('source_language', sourceLanguage);
+                query = query.eq('source_lang', sourceLanguage);
             }
 
             if (targetLanguage) {
-                query = query.eq('target_language', targetLanguage);
+                query = query.eq('target_lang', targetLanguage);
             }
 
             if (domain) {
