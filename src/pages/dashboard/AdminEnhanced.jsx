@@ -602,15 +602,20 @@ const AdminEnhanced = () => {
     const fetchAdminData = async () => {
         setLoading(true);
         try {
-            // Fetch all profiles
-            const { data: profiles } = await supabase
+            console.log('Fetching admin data...');
+            
+            // Fetch all profiles with error handling
+            const { data: profiles, error: profilesError } = await supabase
                 .from('profiles')
                 .select('*')
                 .order('created_at', { ascending: false });
             
+            if (profilesError) {
+                console.error('Error fetching profiles:', profilesError);
+            }
             setTranslators(profiles || []);
 
-            // Fetch all projects with relations
+            // Fetch all projects with relations and error handling
             const { data: projectsData, error: projectsError } = await supabase
                 .from('projects')
                 .select(`
@@ -627,16 +632,19 @@ const AdminEnhanced = () => {
             console.log('Fetched projects:', projectsData?.length || 0, 'projects');
             setProjects(projectsData || []);
 
-            // Fetch activity log
-            const { data: activities } = await supabase
+            // Fetch activity log with error handling
+            const { data: activities, error: activitiesError } = await supabase
                 .from('activity_log')
                 .select('*')
                 .order('created_at', { ascending: false })
                 .limit(20);
             
+            if (activitiesError) {
+                console.error('Error fetching activities:', activitiesError);
+            }
             setActivityLog(activities || []);
 
-            // Calculate stats
+            // Calculate stats safely
             const completedProjects = projectsData?.filter(p => p.status === 'completed').length || 0;
             const inProgressProjects = projectsData?.filter(p => p.status === 'in_progress' || p.status === 'pending').length || 0;
             const totalRevenue = projectsData?.reduce((sum, p) => sum + (p.total_payment || 0), 0) || 0;
@@ -652,8 +660,21 @@ const AdminEnhanced = () => {
                 totalWords,
                 avgCompletionTime: 3.5 // days - calculate from actual data later
             });
+
+            console.log('Admin data fetch completed successfully');
         } catch (err) {
             console.error('Admin fetch error:', err);
+            // Set default values to prevent crashes
+            setStats({
+                totalUsers: 0,
+                activeTranslators: 0,
+                totalProjects: 0,
+                completedProjects: 0,
+                inProgressProjects: 0,
+                totalRevenue: 0,
+                totalWords: 0,
+                avgCompletionTime: 0
+            });
         } finally {
             setLoading(false);
         }
@@ -714,8 +735,8 @@ const AdminEnhanced = () => {
     };
 
     const fetchAnnotations = async () => {
-        setLoading(true);
         try {
+            console.log('Fetching annotations for Analytics Dashboard...');
             const { data, error } = await supabase
                 .from('annotations')
                 .select('*')
@@ -724,14 +745,17 @@ const AdminEnhanced = () => {
 
             if (error) {
                 console.error('Error fetching annotations:', error);
+                // Set empty array but don't fail completely
+                setAnnotations([]);
                 return;
             }
 
+            console.log('Successfully fetched annotations:', data?.length || 0);
             setAnnotations(data || []);
         } catch (err) {
             console.error('Annotations fetch error:', err);
-        } finally {
-            setLoading(false);
+            // Gracefully handle errors by setting empty array
+            setAnnotations([]);
         }
     };
 
@@ -860,7 +884,7 @@ const AdminEnhanced = () => {
         <div className="dashboard-page fade-in">
             {/* Header */}
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
-                <h1 style={{ fontSize: '2rem', fontWeight: 'bold', color: '#fff' }}>Admin Control Panel</h1>
+                <h1 style={{ fontSize: '2rem', fontWeight: 'bold', color: '#fff' }}>Admin Control Panel - DEPLOYMENT TEST v2.1</h1>
                 <div style={{ display: 'flex', gap: '1rem' }}>
                     <button
                         onClick={handleDeleteAllProjects}
@@ -1493,17 +1517,71 @@ const AdminEnhanced = () => {
                         <p style={{ color: '#666', fontSize: '0.9rem' }}>
                             Comprehensive insights into translation quality, productivity, and error patterns - UPDATED
                         </p>
+                        <div style={{ fontSize: '0.8rem', color: '#888', marginTop: '0.5rem' }}>
+                            Data loaded: {annotations.length} annotations, {projects.length} projects
+                        </div>
                     </div>
 
                     {/* Charts Grid */}
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '2rem', marginBottom: '2rem' }}>
                         {/* Quality Trends Chart */}
-                        <QualityTrendsChart data={annotations} />
+                        <div style={{ minHeight: '350px' }}>
+                            {annotations.length > 0 ? (
+                                <QualityTrendsChart data={annotations} />
+                            ) : (
+                                <div className="dashboard-card">
+                                    <div className="card-header">
+                                        <h3>📈 Quality Trends (Last 7 Days)</h3>
+                                    </div>
+                                    <div style={{ padding: '2rem', textAlign: 'center', color: '#666' }}>
+                                        <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>📊</div>
+                                        <p>No annotation data available yet.</p>
+                                        <p style={{ fontSize: '0.85rem', marginTop: '1rem' }}>
+                                            Quality trends will appear here once translators start using the CAT workspace and annotation system.
+                                        </p>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
                         
                         {/* Error Analysis and Productivity Charts */}
                         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '2rem' }}>
-                            <ErrorAnalysisChart data={annotations} />
-                            <ProductivityMetrics projects={projects} annotations={annotations} />
+                            <div style={{ minHeight: '350px' }}>
+                                {annotations.length > 0 ? (
+                                    <ErrorAnalysisChart data={annotations} />
+                                ) : (
+                                    <div className="dashboard-card">
+                                        <div className="card-header">
+                                            <h3>🎯 Error Type Distribution</h3>
+                                        </div>
+                                        <div style={{ padding: '2rem', textAlign: 'center', color: '#666' }}>
+                                            <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>✨</div>
+                                            <p>No error data available yet.</p>
+                                            <p style={{ fontSize: '0.85rem', marginTop: '1rem' }}>
+                                                Error analysis will show here once annotations with error types are created.
+                                            </p>
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+                            <div style={{ minHeight: '350px' }}>
+                                {projects.length > 0 && annotations.length > 0 ? (
+                                    <ProductivityMetrics projects={projects} annotations={annotations} />
+                                ) : (
+                                    <div className="dashboard-card">
+                                        <div className="card-header">
+                                            <h3>⚡ Translator Productivity</h3>
+                                        </div>
+                                        <div style={{ padding: '2rem', textAlign: 'center', color: '#666' }}>
+                                            <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>📊</div>
+                                            <p>No productivity data available yet.</p>
+                                            <p style={{ fontSize: '0.85rem', marginTop: '1rem' }}>
+                                                Translator metrics will appear here once projects are completed and annotated.
+                                            </p>
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
                         </div>
                     </div>
 
