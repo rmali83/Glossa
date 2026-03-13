@@ -213,11 +213,32 @@ export class TranslationMemoryService {
             return null;
         }
 
+        // Map full language names to codes
+        const languageMap = {
+            'English': 'en',
+            'Urdu': 'ur',
+            'Spanish': 'es',
+            'French': 'fr',
+            'German': 'de',
+            'Arabic': 'ar',
+            'Chinese': 'zh',
+            'Japanese': 'ja',
+            'Korean': 'ko',
+            'Portuguese': 'pt',
+            'Russian': 'ru',
+            'Italian': 'it',
+            'Dutch': 'nl',
+            'Hindi': 'hi'
+        };
+        
+        const sourceCode = languageMap[project.source_language] || project.source_language.toLowerCase().substring(0, 2);
+        const targetCode = languageMap[project.target_language] || project.target_language.toLowerCase().substring(0, 2);
+
         return await this.addEntry({
             sourceText: segment.source_text,
             targetText: segment.target_text,
-            sourceLanguage: project.source_language,
-            targetLanguage: project.target_language,
+            sourceLanguage: sourceCode,
+            targetLanguage: targetCode,
             domain: project.domain,
             projectId: project.id,
             createdBy: segment.translator_id,

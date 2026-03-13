@@ -336,11 +336,37 @@ const CATProjectView = () => {
             const currentSegment = segments[activeSegmentIndex];
             console.log('Fetching TM matches for segment:', currentSegment.source_text?.substring(0, 50) + '...');
             
+            // Map full language names to codes for TM lookup
+            const languageMap = {
+                'English': 'en',
+                'Urdu': 'ur',
+                'Spanish': 'es',
+                'French': 'fr',
+                'German': 'de',
+                'Arabic': 'ar',
+                'Chinese': 'zh',
+                'Japanese': 'ja',
+                'Korean': 'ko',
+                'Portuguese': 'pt',
+                'Russian': 'ru',
+                'Italian': 'it',
+                'Dutch': 'nl',
+                'Hindi': 'hi'
+            };
+            
+            const sourceCode = languageMap[project.source_language] || project.source_language.toLowerCase().substring(0, 2);
+            const targetCode = languageMap[project.target_language] || project.target_language.toLowerCase().substring(0, 2);
+            
+            console.log('Language mapping:', {
+                source: `${project.source_language} → ${sourceCode}`,
+                target: `${project.target_language} → ${targetCode}`
+            });
+            
             // Use our enhanced TM service with fuzzy matching
             const matches = await TranslationMemoryService.findMatches(
                 currentSegment.source_text,
-                project.source_language,
-                project.target_language,
+                sourceCode,
+                targetCode,
                 50, // Minimum 50% match
                 5   // Top 5 matches
             );
