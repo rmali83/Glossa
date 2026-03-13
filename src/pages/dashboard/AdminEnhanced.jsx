@@ -6,7 +6,7 @@ import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../context/AuthContext';
 import SimpleQualityChart from '../../components/SimpleQualityChart';
 import SimpleErrorChart from '../../components/SimpleErrorChart';
-import SimpleProductivityChart from '../../components/SimpleProductivityChart';
+import TMManagement from '../../components/TMManagement';
 
 // Component for managing global annotation settings for the entire workspace
 const GlobalAnnotationSettings = ({ onUpdate }) => {
@@ -927,7 +927,7 @@ const AdminEnhanced = () => {
                 borderBottom: '2px solid rgba(255,255,255,0.1)',
                 paddingBottom: '1rem'
             }}>
-                {['overview', 'users', 'jobs', 'datasets', 'analytics', 'reports', 'annotation-settings'].map(tab => (
+                {['overview', 'users', 'jobs', 'datasets', 'analytics', 'tm', 'reports', 'annotation-settings'].map(tab => (
                     <button
                         key={tab}
                         onClick={() => setActiveTab(tab)}
@@ -943,7 +943,7 @@ const AdminEnhanced = () => {
                             textTransform: 'capitalize'
                         }}
                     >
-                        {tab === 'datasets' ? '🧬 Datasets' : tab === 'annotation-settings' ? '⚙️ Annotation' : tab}
+                        {tab === 'datasets' ? '🧬 Datasets' : tab === 'annotation-settings' ? '⚙️ Annotation' : tab === 'tm' ? '🔄 TM' : tab}
                     </button>
                 ))}
             </div>
@@ -1593,6 +1593,21 @@ const AdminEnhanced = () => {
                         </div>
                     </div>
                 </>
+            )}
+
+            {/* TM Management Tab */}
+            {activeTab === 'tm' && (
+                <div>
+                    <div style={{ marginBottom: '2rem' }}>
+                        <h2 style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#fff', marginBottom: '0.5rem' }}>
+                            🔄 Translation Memory Management
+                        </h2>
+                        <p style={{ color: '#666', fontSize: '0.9rem' }}>
+                            Manage translation memory entries, view statistics, and populate TM from existing segments
+                        </p>
+                    </div>
+                    <TMManagement />
+                </div>
             )}
 
             {/* Reports Tab */}

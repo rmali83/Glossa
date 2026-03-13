@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../context/AuthContext';
+import { TranslationMemoryService } from '../../services/translationMemoryService';
 import { translateText, generateAISuggestions, checkTranslationQuality } from '../../services/aiTranslation';
 import SimpleUploadModal from '../../components/SimpleUploadModal';
 import simpleUploadManager from '../../services/simpleUploadManager';
@@ -329,21 +330,26 @@ const CATProjectView = () => {
     }, [activeSegmentIndex, project]);
 
     const fetchTranslationMemory = async () => {
-        if (!project) return;
+        if (!project || !segments[activeSegmentIndex]) return;
         
         try {
-            const { data, error } = await supabase
-                .from('translation_memory')
-                .select('*')
-                .eq('source_language', project.source_language)
-                .eq('target_language', project.target_language)
-                .limit(5);
-
-            if (!error && data) {
-                setTmMatches(data);
-            }
+            const currentSegment = segments[activeSegmentIndex];
+            console.log('Fetching TM matches for segment:', currentSegment.source_text?.substring(0, 50) + '...');
+            
+            // Use our enhanced TM service with fuzzy matching
+            const matches = await TranslationMemoryService.findMatches(
+                currentSegment.source_text,
+                project.source_language,
+                project.target_language,
+                50, // Minimum 50% match
+                5   // Top 5 matches
+            );
+            
+            console.log(`Found ${matches.length} TM matches`);
+            setTmMatches(matches);
         } catch (err) {
             console.error('Error fetching TM:', err);
+            setTmMatches([]);
         }
     };
 
@@ -972,6 +978,34 @@ const CATProjectView = () => {
         
         // Save to database
         await saveSegmentToDatabase(newSegments[activeSegmentIndex]);
+        
+        // 🔄 AUTO-ADD TO TRANSLATION MEMORY
+        const currentSegment = newSegments[activeSegmentIndex];
+        if (currentSegment.target && currentSegment.target.trim() !== '' && project) {
+            try {
+                console.log('🔄 Auto-adding confirmed segment to TM...');
+                
+                // Get quality score from current annotation if available
+                let qualityScore = 3; // Default
+                if (annotation && annotation.quality_rating) {
+                    qualityScore = annotation.quality_rating;
+                }
+                
+                await TranslationMemoryService.autoAddFromSegment(
+                    {
+                        source_text: currentSegment.source,
+                        target_text: currentSegment.target,
+                        translator_id: user?.id
+                    },
+                    project,
+                    qualityScore
+                );
+                
+                console.log('✅ Segment added to TM successfully');
+            } catch (err) {
+                console.error('❌ Error adding segment to TM:', err);
+            }
+        }
         
         // Check if all segments are confirmed
         const allConfirmed = newSegments.every(seg => seg.status === 'confirmed');
@@ -1728,29 +1762,86 @@ ${segments.map(seg => `      <trans-unit id="${seg.segment_number}">
                                             tmMatches.map((tm, index) => (
                                                 <div key={tm.id} className="space-y-3">
                                                     <div className="flex justify-between items-center">
-                                                        <h4 className="text-xs font-bold text-slate-500 uppercase">TM Match #{index + 1}</h4>
-                                                        <span className="text-[10px] px-1.5 py-0.5 bg-primary-500/20 text-primary-500 rounded font-bold">
-                                                            {Math.floor(Math.random() * 20) + 80}%
-                                                        </span>
+                                                        <h4 className="text-xs font-bold text-slate-500 uppercase">
+                                                            TM Match #{index + 1}
+                                                            {tm.domain && (
+                                                                <span className="ml-2 text-[9px] px-1 py-0.5 bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-400 rounded">
+                                                                    {tm.domain}
+                                                                </span>
+                                                            )}
+                                                        </h4>
+                                                        <div className="flex items-center gap-2">
+                                                            {/* Quality Score */}
+                                                            {tm.qualityScore > 0 && (
+                                                                <div className="flex items-center gap-1">
+                                                                    <span className="text-[9px] text-slate-400">Quality:</span>
+                                                                    <div className="flex">
+                                                                        {[...Array(5)].map((_, i) => (
+                                                                            <span key={i} className={`text-[8px] ${i < tm.qualityScore ? 'text-yellow-400' : 'text-slate-300'}`}>★</span>
+                                                                        ))}
+                                                                    </div>
+                                                                </div>
+                                                            )}
+                                                            {/* Match Percentage */}
+                                                            <span 
+                                                                className="text-[10px] px-1.5 py-0.5 rounded font-bold"
+                                                                style={{
+                                                                    backgroundColor: tm.matchColor + '20',
+                                                                    color: tm.matchColor
+                                                                }}
+                                                            >
+                                                                {tm.matchPercentage}%
+                                                            </span>
+                                                        </div>
                                                     </div>
                                                     <div 
                                                         onClick={() => {
-                                                            handleSegmentChange(tm.target_text);
+                                                            handleSegmentChange(tm.targetText);
+                                                            // Update usage count
+                                                            TranslationMemoryService.addEntry({
+                                                                sourceText: tm.sourceText,
+                                                                targetText: tm.targetText,
+                                                                sourceLanguage: project.source_language,
+                                                                targetLanguage: project.target_language,
+                                                                domain: project.domain,
+                                                                projectId: project.id,
+                                                                createdBy: user?.id,
+                                                                qualityScore: tm.qualityScore
+                                                            });
                                                         }}
                                                         className="p-3 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm cursor-pointer hover:border-primary-500 transition-colors group"
                                                     >
-                                                        <p className="text-xs text-slate-400 mb-2 italic">{tm.source_text}</p>
-                                                        <p className="text-sm font-medium">{tm.target_text}</p>
-                                                        <div className="mt-2 flex justify-end">
-                                                            <span className="text-[9px] text-slate-400 group-hover:text-primary-500 transition-colors">Click to Apply</span>
+                                                        <div className="flex items-start justify-between mb-2">
+                                                            <p className="text-xs text-slate-400 italic flex-1">{tm.sourceText}</p>
+                                                            <span className="text-[8px] text-slate-400 ml-2">
+                                                                {tm.matchQuality}
+                                                            </span>
+                                                        </div>
+                                                        <p className="text-sm font-medium">{tm.targetText}</p>
+                                                        <div className="mt-2 flex justify-between items-center">
+                                                            <div className="flex items-center gap-2 text-[8px] text-slate-400">
+                                                                {tm.usageCount > 0 && (
+                                                                    <span>Used {tm.usageCount}x</span>
+                                                                )}
+                                                                {tm.createdAt && (
+                                                                    <span>{new Date(tm.createdAt).toLocaleDateString()}</span>
+                                                                )}
+                                                            </div>
+                                                            <span className="text-[9px] text-slate-400 group-hover:text-primary-500 transition-colors">
+                                                                Click to Apply
+                                                            </span>
                                                         </div>
                                                     </div>
                                                 </div>
                                             ))
                                         ) : (
                                             <div className="text-center py-8 text-slate-400 text-sm">
+                                                <div className="text-4xl mb-4">🔍</div>
                                                 <p>No translation memory matches found.</p>
                                                 <p className="text-xs mt-2">Your translations will be added to TM automatically.</p>
+                                                <p className="text-xs mt-1 text-slate-500">
+                                                    Minimum match threshold: 50%
+                                                </p>
                                             </div>
                                         )}
 
