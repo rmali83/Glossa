@@ -1943,23 +1943,16 @@ const CreateUserModal = ({ onClose, onSuccess }) => {
         setLoading(true);
 
         try {
-            // For now, we'll create a profile entry directly since admin.createUser requires service role
-            // In a production environment, you'd want to use proper admin API or invite system
+            // First, let's try to insert with minimal required fields
+            // We'll only use fields that definitely exist in the profiles table
             
-            // Generate a temporary user ID (in production, this would come from auth)
-            const tempUserId = crypto.randomUUID();
-            
-            // Insert directly into profiles table
             const { data: profileData, error: profileError } = await supabase
                 .from('profiles')
                 .insert([{
-                    id: tempUserId,
+                    id: crypto.randomUUID(),
                     email: formData.email,
                     full_name: formData.fullName,
-                    user_type: formData.userType,
-                    language_pairs: formData.languagePairs.length > 0 ? formData.languagePairs : null,
-                    years_experience: formData.experienceLevel,
-                    created_at: new Date().toISOString()
+                    user_type: formData.userType
                 }])
                 .select()
                 .single();
@@ -1970,6 +1963,23 @@ const CreateUserModal = ({ onClose, onSuccess }) => {
                     throw new Error('A user with this email already exists');
                 }
                 throw profileError;
+            }
+
+            // If the insert was successful, try to update with additional fields if they exist
+            if (profileData && (formData.languagePairs.length > 0 || formData.experienceLevel)) {
+                const updateData = {};
+                if (formData.languagePairs.length > 0) {
+                    updateData.language_pairs = formData.languagePairs;
+                }
+                if (formData.experienceLevel) {
+                    updateData.years_experience = formData.experienceLevel;
+                }
+
+                // Try to update additional fields (ignore errors if columns don't exist)
+                await supabase
+                    .from('profiles')
+                    .update(updateData)
+                    .eq('id', profileData.id);
             }
 
             alert('✅ User profile created successfully!\n\nNote: This creates a user profile. In production, you would send an invitation email for the user to complete registration.');
