@@ -3,7 +3,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../context/AuthContext';
 import SimpleUploadModal from '../../components/SimpleUploadModal';
-import WebsiteTranslationWizardSimple from '../../components/WebsiteTranslationWizardSimple';
+import WebsiteTranslationWizard from '../../components/WebsiteTranslationWizard';
 import simpleUploadManager from '../../services/simpleUploadManager';
 import LANGUAGES from '../../data/languages';
 import './DashboardTheme.css';
@@ -572,7 +572,7 @@ const CreateJob = () => {
 
       {/* Website Translation Wizard */}
       {showWebsiteWizard && projectId && (
-        <WebsiteTranslationWizardSimple
+        <WebsiteTranslationWizard
           projectId={projectId}
           projectName={formData.name}
           onClose={() => setShowWebsiteWizard(false)}
