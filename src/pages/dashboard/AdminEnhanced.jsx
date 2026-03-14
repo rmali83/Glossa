@@ -4,6 +4,9 @@ import './DashboardPages.css';
 import './DashboardTheme.css';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../context/AuthContext';
+import AdvancedQualityChart from '../../components/AdvancedQualityChart';
+import AdvancedErrorChart from '../../components/AdvancedErrorChart';
+import ProductivityChart from '../../components/ProductivityChart';
 import TMManagement from '../../components/TMManagement';
 import emailService from '../../services/emailService';
 
@@ -1819,115 +1822,276 @@ const AdminEnhanced = () => {
                 </div>
             )}
 
-            {/* Analytics Tab - Minimal Safe Version */}
+            {/* Analytics Tab - Advanced Dashboard */}
             {activeTab === 'analytics' && (
-                <div className="dashboard-card">
-                    <div className="card-header">
-                        <h3>📊 Analytics Dashboard</h3>
+                <div>
+                    {/* Analytics Header */}
+                    <div style={{ marginBottom: '2rem' }}>
+                        <h2 style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#fff', marginBottom: '0.5rem' }}>
+                            📊 Advanced Analytics Dashboard
+                        </h2>
+                        <p style={{ color: '#666', fontSize: '0.9rem' }}>
+                            Comprehensive translation quality insights, productivity metrics, and performance analytics
+                        </p>
+                        <div style={{ fontSize: '0.8rem', color: '#888', marginTop: '0.5rem' }}>
+                            Data: {annotations?.length || 0} annotations • {projects?.length || 0} projects • {translators?.length || 0} users
+                        </div>
                     </div>
-                    <div style={{ padding: '2rem' }}>
-                        <div style={{ 
-                            textAlign: 'center',
-                            background: 'rgba(16, 185, 129, 0.1)',
-                            border: '2px solid #10b981',
-                            borderRadius: '12px',
-                            padding: '3rem 2rem',
-                            marginBottom: '2rem'
-                        }}>
-                            <div style={{ fontSize: '4rem', marginBottom: '1rem' }}>📊</div>
-                            <h2 style={{ color: '#10b981', marginBottom: '1rem' }}>Analytics Dashboard</h2>
-                            <p style={{ color: '#888', marginBottom: '2rem', fontSize: '1.1rem' }}>
-                                Translation quality insights and performance metrics will appear here.
-                            </p>
-                            
-                            <div style={{ 
-                                display: 'grid', 
-                                gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', 
-                                gap: '1rem',
-                                marginBottom: '2rem'
-                            }}>
-                                <div style={{ 
-                                    background: 'rgba(59, 130, 246, 0.1)', 
-                                    border: '1px solid rgba(59, 130, 246, 0.3)',
-                                    borderRadius: '8px',
-                                    padding: '1.5rem',
-                                    textAlign: 'center'
-                                }}>
-                                    <div style={{ fontSize: '2rem', fontWeight: 'bold', color: '#3b82f6' }}>
-                                        {annotations ? annotations.length : 0}
-                                    </div>
-                                    <div style={{ fontSize: '0.9rem', color: '#888' }}>Annotations</div>
-                                </div>
-                                
-                                <div style={{ 
-                                    background: 'rgba(16, 185, 129, 0.1)', 
-                                    border: '1px solid rgba(16, 185, 129, 0.3)',
-                                    borderRadius: '8px',
-                                    padding: '1.5rem',
-                                    textAlign: 'center'
-                                }}>
-                                    <div style={{ fontSize: '2rem', fontWeight: 'bold', color: '#10b981' }}>
-                                        {projects ? projects.length : 0}
-                                    </div>
-                                    <div style={{ fontSize: '0.9rem', color: '#888' }}>Projects</div>
-                                </div>
-                                
-                                <div style={{ 
-                                    background: 'rgba(245, 158, 11, 0.1)', 
-                                    border: '1px solid rgba(245, 158, 11, 0.3)',
-                                    borderRadius: '8px',
-                                    padding: '1.5rem',
-                                    textAlign: 'center'
-                                }}>
-                                    <div style={{ fontSize: '2rem', fontWeight: 'bold', color: '#f59e0b' }}>
-                                        {translators ? translators.length : 0}
-                                    </div>
-                                    <div style={{ fontSize: '0.9rem', color: '#888' }}>Users</div>
-                                </div>
-                            </div>
 
-                            <button
-                                onClick={() => {
-                                    alert('🎉 Analytics functionality is working! Charts and detailed metrics will be added in the next update.');
-                                }}
-                                style={{
-                                    padding: '12px 32px',
-                                    background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
-                                    color: '#fff',
-                                    border: 'none',
-                                    borderRadius: '8px',
-                                    fontSize: '1rem',
-                                    fontWeight: '600',
-                                    cursor: 'pointer',
-                                    boxShadow: '0 4px 12px rgba(16, 185, 129, 0.3)',
-                                    transition: 'all 0.3s ease'
-                                }}
-                            >
-                                📈 View Analytics (Coming Soon)
-                            </button>
+                    {/* Key Metrics Cards */}
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '1.5rem', marginBottom: '2rem' }}>
+                        <div className="dashboard-card" style={{ padding: '1.5rem', textAlign: 'center' }}>
+                            <div style={{ fontSize: '2.5rem', marginBottom: '0.5rem' }}>📈</div>
+                            <div style={{ fontSize: '2rem', fontWeight: 'bold', color: '#10b981' }}>
+                                {annotations && annotations.filter(a => a.quality_rating).length > 0 
+                                    ? (annotations.filter(a => a.quality_rating).reduce((sum, a) => sum + a.quality_rating, 0) / annotations.filter(a => a.quality_rating).length).toFixed(1)
+                                    : '0.0'
+                                }
+                            </div>
+                            <div style={{ fontSize: '0.9rem', color: '#888' }}>Avg Quality Score</div>
+                            <div style={{ fontSize: '0.75rem', color: '#666', marginTop: '0.5rem' }}>
+                                out of 5.0 stars
+                            </div>
                         </div>
 
-                        <div style={{ 
-                            background: 'rgba(59, 130, 246, 0.1)',
-                            border: '1px solid rgba(59, 130, 246, 0.3)',
-                            borderRadius: '8px',
-                            padding: '1.5rem'
-                        }}>
-                            <h4 style={{ color: '#3b82f6', marginBottom: '1rem' }}>📋 Analytics Features (In Development)</h4>
-                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '1rem' }}>
-                                <div style={{ color: '#888' }}>
-                                    • Quality trend analysis<br/>
-                                    • Error pattern detection<br/>
-                                    • Productivity metrics
-                                </div>
-                                <div style={{ color: '#888' }}>
-                                    • Translation accuracy scores<br/>
-                                    • Performance comparisons<br/>
-                                    • Custom reporting
-                                </div>
+                        <div className="dashboard-card" style={{ padding: '1.5rem', textAlign: 'center' }}>
+                            <div style={{ fontSize: '2.5rem', marginBottom: '0.5rem' }}>🎯</div>
+                            <div style={{ fontSize: '2rem', fontWeight: 'bold', color: '#3b82f6' }}>
+                                {annotations && annotations.length > 0 
+                                    ? Math.round(((annotations.length - annotations.filter(a => a.error_fluency || a.error_grammar || a.error_terminology || a.error_style || a.error_accuracy).length) / annotations.length) * 100)
+                                    : 100
+                                }%
+                            </div>
+                            <div style={{ fontSize: '0.9rem', color: '#888' }}>Error-Free Rate</div>
+                            <div style={{ fontSize: '0.75rem', color: '#666', marginTop: '0.5rem' }}>
+                                {annotations ? annotations.filter(a => a.error_fluency || a.error_grammar || a.error_terminology || a.error_style || a.error_accuracy).length : 0} total errors
+                            </div>
+                        </div>
+
+                        <div className="dashboard-card" style={{ padding: '1.5rem', textAlign: 'center' }}>
+                            <div style={{ fontSize: '2.5rem', marginBottom: '0.5rem' }}>⚡</div>
+                            <div style={{ fontSize: '2rem', fontWeight: 'bold', color: '#f59e0b' }}>
+                                {projects ? projects.filter(p => p.status === 'completed').length : 0}
+                            </div>
+                            <div style={{ fontSize: '0.9rem', color: '#888' }}>Completed Projects</div>
+                            <div style={{ fontSize: '0.75rem', color: '#666', marginTop: '0.5rem' }}>
+                                {projects ? Math.round((projects.filter(p => p.status === 'completed').length / Math.max(projects.length, 1)) * 100) : 0}% completion rate
+                            </div>
+                        </div>
+
+                        <div className="dashboard-card" style={{ padding: '1.5rem', textAlign: 'center' }}>
+                            <div style={{ fontSize: '2.5rem', marginBottom: '0.5rem' }}>👥</div>
+                            <div style={{ fontSize: '2rem', fontWeight: 'bold', color: '#8b5cf6' }}>
+                                {translators ? translators.filter(t => t.user_type === 'Freelance Translator' || t.user_type === 'Translator').length : 0}
+                            </div>
+                            <div style={{ fontSize: '0.9rem', color: '#888' }}>Active Translators</div>
+                            <div style={{ fontSize: '0.75rem', color: '#666', marginTop: '0.5rem' }}>
+                                {translators ? translators.length : 0} total users
                             </div>
                         </div>
                     </div>
+
+                    {annotations && annotations.length > 0 ? (
+                        <div>
+                            {/* Main Charts Grid */}
+                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '1.5rem', marginBottom: '2rem' }}>
+                                <AdvancedQualityChart data={annotations} projects={projects} />
+                                <AdvancedErrorChart data={annotations} />
+                            </div>
+
+                            {/* Productivity Chart - Full Width */}
+                            <div style={{ marginBottom: '2rem' }}>
+                                <ProductivityChart 
+                                    projects={projects} 
+                                    annotations={annotations} 
+                                    translators={translators} 
+                                />
+                            </div>
+
+                            {/* Additional Insights */}
+                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '1.5rem' }}>
+                                {/* Project Status Breakdown */}
+                                <div className="dashboard-card">
+                                    <div className="card-header">
+                                        <h3>📋 Project Status Overview</h3>
+                                    </div>
+                                    <div style={{ padding: '1.5rem' }}>
+                                        {['completed', 'in_progress', 'pending', 'cancelled'].map(status => {
+                                            const count = projects ? projects.filter(p => p.status === status).length : 0;
+                                            const percentage = projects && projects.length > 0 ? Math.round((count / projects.length) * 100) : 0;
+                                            const colors = {
+                                                completed: '#10b981',
+                                                in_progress: '#3b82f6',
+                                                pending: '#f59e0b',
+                                                cancelled: '#ef4444'
+                                            };
+                                            
+                                            return (
+                                                <div key={status} style={{ 
+                                                    display: 'flex', 
+                                                    alignItems: 'center', 
+                                                    gap: '1rem',
+                                                    marginBottom: '1rem'
+                                                }}>
+                                                    <div style={{ 
+                                                        width: '100px', 
+                                                        fontSize: '0.9rem', 
+                                                        color: '#fff',
+                                                        textTransform: 'capitalize'
+                                                    }}>
+                                                        {status.replace('_', ' ')}
+                                                    </div>
+                                                    <div style={{ 
+                                                        flex: 1, 
+                                                        height: '24px', 
+                                                        background: 'rgba(255,255,255,0.1)', 
+                                                        borderRadius: '12px', 
+                                                        overflow: 'hidden'
+                                                    }}>
+                                                        <div 
+                                                            style={{
+                                                                width: `${percentage}%`,
+                                                                height: '100%',
+                                                                background: colors[status],
+                                                                borderRadius: '12px',
+                                                                display: 'flex',
+                                                                alignItems: 'center',
+                                                                justifyContent: 'center',
+                                                                color: '#fff',
+                                                                fontSize: '0.8rem',
+                                                                fontWeight: 'bold',
+                                                                minWidth: count > 0 ? '30px' : '0px'
+                                                            }}
+                                                        >
+                                                            {count > 0 ? count : ''}
+                                                        </div>
+                                                    </div>
+                                                    <div style={{ 
+                                                        width: '50px', 
+                                                        fontSize: '0.8rem', 
+                                                        color: '#666',
+                                                        textAlign: 'right'
+                                                    }}>
+                                                        {percentage}%
+                                                    </div>
+                                                </div>
+                                            );
+                                        })}
+                                    </div>
+                                </div>
+
+                                {/* Quality Distribution */}
+                                <div className="dashboard-card">
+                                    <div className="card-header">
+                                        <h3>⭐ Quality Rating Distribution</h3>
+                                    </div>
+                                    <div style={{ padding: '1.5rem' }}>
+                                        {[5, 4, 3, 2, 1].map(rating => {
+                                            const count = annotations ? annotations.filter(a => a.quality_rating === rating).length : 0;
+                                            const total = annotations ? annotations.filter(a => a.quality_rating).length : 0;
+                                            const percentage = total > 0 ? Math.round((count / total) * 100) : 0;
+                                            
+                                            return (
+                                                <div key={rating} style={{ 
+                                                    display: 'flex', 
+                                                    alignItems: 'center', 
+                                                    gap: '1rem',
+                                                    marginBottom: '1rem'
+                                                }}>
+                                                    <div style={{ 
+                                                        width: '60px', 
+                                                        fontSize: '0.9rem', 
+                                                        color: rating >= 4 ? '#10b981' : rating >= 3 ? '#f59e0b' : '#ef4444',
+                                                        fontWeight: 'bold'
+                                                    }}>
+                                                        {rating} ⭐
+                                                    </div>
+                                                    <div style={{ 
+                                                        flex: 1, 
+                                                        height: '24px', 
+                                                        background: 'rgba(255,255,255,0.1)', 
+                                                        borderRadius: '12px', 
+                                                        overflow: 'hidden'
+                                                    }}>
+                                                        <div 
+                                                            style={{
+                                                                width: `${percentage}%`,
+                                                                height: '100%',
+                                                                background: rating >= 4 ? '#10b981' : rating >= 3 ? '#f59e0b' : '#ef4444',
+                                                                borderRadius: '12px',
+                                                                display: 'flex',
+                                                                alignItems: 'center',
+                                                                justifyContent: 'center',
+                                                                color: '#fff',
+                                                                fontSize: '0.8rem',
+                                                                fontWeight: 'bold',
+                                                                minWidth: count > 0 ? '30px' : '0px'
+                                                            }}
+                                                        >
+                                                            {count > 0 ? count : ''}
+                                                        </div>
+                                                    </div>
+                                                    <div style={{ 
+                                                        width: '50px', 
+                                                        fontSize: '0.8rem', 
+                                                        color: '#666',
+                                                        textAlign: 'right'
+                                                    }}>
+                                                        {percentage}%
+                                                    </div>
+                                                </div>
+                                            );
+                                        })}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    ) : (
+                        <div className="dashboard-card">
+                            <div style={{ textAlign: 'center', padding: '4rem 2rem' }}>
+                                <div style={{ fontSize: '4rem', marginBottom: '1rem' }}>📊</div>
+                                <h3 style={{ color: '#fff', marginBottom: '1rem' }}>No Analytics Data Yet</h3>
+                                <p style={{ color: '#888', marginBottom: '2rem', maxWidth: '600px', margin: '0 auto 2rem' }}>
+                                    Start creating projects and adding quality annotations to see comprehensive analytics. 
+                                    The dashboard will show quality trends, error patterns, and productivity metrics.
+                                </p>
+                                
+                                <button
+                                    onClick={generateSampleAnalyticsData}
+                                    style={{
+                                        padding: '12px 32px',
+                                        background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+                                        color: '#fff',
+                                        border: 'none',
+                                        borderRadius: '8px',
+                                        fontSize: '1rem',
+                                        fontWeight: '600',
+                                        cursor: 'pointer',
+                                        boxShadow: '0 4px 12px rgba(16, 185, 129, 0.3)',
+                                        marginRight: '1rem'
+                                    }}
+                                >
+                                    🧪 Generate Sample Analytics Data
+                                </button>
+                                
+                                <button
+                                    onClick={() => setActiveTab('jobs')}
+                                    style={{
+                                        padding: '12px 32px',
+                                        background: 'rgba(59, 130, 246, 0.2)',
+                                        color: '#3b82f6',
+                                        border: '1px solid rgba(59, 130, 246, 0.3)',
+                                        borderRadius: '8px',
+                                        fontSize: '1rem',
+                                        fontWeight: '600',
+                                        cursor: 'pointer'
+                                    }}
+                                >
+                                    📋 Create First Project
+                                </button>
+                            </div>
+                        </div>
+                    )}
                 </div>
             )}
             {/* TM Management Tab */}
