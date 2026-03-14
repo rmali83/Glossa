@@ -16,13 +16,15 @@
 
 class WebsiteScraper {
   /**
-   * Fetch and parse a website URL
+   * Fetch and parse a website URL with configuration
    * @param {string} url - Website URL to scrape
+   * @param {Object} config - Scraping configuration from wizard
    * @returns {Promise<Object>} Extracted content
    */
-  async scrapeWebsite(url) {
+  async scrapeWebsite(url, config = {}) {
     try {
       console.log('[WebsiteScraper] Fetching:', url);
+      console.log('[WebsiteScraper] Config:', config);
 
       // Validate URL
       if (!this.isValidUrl(url)) {
@@ -36,30 +38,44 @@ class WebsiteScraper {
       const parser = new DOMParser();
       const doc = parser.parseFromString(html, 'text/html');
 
-      // Extract all translatable content
+      // Apply platform-specific exclusions
+      if (config.platformSettings?.excludeSelectors) {
+        this.removeExcludedElements(doc, config.platformSettings.excludeSelectors);
+      }
+
+      // Apply translation settings exclusions
+      if (config.translationSettings?.excludeSelectors) {
+        this.removeExcludedElements(doc, config.translationSettings.excludeSelectors);
+      }
+
+      // Extract content based on selected content types
       const content = {
         url: url,
         title: this.extractTitle(doc),
-        metaTags: this.extractMetaTags(doc),
-        openGraph: this.extractOpenGraph(doc),
-        twitterCards: this.extractTwitterCards(doc),
-        structuredData: this.extractStructuredData(doc),
-        navigation: this.extractNavigation(doc),
-        buttons: this.extractButtons(doc),
-        links: this.extractLinks(doc),
-        forms: this.extractForms(doc),
-        images: this.extractImages(doc),
-        headings: this.extractHeadings(doc),
-        paragraphs: this.extractParagraphs(doc),
-        lists: this.extractLists(doc),
-        tables: this.extractTables(doc),
-        hiddenContent: this.extractHiddenContent(doc),
-        ariaLabels: this.extractAriaLabels(doc),
-        dataAttributes: this.extractDataAttributes(doc)
+        metaTags: config.contentTypes?.metadata !== false ? this.extractMetaTags(doc) : [],
+        openGraph: config.contentTypes?.metadata !== false ? this.extractOpenGraph(doc) : [],
+        twitterCards: config.contentTypes?.metadata !== false ? this.extractTwitterCards(doc) : [],
+        structuredData: config.contentTypes?.metadata !== false ? this.extractStructuredData(doc) : [],
+        navigation: config.contentTypes?.navigation !== false ? this.extractNavigation(doc) : [],
+        buttons: config.contentTypes?.buttons !== false ? this.extractButtons(doc) : [],
+        links: config.contentTypes?.mainContent !== false ? this.extractLinks(doc) : [],
+        forms: config.contentTypes?.forms !== false ? this.extractForms(doc) : [],
+        images: config.contentTypes?.images !== false ? this.extractImages(doc) : [],
+        headings: config.contentTypes?.mainContent !== false ? this.extractHeadings(doc) : [],
+        paragraphs: config.contentTypes?.mainContent !== false ? this.extractParagraphs(doc) : [],
+        lists: config.contentTypes?.mainContent !== false ? this.extractLists(doc) : [],
+        tables: config.contentTypes?.mainContent !== false ? this.extractTables(doc) : [],
+        footer: config.contentTypes?.footer !== false ? this.extractFooter(doc) : [],
+        sidebar: config.contentTypes?.sidebar !== false ? this.extractSidebar(doc) : [],
+        popups: config.contentTypes?.popups === true ? this.extractPopups(doc) : [],
+        comments: config.contentTypes?.comments === true ? this.extractComments(doc) : [],
+        hiddenContent: config.translationSettings?.includeHidden === true ? this.extractHiddenContent(doc) : [],
+        ariaLabels: config.translationSettings?.translateAttributes !== false ? this.extractAriaLabels(doc) : [],
+        dataAttributes: config.translationSettings?.translateAttributes !== false ? this.extractDataAttributes(doc) : []
       };
 
       // Convert to segments
-      const segments = this.convertToSegments(content);
+      const segments = this.convertToSegments(content, config);
 
       return {
         success: true,
@@ -69,7 +85,8 @@ class WebsiteScraper {
         metadata: {
           totalSegments: segments.length,
           pageTitle: content.title,
-          scrapedAt: new Date().toISOString()
+          scrapedAt: new Date().toISOString(),
+          configuration: config
         }
       };
 
@@ -706,6 +723,190 @@ class WebsiteScraper {
     }
   }
 }
+
+  /**
+   * Remove excluded elements from document
+   */
+  removeExcludedElements(doc, excludeSelectors) {
+    if (!excludeSelectors || !Array.isArray(excludeSelectors)) return;
+    
+    excludeSelectors.forEach(selector => {
+      try {
+        const elements = doc.querySelectorAll(selector);
+        elements.forEach(el => el.remove());
+      } catch (error) {
+        console.warn(`Invalid CSS selector: ${selector}`);
+      }
+    });
+  }
+
+  /**
+   * Extract footer content
+   */
+  extractFooter(doc) {
+    const footers = [];
+    const footerSelectors = [
+      'footer',
+      '.footer',
+      '#footer',
+      '[role="contentinfo"]',
+      '.site-footer',
+      '.page-footer'
+    ];
+
+    footerSelectors.forEach(selector => {
+      const elements = doc.querySelectorAll(selector);
+      elements.forEach(el => {
+        const text = this.cleanText(el.textContent);
+        if (text && text.length > 3) {
+          footers.push({
+            text: text,
+            selector: selector,
+            tag: el.tagName.toLowerCase()
+          });
+        }
+      });
+    });
+
+    return footers;
+  }
+
+  /**
+   * Extract sidebar content
+   */
+  extractSidebar(doc) {
+    const sidebars = [];
+    const sidebarSelectors = [
+      '.sidebar',
+      '.widget',
+      '.aside',
+      'aside',
+      '[role="complementary"]',
+      '.secondary'
+    ];
+
+    sidebarSelectors.forEach(selector => {
+      const elements = doc.querySelectorAll(selector);
+      elements.forEach(el => {
+        const text = this.cleanText(el.textContent);
+        if (text && text.length > 3) {
+          sidebars.push({
+            text: text,
+            selector: selector,
+            tag: el.tagName.toLowerCase()
+          });
+        }
+      });
+    });
+
+    return sidebars;
+  }
+
+  /**
+   * Extract popup and modal content
+   */
+  extractPopups(doc) {
+    const popups = [];
+    const popupSelectors = [
+      '.modal',
+      '.popup',
+      '.overlay',
+      '.lightbox',
+      '[role="dialog"]',
+      '.fancybox',
+      '.tooltip'
+    ];
+
+    popupSelectors.forEach(selector => {
+      const elements = doc.querySelectorAll(selector);
+      elements.forEach(el => {
+        const text = this.cleanText(el.textContent);
+        if (text && text.length > 3) {
+          popups.push({
+            text: text,
+            selector: selector,
+            tag: el.tagName.toLowerCase()
+          });
+        }
+      });
+    });
+
+    return popups;
+  }
+
+  /**
+   * Extract comments content
+   */
+  extractComments(doc) {
+    const comments = [];
+    const commentSelectors = [
+      '.comment',
+      '.review',
+      '.testimonial',
+      '.feedback',
+      '[class*="comment"]',
+      '[class*="review"]'
+    ];
+
+    commentSelectors.forEach(selector => {
+      const elements = doc.querySelectorAll(selector);
+      elements.forEach(el => {
+        const text = this.cleanText(el.textContent);
+        if (text && text.length > 10) {
+          comments.push({
+            text: text,
+            selector: selector,
+            tag: el.tagName.toLowerCase()
+          });
+        }
+      });
+    });
+
+    return comments;
+  }
+
+  /**
+   * Convert content to segments with configuration
+   */
+  convertToSegments(content, config = {}) {
+    const segments = [];
+    let segmentId = 1;
+
+    // Helper function to add segment
+    const addSegment = (text, type, metadata = {}) => {
+      if (text && text.trim().length > 0) {
+        segments.push({
+          id: segmentId++,
+          text: text.trim(),
+          type: type,
+          metadata: metadata
+        });
+      }
+    };
+
+    // Process each content type based on configuration
+    Object.entries(content).forEach(([contentType, items]) => {
+      if (!items || (Array.isArray(items) && items.length === 0)) return;
+
+      if (contentType === 'title' && typeof items === 'string') {
+        addSegment(items, 'title');
+      } else if (Array.isArray(items)) {
+        items.forEach(item => {
+          if (typeof item === 'string') {
+            addSegment(item, contentType);
+          } else if (item && item.text) {
+            addSegment(item.text, contentType, {
+              selector: item.selector,
+              tag: item.tag,
+              attributes: item.attributes
+            });
+          }
+        });
+      }
+    });
+
+    return segments;
+  }
 
 // Export singleton instance
 const websiteScraper = new WebsiteScraper();

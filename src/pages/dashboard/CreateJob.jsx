@@ -3,7 +3,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../context/AuthContext';
 import SimpleUploadModal from '../../components/SimpleUploadModal';
-import WebsiteTranslationModal from '../../components/WebsiteTranslationModal';
+import WebsiteTranslationWizard from '../../components/WebsiteTranslationWizard';
 import simpleUploadManager from '../../services/simpleUploadManager';
 import LANGUAGES from '../../data/languages';
 import './DashboardTheme.css';
@@ -77,7 +77,7 @@ const CreateJob = () => {
   const [uploadedFiles, setUploadedFiles] = useState([]);
   const [totalWords, setTotalWords] = useState(0);
   const [showUploadModal, setShowUploadModal] = useState(false);
-  const [showWebsiteModal, setShowWebsiteModal] = useState(false);
+  const [showWebsiteWizard, setShowWebsiteWizard] = useState(false);
   const [creating, setCreating] = useState(false);
   const [projectId, setProjectId] = useState(null);
   const [translators, setTranslators] = useState([]);
@@ -105,16 +105,16 @@ const CreateJob = () => {
     fetchUsers();
   }, []);
 
-  // Auto-open website modal for website template
+  // Auto-open website wizard for website template
   useEffect(() => {
-    if (template === 'website' && projectId && !showWebsiteModal) {
+    if (template === 'website' && projectId && !showWebsiteWizard) {
       // Small delay to ensure project is created
       const timer = setTimeout(() => {
-        setShowWebsiteModal(true);
+        setShowWebsiteWizard(true);
       }, 500);
       return () => clearTimeout(timer);
     }
-  }, [template, projectId, showWebsiteModal]);
+  }, [template, projectId, showWebsiteWizard]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -494,7 +494,7 @@ const CreateJob = () => {
                 </h3>
                 <div className="flex gap-3">
                   <button
-                    onClick={() => setShowWebsiteModal(true)}
+                    onClick={() => setShowWebsiteWizard(true)}
                     className="px-6 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-xl font-semibold transition-all flex items-center gap-2"
                   >
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -570,12 +570,12 @@ const CreateJob = () => {
         />
       )}
 
-      {/* Website Translation Modal */}
-      {showWebsiteModal && projectId && (
-        <WebsiteTranslationModal
+      {/* Website Translation Wizard */}
+      {showWebsiteWizard && projectId && (
+        <WebsiteTranslationWizard
           projectId={projectId}
           projectName={formData.name}
-          onClose={() => setShowWebsiteModal(false)}
+          onClose={() => setShowWebsiteWizard(false)}
           onComplete={handleUploadComplete}
         />
       )}
