@@ -3,6 +3,7 @@ import websiteScraper from '../services/websiteScraper';
 import { supabase } from '../lib/supabase';
 
 const WebsiteTranslationWizard = ({ projectId, projectName, onClose, onComplete }) => {
+    console.log('🧙‍♂️ WebsiteTranslationWizard v2.0 Loading...'); // Debug log
     const [currentStep, setCurrentStep] = useState(1);
     const [wizardData, setWizardData] = useState({
         // Step 1: Website URL & Detection
@@ -312,8 +313,8 @@ const WebsiteTranslationWizard = ({ projectId, projectName, onClose, onComplete 
                 {/* Header */}
                 <div className="flex justify-between items-center mb-6">
                     <div>
-                        <h2 className="text-2xl font-bold text-white">Website Translation Wizard</h2>
-                        <p className="text-gray-400">Step {currentStep} of 5</p>
+                        <h2 className="text-2xl font-bold text-white">🧙‍♂️ Advanced Website Translation Wizard v2.0</h2>
+                        <p className="text-gray-400">Step {currentStep} of 5 • Weglot-Style Experience</p>
                     </div>
                     <button
                         onClick={onClose}
