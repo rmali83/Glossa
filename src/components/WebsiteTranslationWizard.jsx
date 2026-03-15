@@ -3,7 +3,7 @@ import websiteScraper from '../services/websiteScraper';
 import { supabase } from '../lib/supabase';
 
 const WebsiteTranslationWizard = ({ projectId, projectName, onClose, onComplete }) => {
-    console.log('🧙‍♂️ WebsiteTranslationWizard v3.0 Loading...'); // Debug log
+    console.log('🧙‍♂️ WebsiteTranslationWizard v3.0 Loading...', new Date().toISOString()); // Debug log
     
     const [currentStep, setCurrentStep] = useState(1);
     const [wizardData, setWizardData] = useState({
@@ -103,7 +103,7 @@ const WebsiteTranslationWizard = ({ projectId, projectName, onClose, onComplete 
                 {/* Header */}
                 <div className="flex justify-between items-center mb-6">
                     <div>
-                        <h2 className="text-2xl font-bold text-white">🧙‍♂️ Website Translation Wizard v3.0</h2>
+                        <h2 className="text-2xl font-bold text-white">🧙‍♂️ Website Translation Wizard v3.0 - LIVE</h2>
                         <p className="text-gray-400">Step {currentStep} of 3 • Weglot-Style Experience</p>
                     </div>
                     <button
