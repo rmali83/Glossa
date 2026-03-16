@@ -117,7 +117,7 @@ const AutomatedWebsiteTranslation = () => {
         <h2 className="text-2xl font-bold text-gray-900 mb-2">
           Configure Your Website
         </h2>
-        <p className="text-gray-600 mb-6">
+        <p className="text-gray-700 mb-6 text-base font-medium">
           Enter your website domain to set up automated translation monitoring.
         </p>
       </div>
@@ -131,9 +131,14 @@ const AutomatedWebsiteTranslation = () => {
           placeholder="https://www.yourwebsite.com"
           value={formData.domain}
           onChange={(e) => setFormData(prev => ({ ...prev, domain: e.target.value }))}
-          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 placeholder-gray-500"
+          style={{
+            fontSize: '16px',
+            fontWeight: '400',
+            backgroundColor: '#ffffff'
+          }}
         />
-        <p className="text-sm text-gray-500 mt-2">
+        <p className="text-sm text-gray-600 mt-2 font-medium">
           We'll automatically monitor this website for content changes
         </p>
       </div>
@@ -145,7 +150,11 @@ const AutomatedWebsiteTranslation = () => {
         <select
           value={formData.source_language}
           onChange={(e) => setFormData(prev => ({ ...prev, source_language: e.target.value }))}
-          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 text-gray-900 bg-white"
+          style={{
+            fontSize: '16px',
+            fontWeight: '400'
+          }}
         >
           {languages.map(lang => (
             <option key={lang.code} value={lang.code}>
@@ -153,14 +162,17 @@ const AutomatedWebsiteTranslation = () => {
             </option>
           ))}
         </select>
+        <p className="text-sm text-gray-600 mt-2 font-medium">
+          The original language of your website content
+        </p>
       </div>
 
       <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
         <div className="flex items-start space-x-2">
           <span className="text-blue-600 text-lg">🤖</span>
           <div>
-            <h4 className="font-medium text-blue-900">Fully Automated Translation</h4>
-            <p className="text-sm text-blue-700 mt-1">
+            <h4 className="font-semibold text-blue-900 text-base">Fully Automated Translation</h4>
+            <p className="text-sm text-blue-800 mt-1 font-medium">
               Our system will automatically detect content changes, translate them, and deploy updates to your website - no manual work required!
             </p>
           </div>
