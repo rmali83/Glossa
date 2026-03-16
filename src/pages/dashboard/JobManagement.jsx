@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../context/AuthContext';
-import JobTemplatesModal from '../../components/JobTemplatesModal';
 import './DashboardPages.css';
 import './DashboardTheme.css';
 
@@ -13,7 +12,7 @@ const JobManagement = () => {
     const [filteredJobs, setFilteredJobs] = useState([]);
     const [loading, setLoading] = useState(true);
     const [selectedJobs, setSelectedJobs] = useState([]);
-    const [showTemplateModal, setShowTemplateModal] = useState(false);
+
     
     // Filters
     const [filters, setFilters] = useState({
@@ -30,28 +29,6 @@ const JobManagement = () => {
         sortBy: 'created_at',
         sortOrder: 'desc'
     });
-
-    // Job Templates
-    const [templates, setTemplates] = useState([
-        {
-            id: 1,
-            name: 'Website Translation',
-            source_language: 'English',
-            target_language: 'Spanish',
-            pay_rate_per_word: 0.05,
-            specialization: 'General',
-            difficulty_level: 'standard'
-        },
-        {
-            id: 2,
-            name: 'Legal Document',
-            source_language: 'English',
-            target_language: 'French',
-            pay_rate_per_word: 0.08,
-            specialization: 'Legal',
-            difficulty_level: 'expert'
-        }
-    ]);
 
     useEffect(() => {
         fetchJobs();
@@ -233,11 +210,6 @@ const JobManagement = () => {
         }
     };
 
-    const handleCreateFromTemplate = (template) => {
-        navigate('/dashboard/admin/create-job', { state: { template } });
-        setShowTemplateModal(false);
-    };
-
     const resetFilters = () => {
         setFilters({
             search: '',
@@ -273,21 +245,6 @@ const JobManagement = () => {
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
                 <h1 style={{ fontSize: '2rem', fontWeight: 'bold', color: '#fff' }}>Job Management</h1>
                 <div style={{ display: 'flex', gap: '1rem' }}>
-                    <button
-                        onClick={() => setShowTemplateModal(true)}
-                        style={{
-                            padding: '12px 24px',
-                            background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
-                            color: '#fff',
-                            border: 'none',
-                            borderRadius: '12px',
-                            fontSize: '1rem',
-                            fontWeight: '600',
-                            cursor: 'pointer'
-                        }}
-                    >
-                        📋 Templates
-                    </button>
                     <button
                         onClick={() => navigate('/dashboard/admin/create-job')}
                         style={{
@@ -686,76 +643,6 @@ const JobManagement = () => {
                     </table>
                 </div>
             </div>
-
-            {/* Template Modal */}
-            {showTemplateModal && (
-                <div style={{
-                    position: 'fixed',
-                    top: 0,
-                    left: 0,
-                    right: 0,
-                    bottom: 0,
-                    background: 'rgba(0,0,0,0.8)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    zIndex: 1000
-                }}>
-                    <div style={{
-                        background: '#1a1a2e',
-                        borderRadius: '16px',
-                        padding: '2rem',
-                        maxWidth: '600px',
-                        width: '90%'
-                    }}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-                            <h2 style={{ color: '#fff', fontSize: '1.5rem' }}>Job Templates</h2>
-                            <button
-                                onClick={() => setShowTemplateModal(false)}
-                                style={{
-                                    background: 'none',
-                                    border: 'none',
-                                    color: '#fff',
-                                    fontSize: '1.5rem',
-                                    cursor: 'pointer'
-                                }}
-                            >
-                                ×
-                            </button>
-                        </div>
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
-                            {templates.map(template => (
-                                <div
-                                    key={template.id}
-                                    onClick={() => handleCreateFromTemplate(template)}
-                                    style={{
-                                        padding: '20px',
-                                        background: 'rgba(255,255,255,0.05)',
-                                        borderRadius: '12px',
-                                        cursor: 'pointer',
-                                        border: '2px solid transparent',
-                                        transition: 'all 0.3s'
-                                    }}
-                                    onMouseOver={(e) => e.currentTarget.style.borderColor = '#667eea'}
-                                    onMouseOut={(e) => e.currentTarget.style.borderColor = 'transparent'}
-                                >
-                                    <h3 style={{ color: '#fff', marginBottom: '10px' }}>{template.name}</h3>
-                                    <div style={{ display: 'flex', gap: '15px', fontSize: '0.85rem', color: '#999' }}>
-                                        <span>{template.source_language} → {template.target_language}</span>
-                                        <span>${template.pay_rate_per_word}/word</span>
-                                        <span>{template.specialization}</span>
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
-                    </div>
-                </div>
-            )}
-
-            {/* Job Templates Modal */}
-            {showTemplateModal && (
-                <JobTemplatesModal onClose={() => setShowTemplateModal(false)} />
-            )}
         </div>
     );
 };

@@ -20,6 +20,8 @@ import Settings from './pages/dashboard/Settings';
 import Messages from './pages/dashboard/Messages';
 import AdminEnhanced from './pages/dashboard/AdminEnhanced';
 import CreateJob from './pages/dashboard/CreateJob';
+import AutomatedWebsiteTranslation from './pages/dashboard/AutomatedWebsiteTranslation';
+import AutomatedTranslationDemo from './pages/dashboard/AutomatedTranslationDemo';
 import JobManagement from './pages/dashboard/JobManagement';
 import TranslatorProfile from './pages/dashboard/TranslatorProfile';
 import Onboarding from './pages/Onboarding';
@@ -80,6 +82,8 @@ function App() {
                 <Route path="/settings" element={<Settings />} />
                 <Route path="/admin" element={<AdminEnhanced />} />
                 <Route path="/admin/create-job" element={<CreateJob />} />
+                <Route path="/admin/automated-translation" element={<AutomatedWebsiteTranslation />} />
+                <Route path="/admin/automated-translation-demo" element={<AutomatedTranslationDemo />} />
                 <Route path="/cat" element={<GlossaCAT />} />
                 <Route path="/cat/:projectId" element={<CATProjectView />} />
               </Routes>

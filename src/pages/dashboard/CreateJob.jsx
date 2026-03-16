@@ -3,7 +3,6 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../context/AuthContext';
 import SimpleUploadModal from '../../components/SimpleUploadModal';
-import WebsiteTranslationWizard from '../../components/WebsiteTranslationWizard';
 import simpleUploadManager from '../../services/simpleUploadManager';
 import LANGUAGES from '../../data/languages';
 import './DashboardTheme.css';
@@ -77,7 +76,6 @@ const CreateJob = () => {
   const [uploadedFiles, setUploadedFiles] = useState([]);
   const [totalWords, setTotalWords] = useState(0);
   const [showUploadModal, setShowUploadModal] = useState(false);
-  const [showWebsiteWizard, setShowWebsiteWizard] = useState(false);
   const [creating, setCreating] = useState(false);
   const [projectId, setProjectId] = useState(null);
   const [translators, setTranslators] = useState([]);
@@ -104,17 +102,6 @@ const CreateJob = () => {
     };
     fetchUsers();
   }, []);
-
-  // Auto-open website wizard for website template
-  useEffect(() => {
-    if (template === 'website' && projectId && !showWebsiteWizard) {
-      // Small delay to ensure project is created
-      const timer = setTimeout(() => {
-        setShowWebsiteWizard(true);
-      }, 500);
-      return () => clearTimeout(timer);
-    }
-  }, [template, projectId, showWebsiteWizard]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -494,13 +481,13 @@ const CreateJob = () => {
                 </h3>
                 <div className="flex gap-3">
                   <button
-                    onClick={() => setShowWebsiteWizard(true)}
-                    className="px-6 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-xl font-semibold transition-all flex items-center gap-2"
+                    onClick={() => setShowUploadModal(true)}
+                    className="px-6 py-2 bg-green-600 hover:bg-green-700 text-white rounded-xl font-semibold transition-all"
                   >
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />
                     </svg>
-                    Translate Website
+                    + Upload Files
                   </button>
                   <button
                     onClick={() => setShowUploadModal(true)}
@@ -557,28 +544,39 @@ const CreateJob = () => {
               </button>
             </div>
           )}
+          {/* Website Translation Section - INLINE */}
+          {/* Website Translation Section - REMOVED */}
+          
+          {/* Upload Modal */}
+          {showUploadModal && projectId && (
+            <SimpleUploadModal
+              projectId={projectId}
+              projectName={formData.name}
+              onClose={() => setShowUploadModal(false)}
+              onUploadComplete={handleUploadComplete}
+            />
+          )}
+
+          {/* URL Extractor */}
+          {showUrlExtractor && projectId && (
+            <UrlExtractor
+              projectId={projectId}
+              onClose={() => setShowUrlExtractor(false)}
+              onComplete={handleUploadComplete}
+            />
+          )}
         </div>
+
+        {/* Upload Modal */}
+        {showUploadModal && projectId && (
+          <SimpleUploadModal
+            projectId={projectId}
+            projectName={formData.name}
+            onClose={() => setShowUploadModal(false)}
+            onUploadComplete={handleUploadComplete}
+          />
+        )}
       </div>
-
-      {/* Upload Modal */}
-      {showUploadModal && projectId && (
-        <SimpleUploadModal
-          projectId={projectId}
-          projectName={formData.name}
-          onClose={() => setShowUploadModal(false)}
-          onUploadComplete={handleUploadComplete}
-        />
-      )}
-
-      {/* Website Translation Wizard */}
-      {showWebsiteWizard && projectId && (
-        <WebsiteTranslationWizard
-          projectId={projectId}
-          projectName={formData.name}
-          onClose={() => setShowWebsiteWizard(false)}
-          onComplete={handleUploadComplete}
-        />
-      )}
     </div>
   );
 };

@@ -1005,6 +1005,22 @@ const AdminEnhanced = () => {
                     >
                         + Create Job
                     </button>
+                    <button
+                        onClick={() => navigate('/dashboard/admin/automated-translation')}
+                        style={{
+                            padding: '12px 24px',
+                            background: 'linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%)',
+                            color: '#fff',
+                            border: 'none',
+                            borderRadius: '12px',
+                            fontSize: '1rem',
+                            fontWeight: '600',
+                            cursor: 'pointer',
+                            boxShadow: '0 4px 12px rgba(139, 92, 246, 0.3)'
+                        }}
+                    >
+                        🤖 Website Translation
+                    </button>
                 </div>
             </div>
 
