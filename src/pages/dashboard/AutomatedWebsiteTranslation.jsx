@@ -38,7 +38,8 @@ const AutomatedWebsiteTranslation = () => {
     { code: 'ru', name: 'Russian', flag: '🇷🇺' },
     { code: 'ja', name: 'Japanese', flag: '🇯🇵' },
     { code: 'ko', name: 'Korean', flag: '🇰🇷' },
-    { code: 'zh', name: 'Chinese', flag: '🇨🇳' },
+    { code: 'zh', name: 'Chinese (Simplified)', flag: '🇨🇳' },
+    { code: 'zh-tw', name: 'Chinese (Traditional)', flag: '🇹🇼' },
     { code: 'ar', name: 'Arabic', flag: '🇸🇦' },
     { code: 'hi', name: 'Hindi', flag: '🇮🇳' },
     { code: 'nl', name: 'Dutch', flag: '🇳🇱' },
@@ -46,7 +47,69 @@ const AutomatedWebsiteTranslation = () => {
     { code: 'no', name: 'Norwegian', flag: '🇳🇴' },
     { code: 'da', name: 'Danish', flag: '🇩🇰' },
     { code: 'fi', name: 'Finnish', flag: '🇫🇮' },
-    { code: 'pl', name: 'Polish', flag: '🇵🇱' }
+    { code: 'pl', name: 'Polish', flag: '🇵🇱' },
+    { code: 'tr', name: 'Turkish', flag: '🇹🇷' },
+    { code: 'he', name: 'Hebrew', flag: '🇮🇱' },
+    { code: 'th', name: 'Thai', flag: '🇹🇭' },
+    { code: 'vi', name: 'Vietnamese', flag: '🇻🇳' },
+    { code: 'id', name: 'Indonesian', flag: '🇮🇩' },
+    { code: 'ms', name: 'Malay', flag: '🇲🇾' },
+    { code: 'tl', name: 'Filipino', flag: '🇵🇭' },
+    { code: 'uk', name: 'Ukrainian', flag: '🇺🇦' },
+    { code: 'cs', name: 'Czech', flag: '🇨🇿' },
+    { code: 'sk', name: 'Slovak', flag: '🇸🇰' },
+    { code: 'hu', name: 'Hungarian', flag: '🇭🇺' },
+    { code: 'ro', name: 'Romanian', flag: '🇷🇴' },
+    { code: 'bg', name: 'Bulgarian', flag: '🇧🇬' },
+    { code: 'hr', name: 'Croatian', flag: '🇭🇷' },
+    { code: 'sr', name: 'Serbian', flag: '🇷🇸' },
+    { code: 'sl', name: 'Slovenian', flag: '🇸🇮' },
+    { code: 'et', name: 'Estonian', flag: '🇪🇪' },
+    { code: 'lv', name: 'Latvian', flag: '🇱🇻' },
+    { code: 'lt', name: 'Lithuanian', flag: '🇱🇹' },
+    { code: 'el', name: 'Greek', flag: '🇬🇷' },
+    { code: 'mt', name: 'Maltese', flag: '🇲🇹' },
+    { code: 'ga', name: 'Irish', flag: '🇮🇪' },
+    { code: 'cy', name: 'Welsh', flag: '🏴󠁧󠁢󠁷󠁬󠁳󠁿' },
+    { code: 'is', name: 'Icelandic', flag: '🇮🇸' },
+    { code: 'fa', name: 'Persian', flag: '🇮🇷' },
+    { code: 'ur', name: 'Urdu', flag: '🇵🇰' },
+    { code: 'bn', name: 'Bengali', flag: '🇧🇩' },
+    { code: 'ta', name: 'Tamil', flag: '🇱🇰' },
+    { code: 'te', name: 'Telugu', flag: '🇮🇳' },
+    { code: 'ml', name: 'Malayalam', flag: '🇮🇳' },
+    { code: 'kn', name: 'Kannada', flag: '🇮🇳' },
+    { code: 'gu', name: 'Gujarati', flag: '🇮🇳' },
+    { code: 'pa', name: 'Punjabi', flag: '🇮🇳' },
+    { code: 'mr', name: 'Marathi', flag: '🇮🇳' },
+    { code: 'ne', name: 'Nepali', flag: '🇳🇵' },
+    { code: 'si', name: 'Sinhala', flag: '🇱🇰' },
+    { code: 'my', name: 'Myanmar', flag: '🇲🇲' },
+    { code: 'km', name: 'Khmer', flag: '🇰🇭' },
+    { code: 'lo', name: 'Lao', flag: '🇱🇦' },
+    { code: 'ka', name: 'Georgian', flag: '🇬🇪' },
+    { code: 'am', name: 'Amharic', flag: '🇪🇹' },
+    { code: 'sw', name: 'Swahili', flag: '🇰🇪' },
+    { code: 'zu', name: 'Zulu', flag: '🇿🇦' },
+    { code: 'af', name: 'Afrikaans', flag: '🇿🇦' },
+    { code: 'sq', name: 'Albanian', flag: '🇦🇱' },
+    { code: 'az', name: 'Azerbaijani', flag: '🇦🇿' },
+    { code: 'be', name: 'Belarusian', flag: '🇧🇾' },
+    { code: 'bs', name: 'Bosnian', flag: '🇧🇦' },
+    { code: 'eu', name: 'Basque', flag: '🏴󠁥󠁳󠁰󠁶󠁿' },
+    { code: 'ca', name: 'Catalan', flag: '🏴󠁥󠁳󠁣󠁴󠁿' },
+    { code: 'eo', name: 'Esperanto', flag: '🌍' },
+    { code: 'fo', name: 'Faroese', flag: '🇫🇴' },
+    { code: 'gl', name: 'Galician', flag: '🏴󠁥󠁳󠁧󠁡󠁿' },
+    { code: 'hy', name: 'Armenian', flag: '🇦🇲' },
+    { code: 'kk', name: 'Kazakh', flag: '🇰🇿' },
+    { code: 'ky', name: 'Kyrgyz', flag: '🇰🇬' },
+    { code: 'lb', name: 'Luxembourgish', flag: '🇱🇺' },
+    { code: 'mk', name: 'Macedonian', flag: '🇲🇰' },
+    { code: 'mn', name: 'Mongolian', flag: '🇲🇳' },
+    { code: 'uz', name: 'Uzbek', flag: '🇺🇿' },
+    { code: 'tg', name: 'Tajik', flag: '🇹🇯' },
+    { code: 'tk', name: 'Turkmen', flag: '🇹🇲' }
   ];
 
   const createAutomatedSite = async () => {
@@ -204,57 +267,95 @@ const AutomatedWebsiteTranslation = () => {
         <label className="block text-sm font-medium text-gray-700 mb-4">
           TARGET LANGUAGES
         </label>
-        <select
-          multiple
-          value={formData.target_languages}
-          onChange={(e) => {
-            const selectedOptions = Array.from(e.target.selectedOptions, option => option.value);
-            setFormData(prev => ({ ...prev, target_languages: selectedOptions }));
-          }}
-          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 min-h-[200px] bg-white"
-          size="8"
-          style={{
-            backgroundImage: 'none',
-            fontSize: '14px',
-            lineHeight: '1.5'
-          }}
-        >
-          {languages.filter(lang => lang.code !== formData.source_language).map(lang => (
-            <option 
-              key={lang.code} 
-              value={lang.code} 
-              className="py-2 px-3 hover:bg-blue-50"
-              style={{
-                padding: '8px 12px',
-                fontSize: '14px'
-              }}
-            >
-              {lang.flag} {lang.name}
-            </option>
-          ))}
-        </select>
-        <div className="mt-3 flex items-center justify-between">
-          <p className="text-sm text-gray-500">
-            Hold Ctrl/Cmd to select multiple languages
+        <div className="relative">
+          <select
+            multiple
+            value={formData.target_languages}
+            onChange={(e) => {
+              const selectedOptions = Array.from(e.target.selectedOptions, option => option.value);
+              setFormData(prev => ({ ...prev, target_languages: selectedOptions }));
+            }}
+            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 min-h-[240px] bg-white text-gray-900 shadow-sm"
+            size="10"
+            style={{
+              backgroundImage: 'none',
+              fontSize: '14px',
+              lineHeight: '1.6',
+              scrollbarWidth: 'thin',
+              scrollbarColor: '#cbd5e1 #f1f5f9'
+            }}
+          >
+            {languages
+              .filter(lang => lang.code !== formData.source_language)
+              .sort((a, b) => a.name.localeCompare(b.name))
+              .map(lang => (
+                <option 
+                  key={lang.code} 
+                  value={lang.code} 
+                  className="py-2 px-3 hover:bg-blue-50 cursor-pointer"
+                  style={{
+                    padding: '10px 12px',
+                    fontSize: '14px',
+                    fontWeight: '500',
+                    backgroundColor: formData.target_languages.includes(lang.code) ? '#dbeafe' : 'white',
+                    color: formData.target_languages.includes(lang.code) ? '#1e40af' : '#374151',
+                    borderBottom: '1px solid #f3f4f6'
+                  }}
+                >
+                  {lang.flag} {lang.name}
+                </option>
+              ))
+            }
+          </select>
+          
+          {/* Custom scrollbar styling */}
+          <style jsx>{`
+            select::-webkit-scrollbar {
+              width: 8px;
+            }
+            select::-webkit-scrollbar-track {
+              background: #f1f5f9;
+              border-radius: 4px;
+            }
+            select::-webkit-scrollbar-thumb {
+              background: #cbd5e1;
+              border-radius: 4px;
+            }
+            select::-webkit-scrollbar-thumb:hover {
+              background: #94a3b8;
+            }
+          `}</style>
+        </div>
+        
+        <div className="mt-4 flex items-center justify-between">
+          <p className="text-sm text-gray-600 font-medium">
+            💡 Hold Ctrl/Cmd while clicking to select multiple languages
           </p>
-          <p className="text-sm font-medium text-blue-600">
+          <p className="text-sm font-semibold text-blue-600 bg-blue-50 px-3 py-1 rounded-full">
             Selected: {formData.target_languages.length} language(s)
           </p>
         </div>
         
         {/* Selected Languages Preview */}
         {formData.target_languages.length > 0 && (
-          <div className="mt-3 p-3 bg-blue-50 border border-blue-200 rounded-lg">
-            <p className="text-sm font-medium text-blue-900 mb-2">Selected Languages:</p>
+          <div className="mt-4 p-4 bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-lg">
+            <p className="text-sm font-semibold text-blue-900 mb-3 flex items-center">
+              <span className="mr-2">🌍</span>
+              Your website will be available in these languages:
+            </p>
             <div className="flex flex-wrap gap-2">
               {formData.target_languages.map(langCode => {
                 const lang = languages.find(l => l.code === langCode);
                 return (
                   <span 
                     key={langCode}
-                    className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800"
+                    className="inline-flex items-center px-3 py-2 rounded-lg text-sm font-medium bg-white border border-blue-200 text-blue-800 shadow-sm"
+                    style={{
+                      background: 'linear-gradient(135deg, #ffffff 0%, #f0f9ff 100%)'
+                    }}
                   >
-                    {lang?.flag} {lang?.name}
+                    <span className="mr-2 text-base">{lang?.flag}</span>
+                    {lang?.name}
                   </span>
                 );
               })}
