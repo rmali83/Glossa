@@ -49,15 +49,6 @@ const AutomatedWebsiteTranslation = () => {
     { code: 'pl', name: 'Polish', flag: '🇵🇱' }
   ];
 
-  const handleLanguageToggle = (langCode) => {
-    setFormData(prev => ({
-      ...prev,
-      target_languages: prev.target_languages.includes(langCode)
-        ? prev.target_languages.filter(lang => lang !== langCode)
-        : [...prev.target_languages, langCode]
-    }));
-  };
-
   const createAutomatedSite = async () => {
     setIsProcessing(true);
     try {
@@ -201,23 +192,63 @@ const AutomatedWebsiteTranslation = () => {
         <label className="block text-sm font-medium text-gray-700 mb-4">
           TARGET LANGUAGES
         </label>
-        <div className="grid grid-cols-2 gap-3 max-h-80 overflow-y-auto border border-gray-200 rounded-lg p-4">
+        <select
+          multiple
+          value={formData.target_languages}
+          onChange={(e) => {
+            const selectedOptions = Array.from(e.target.selectedOptions, option => option.value);
+            setFormData(prev => ({ ...prev, target_languages: selectedOptions }));
+          }}
+          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 min-h-[200px] bg-white"
+          size="8"
+          style={{
+            backgroundImage: 'none',
+            fontSize: '14px',
+            lineHeight: '1.5'
+          }}
+        >
           {languages.filter(lang => lang.code !== formData.source_language).map(lang => (
-            <label key={lang.code} className="flex items-center space-x-3 cursor-pointer hover:bg-gray-50 p-3 rounded-lg">
-              <input
-                type="checkbox"
-                checked={formData.target_languages.includes(lang.code)}
-                onChange={() => handleLanguageToggle(lang.code)}
-                className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-              />
-              <span className="text-lg">{lang.flag}</span>
-              <span className="text-sm font-medium">{lang.name}</span>
-            </label>
+            <option 
+              key={lang.code} 
+              value={lang.code} 
+              className="py-2 px-3 hover:bg-blue-50"
+              style={{
+                padding: '8px 12px',
+                fontSize: '14px'
+              }}
+            >
+              {lang.flag} {lang.name}
+            </option>
           ))}
+        </select>
+        <div className="mt-3 flex items-center justify-between">
+          <p className="text-sm text-gray-500">
+            Hold Ctrl/Cmd to select multiple languages
+          </p>
+          <p className="text-sm font-medium text-blue-600">
+            Selected: {formData.target_languages.length} language(s)
+          </p>
         </div>
-        <p className="text-sm text-gray-500 mt-3">
-          Selected: {formData.target_languages.length} language(s)
-        </p>
+        
+        {/* Selected Languages Preview */}
+        {formData.target_languages.length > 0 && (
+          <div className="mt-3 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+            <p className="text-sm font-medium text-blue-900 mb-2">Selected Languages:</p>
+            <div className="flex flex-wrap gap-2">
+              {formData.target_languages.map(langCode => {
+                const lang = languages.find(l => l.code === langCode);
+                return (
+                  <span 
+                    key={langCode}
+                    className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800"
+                  >
+                    {lang?.flag} {lang?.name}
+                  </span>
+                );
+              })}
+            </div>
+          </div>
+        )}
       </div>
 
       <div className="bg-green-50 border border-green-200 rounded-lg p-4">
