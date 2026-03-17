@@ -1,5 +1,5 @@
 // Content Management API endpoints
-import { supabase } from '../../src/lib/supabase';
+import { supabaseServer } from '../../src/lib/supabase-server';
 
 export default async function handler(req, res) {
   // Set CORS headers
@@ -35,7 +35,7 @@ export default async function handler(req, res) {
 // GET /api/content - Get all contents
 async function getContents(req, res) {
   try {
-    const { data, error } = await supabase.rpc('get_all_contents_with_translations');
+    const { data, error } = await supabaseServer.rpc('get_all_contents_with_translations');
 
     if (error) throw error;
 
@@ -59,13 +59,12 @@ async function createContent(req, res) {
       });
     }
 
-    // Create content record
-    const { data: content, error: contentError } = await supabase
+    // Create content record using service role (bypasses RLS)
+    const { data: content, error: contentError } = await supabaseServer
       .from('contents')
       .insert({
         type,
-        status: 'draft',
-        created_by: req.user?.id // Assuming auth middleware sets req.user
+        status: 'draft'
       })
       .select()
       .single();
@@ -73,7 +72,7 @@ async function createContent(req, res) {
     if (contentError) throw contentError;
 
     // Create translation record
-    const { error: translationError } = await supabase
+    const { error: translationError } = await supabaseServer
       .from('content_translations')
       .insert({
         content_id: content.id,
@@ -92,7 +91,7 @@ async function createContent(req, res) {
         category_id: categoryId
       }));
 
-      const { error: categoryError } = await supabase
+      const { error: categoryError } = await supabaseServer
         .from('content_categories')
         .insert(categoryRecords);
 

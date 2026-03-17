@@ -1,5 +1,5 @@
 // Individual Content API endpoints
-import { supabase } from '../../src/lib/supabase';
+import { supabaseServer } from '../../src/lib/supabase-server';
 
 export default async function handler(req, res) {
   // Set CORS headers
@@ -45,7 +45,7 @@ async function getContent(req, res, id) {
     const { language = 'en' } = req.query;
 
     // Get content with translation
-    const { data, error } = await supabase.rpc('get_content_with_translation', {
+    const { data, error } = await supabaseServer.rpc('get_content_with_translation', {
       p_content_id: id,
       p_language: language
     });
@@ -57,7 +57,7 @@ async function getContent(req, res, id) {
     }
 
     // Get all available translations
-    const { data: translations, error: translationsError } = await supabase
+    const { data: translations, error: translationsError } = await supabaseServer
       .from('content_translations')
       .select('language, title, body, slug')
       .eq('content_id', id);
@@ -65,7 +65,7 @@ async function getContent(req, res, id) {
     if (translationsError) throw translationsError;
 
     // Get categories
-    const { data: categories, error: categoriesError } = await supabase
+    const { data: categories, error: categoriesError } = await supabaseServer
       .from('content_categories')
       .select('category_id, categories(id, name)')
       .eq('content_id', id);
