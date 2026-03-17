@@ -1021,6 +1021,22 @@ const AdminEnhanced = () => {
                     >
                         🤖 Website Translation
                     </button>
+                    <button
+                        onClick={() => navigate('/dashboard/admin/content')}
+                        style={{
+                            padding: '12px 24px',
+                            background: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)',
+                            color: '#fff',
+                            border: 'none',
+                            borderRadius: '12px',
+                            fontSize: '1rem',
+                            fontWeight: '600',
+                            cursor: 'pointer',
+                            boxShadow: '0 4px 12px rgba(245, 158, 11, 0.3)'
+                        }}
+                    >
+                        📝 Content Management
+                    </button>
                 </div>
             </div>
 
