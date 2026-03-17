@@ -2,6 +2,36 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 
+// CSS for text visibility fixes
+const textVisibilityStyles = `
+  .content-editor input,
+  .content-editor textarea,
+  .content-editor select {
+    color: #1f2937 !important;
+    background-color: #ffffff !important;
+    font-weight: 500 !important;
+  }
+  
+  .content-editor input::placeholder,
+  .content-editor textarea::placeholder {
+    color: #9ca3af !important;
+    opacity: 1 !important;
+  }
+  
+  .content-editor select option {
+    color: #1f2937 !important;
+    background-color: #ffffff !important;
+  }
+  
+  .content-editor .text-gray-700 {
+    color: #374151 !important;
+  }
+  
+  .content-editor .text-gray-600 {
+    color: #4b5563 !important;
+  }
+`;
+
 const ContentEditor = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -187,7 +217,8 @@ const ContentEditor = () => {
   const currentTranslation = translations[activeLanguage] || { title: '', body: '', slug: '' };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 content-editor">
+      <style dangerouslySetInnerHTML={{ __html: textVisibilityStyles }} />
       {/* Header */}
       <div className="bg-white shadow-sm border-b">
         <div className="max-w-7xl mx-auto px-4 py-4">
@@ -255,6 +286,11 @@ const ContentEditor = () => {
                       onChange={(e) => e.target.value && handleTranslate(e.target.value)}
                       className="text-sm border border-gray-300 rounded px-2 py-1"
                       value=""
+                      style={{ 
+                        color: '#1f2937', 
+                        backgroundColor: '#ffffff',
+                        fontWeight: '500'
+                      }}
                     >
                       <option value="">Select language...</option>
                       {languages.filter(l => l.code !== 'en' && !translations[l.code]).map(lang => (
@@ -280,7 +316,18 @@ const ContentEditor = () => {
                     onChange={(e) => updateTranslation('title', e.target.value)}
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-lg"
                     placeholder="Enter title..."
+                    style={{ 
+                      color: '#1f2937', 
+                      backgroundColor: '#ffffff',
+                      fontWeight: '500'
+                    }}
                   />
+                  <style jsx>{`
+                    input::placeholder {
+                      color: #9ca3af !important;
+                      opacity: 1 !important;
+                    }
+                  `}</style>
                 </div>
 
                 {/* Slug */}
@@ -294,6 +341,11 @@ const ContentEditor = () => {
                     onChange={(e) => updateTranslation('slug', e.target.value)}
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     placeholder="url-friendly-slug"
+                    style={{ 
+                      color: '#1f2937', 
+                      backgroundColor: '#ffffff',
+                      fontWeight: '500'
+                    }}
                   />
                 </div>
 
@@ -308,6 +360,13 @@ const ContentEditor = () => {
                     rows={15}
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     placeholder="Write your content here..."
+                    style={{ 
+                      color: '#1f2937', 
+                      backgroundColor: '#ffffff',
+                      fontWeight: '500',
+                      fontSize: '16px',
+                      lineHeight: '1.5'
+                    }}
                   />
                 </div>
               </div>
@@ -327,6 +386,11 @@ const ContentEditor = () => {
                   value={content.type}
                   onChange={(e) => setContent(prev => ({ ...prev, type: e.target.value }))}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                  style={{ 
+                    color: '#1f2937', 
+                    backgroundColor: '#ffffff',
+                    fontWeight: '500'
+                  }}
                 >
                   <option value="blog">📝 Blog</option>
                   <option value="page">📄 Page</option>
@@ -341,6 +405,11 @@ const ContentEditor = () => {
                   value={content.status}
                   onChange={(e) => setContent(prev => ({ ...prev, status: e.target.value }))}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                  style={{ 
+                    color: '#1f2937', 
+                    backgroundColor: '#ffffff',
+                    fontWeight: '500'
+                  }}
                 >
                   <option value="draft">📝 Draft</option>
                   <option value="review">👀 Review</option>

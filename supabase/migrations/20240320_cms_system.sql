@@ -56,12 +56,12 @@ CREATE INDEX IF NOT EXISTS idx_content_categories_category_id ON content_categor
 
 -- Create function to update updated_at timestamp
 CREATE OR REPLACE FUNCTION update_updated_at_column()
-RETURNS TRIGGER AS $
+RETURNS TRIGGER AS $$
 BEGIN
     NEW.updated_at = NOW();
     RETURN NEW;
 END;
-$ LANGUAGE plpgsql;
+$$ LANGUAGE plpgsql;
 
 -- Create triggers for updated_at
 CREATE TRIGGER update_contents_updated_at
@@ -146,7 +146,7 @@ RETURNS TABLE (
     body TEXT,
     slug TEXT,
     language VARCHAR(10)
-) AS $
+) AS $$
 BEGIN
     RETURN QUERY
     SELECT 
@@ -164,7 +164,7 @@ BEGIN
     LEFT JOIN content_translations ct_default ON c.id = ct_default.content_id AND ct_default.language = 'en'
     WHERE c.id = p_content_id;
 END;
-$ LANGUAGE plpgsql;
+$$ LANGUAGE plpgsql;
 
 -- Function to get all contents with their default language translations
 CREATE OR REPLACE FUNCTION get_all_contents_with_translations()
@@ -177,7 +177,7 @@ RETURNS TABLE (
     title TEXT,
     language VARCHAR(10),
     available_languages TEXT[]
-) AS $
+) AS $$
 BEGIN
     RETURN QUERY
     SELECT 
@@ -195,4 +195,4 @@ BEGIN
     GROUP BY c.id, c.type, c.status, c.created_at, c.updated_at, ct.title, ct.language
     ORDER BY c.updated_at DESC;
 END;
-$ LANGUAGE plpgsql;
+$$ LANGUAGE plpgsql;
