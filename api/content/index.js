@@ -1,15 +1,8 @@
 // Content Management API endpoints
 import { createClient } from '@supabase/supabase-js';
 
-// Create Supabase client directly in the API route
-const supabaseUrl = process.env.VITE_SUPABASE_URL;
-const supabaseAnonKey = process.env.VITE_SUPABASE_ANON_KEY;
-
-if (!supabaseUrl || !supabaseAnonKey) {
-    console.error('Missing Supabase environment variables');
-}
-
-const supabase = createClient(supabaseUrl, supabaseAnonKey);
+// Content Management API endpoints
+import { createClient } from '@supabase/supabase-js';
 
 export default async function handler(req, res) {
   // Set CORS headers
@@ -21,14 +14,32 @@ export default async function handler(req, res) {
     return res.status(200).end();
   }
 
+  // Check environment variables first
+  const supabaseUrl = process.env.VITE_SUPABASE_URL;
+  const supabaseAnonKey = process.env.VITE_SUPABASE_ANON_KEY;
+
+  if (!supabaseUrl || !supabaseAnonKey) {
+    console.error('Missing Supabase environment variables:', { 
+      hasUrl: !!supabaseUrl, 
+      hasKey: !!supabaseAnonKey 
+    });
+    return res.status(500).json({ 
+      error: 'Server configuration error',
+      details: 'Missing Supabase environment variables',
+      hasUrl: !!supabaseUrl,
+      hasKey: !!supabaseAnonKey
+    });
+  }
+
+  const supabase = createClient(supabaseUrl, supabaseAnonKey);
   const { method } = req;
 
   try {
     switch (method) {
       case 'GET':
-        return await getContents(req, res);
+        return await getContents(req, res, supabase);
       case 'POST':
-        return await createContent(req, res);
+        return await createContent(req, res, supabase);
       default:
         res.setHeader('Allow', ['GET', 'POST']);
         return res.status(405).json({ error: `Method ${method} not allowed` });
@@ -44,15 +55,25 @@ export default async function handler(req, res) {
 }
 
 // GET /api/content - Get all contents
-async function getContents(req, res) {
+async function getContents(req, res, supabase) {
   try {
-    // Use the PostgreSQL function we created
-    const { data, error } = await supabase.rpc('get_all_contents_with_translations');
+    console.log('Attempting to fetch contents from Supabase');
+    
+    // Try a simple query first
+    const { data, error } = await supabase
+      .from('contents')
+      .select(`
+        *,
+        content_translations(*)
+      `)
+      .limit(10);
 
     if (error) {
       console.error('Supabase error:', error);
       throw error;
     }
+
+    console.log('Contents fetched successfully:', data?.length || 0);
 
     return res.status(200).json({
       success: true,
@@ -65,7 +86,7 @@ async function getContents(req, res) {
 }
 
 // POST /api/content - Create new content
-async function createContent(req, res) {
+async function createContent(req, res, supabase) {
   try {
     const { type, title, body, slug, language = 'en', categories = [] } = req.body;
 
@@ -76,9 +97,9 @@ async function createContent(req, res) {
       });
     }
 
-    console.log('Creating content:', { type, title, body, slug, language });
+    console.log('Creating content:', { type, title, body: body.substring(0, 50) + '...' });
 
-    // Create content record (temporarily bypass RLS by not setting created_by)
+    // Create content record
     const { data: content, error: contentError } = await supabase
       .from('contents')
       .insert({
@@ -94,7 +115,7 @@ async function createContent(req, res) {
       throw contentError;
     }
 
-    console.log('Content created:', content);
+    console.log('Content created:', content.id);
 
     // Create translation record
     const { error: translationError } = await supabase
@@ -113,23 +134,6 @@ async function createContent(req, res) {
     }
 
     console.log('Translation created successfully');
-
-    // Add categories if provided
-    if (categories.length > 0) {
-      const categoryRecords = categories.map(categoryId => ({
-        content_id: content.id,
-        category_id: categoryId
-      }));
-
-      const { error: categoryError } = await supabase
-        .from('content_categories')
-        .insert(categoryRecords);
-
-      if (categoryError) {
-        console.error('Category assignment error:', categoryError);
-        throw categoryError;
-      }
-    }
 
     return res.status(201).json({
       success: true,
