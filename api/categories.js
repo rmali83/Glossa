@@ -35,18 +35,25 @@ export default async function handler(req, res) {
 // GET /api/categories - Get all categories
 async function getCategories(req, res) {
   try {
+    console.log('Fetching categories from Supabase');
     const { data, error } = await supabase
       .from('categories')
       .select('*')
       .order('name');
 
-    if (error) throw error;
+    if (error) {
+      console.error('Supabase categories error:', error);
+      throw error;
+    }
+
+    console.log('Categories fetched:', data?.length || 0);
 
     return res.status(200).json({
       success: true,
       data: data || []
     });
   } catch (error) {
+    console.error('Error in getCategories:', error);
     throw error;
   }
 }
@@ -58,6 +65,7 @@ async function createCategory(req, res) {
 
     if (!name) {
       return res.status(400).json({ 
+        success: false,
         error: 'Category name is required' 
       });
     }
