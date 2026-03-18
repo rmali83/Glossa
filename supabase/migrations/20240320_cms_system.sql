@@ -64,11 +64,13 @@ END;
 $$ LANGUAGE plpgsql;
 
 -- Create triggers for updated_at
+DROP TRIGGER IF EXISTS update_contents_updated_at ON contents;
 CREATE TRIGGER update_contents_updated_at
     BEFORE UPDATE ON contents
     FOR EACH ROW
     EXECUTE FUNCTION update_updated_at_column();
 
+DROP TRIGGER IF EXISTS update_content_translations_updated_at ON content_translations;
 CREATE TRIGGER update_content_translations_updated_at
     BEFORE UPDATE ON content_translations
     FOR EACH ROW
@@ -81,22 +83,28 @@ ALTER TABLE categories ENABLE ROW LEVEL SECURITY;
 ALTER TABLE content_categories ENABLE ROW LEVEL SECURITY;
 
 -- Policies for contents
+DROP POLICY IF EXISTS "Users can view all contents" ON contents;
 CREATE POLICY "Users can view all contents" ON contents
     FOR SELECT USING (true);
 
+DROP POLICY IF EXISTS "Users can insert their own contents" ON contents;
 CREATE POLICY "Users can insert their own contents" ON contents
     FOR INSERT WITH CHECK (created_by = auth.uid());
 
+DROP POLICY IF EXISTS "Users can update their own contents" ON contents;
 CREATE POLICY "Users can update their own contents" ON contents
     FOR UPDATE USING (created_by = auth.uid());
 
+DROP POLICY IF EXISTS "Users can delete their own contents" ON contents;
 CREATE POLICY "Users can delete their own contents" ON contents
     FOR DELETE USING (created_by = auth.uid());
 
 -- Policies for content_translations
+DROP POLICY IF EXISTS "Users can view all content translations" ON content_translations;
 CREATE POLICY "Users can view all content translations" ON content_translations
     FOR SELECT USING (true);
 
+DROP POLICY IF EXISTS "Users can manage translations for their contents" ON content_translations;
 CREATE POLICY "Users can manage translations for their contents" ON content_translations
     FOR ALL USING (
         content_id IN (
@@ -105,16 +113,20 @@ CREATE POLICY "Users can manage translations for their contents" ON content_tran
     );
 
 -- Policies for categories
+DROP POLICY IF EXISTS "Users can view all categories" ON categories;
 CREATE POLICY "Users can view all categories" ON categories
     FOR SELECT USING (true);
 
+DROP POLICY IF EXISTS "Authenticated users can manage categories" ON categories;
 CREATE POLICY "Authenticated users can manage categories" ON categories
     FOR ALL USING (auth.uid() IS NOT NULL);
 
 -- Policies for content_categories
+DROP POLICY IF EXISTS "Users can view all content categories" ON content_categories;
 CREATE POLICY "Users can view all content categories" ON content_categories
     FOR SELECT USING (true);
 
+DROP POLICY IF EXISTS "Users can manage categories for their contents" ON content_categories;
 CREATE POLICY "Users can manage categories for their contents" ON content_categories
     FOR ALL USING (
         content_id IN (

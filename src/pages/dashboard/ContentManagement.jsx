@@ -16,14 +16,18 @@ const ContentManagement = () => {
   const fetchContents = async () => {
     setLoading(true);
     try {
+      console.log('Fetching contents from database');
       const response = await fetch('/api/content');
       const result = await response.json();
       
       if (result.success) {
         setContents(result.data);
+      } else {
+        throw new Error('Failed to fetch contents');
       }
     } catch (error) {
       console.error('Error fetching contents:', error);
+      setContents([]);
     } finally {
       setLoading(false);
     }
@@ -33,15 +37,20 @@ const ContentManagement = () => {
     if (!confirm('Are you sure you want to delete this content?')) return;
 
     try {
+      console.log('Deleting content from database');
       const response = await fetch(`/api/content/${id}`, {
         method: 'DELETE'
       });
 
       if (response.ok) {
         setContents(contents.filter(c => c.id !== id));
+        alert('✅ Content deleted successfully!');
+      } else {
+        throw new Error('Failed to delete content');
       }
     } catch (error) {
       console.error('Error deleting content:', error);
+      alert('Error deleting content: ' + error.message);
     }
   };
 

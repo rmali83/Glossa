@@ -73,19 +73,32 @@ const ContentEditor = () => {
 
   const fetchCategories = async () => {
     try {
+      console.log('Fetching categories from database');
       const response = await fetch('/api/categories');
       const result = await response.json();
       if (result.success) {
         setCategories(result.data);
+      } else {
+        throw new Error('Failed to fetch categories');
       }
     } catch (error) {
       console.error('Error fetching categories:', error);
+      // Fallback to default categories
+      const defaultCategories = [
+        { id: '1', name: 'General' },
+        { id: '2', name: 'News' },
+        { id: '3', name: 'Tutorial' },
+        { id: '4', name: 'Documentation' },
+        { id: '5', name: 'Blog' }
+      ];
+      setCategories(defaultCategories);
     }
   };
 
   const fetchContent = async () => {
     setLoading(true);
     try {
+      console.log('Fetching content from database');
       const response = await fetch(`/api/content/${id}`);
       const result = await response.json();
       
@@ -107,9 +120,12 @@ const ContentEditor = () => {
           };
         });
         setTranslations(translationsObj);
+      } else {
+        throw new Error('Content not found');
       }
     } catch (error) {
       console.error('Error fetching content:', error);
+      alert('Error loading content: ' + error.message);
     } finally {
       setLoading(false);
     }
@@ -121,9 +137,13 @@ const ContentEditor = () => {
       const currentTranslation = translations[activeLanguage];
       if (!currentTranslation?.title || !currentTranslation?.body) {
         alert('Please fill in title and body');
+        setSaving(false);
         return;
       }
 
+      // Use database for production
+      console.log('Using database for content saving');
+      
       const payload = {
         type: content.type,
         status: newStatus || content.status,
@@ -133,6 +153,8 @@ const ContentEditor = () => {
         language: activeLanguage,
         categories: content.categories
       };
+
+      console.log('Saving content with payload:', payload);
 
       let response;
       if (isNew) {
@@ -149,18 +171,29 @@ const ContentEditor = () => {
         });
       }
 
+      console.log('Response status:', response.status);
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
       const result = await response.json();
+      console.log('Response result:', result);
+
       if (result.success) {
         if (isNew) {
+          console.log('Navigating to:', `/dashboard/admin/content/${result.data.id}`);
           navigate(`/dashboard/admin/content/${result.data.id}`);
         } else {
-          alert('Content saved successfully!');
+          alert('✅ Content updated successfully!');
           fetchContent(); // Refresh data
         }
+      } else {
+        throw new Error(result.error || 'Unknown error');
       }
     } catch (error) {
       console.error('Error saving content:', error);
-      alert('Error saving content');
+      alert('Error saving content: ' + error.message);
     } finally {
       setSaving(false);
     }
