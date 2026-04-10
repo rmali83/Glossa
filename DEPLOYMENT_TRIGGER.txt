@@ -1,5 +1,12 @@
-Deployment trigger for extended file format support
-Timestamp: 2026-03-08 23:05:00
-Commit: 8ee0d46 - Added 24 file format support including PDF, XLSX, PPTX, ODT, RTF, SDLXLIFF, MXF, RESX, STRINGS, YAML, INI
+Deployment trigger - Removed all Content Management System components
+Timestamp: 2026-03-19 - Complete CMS removal as requested
+Changes:
+- Deleted all CMS API endpoints (api/content/, api/categories.js, api/translate.js, etc.)
+- Removed ContentEditor.jsx and ContentManagement.jsx components
+- Removed CMS routes from App.jsx
+- Removed Content Management button from AdminEnhanced.jsx
+- Cleaned up all CMS-related imports and references
+- Removed test API endpoints created for CMS
 
-This file triggers a new Vercel deployment to ensure the latest code changes are live.
+The application is now clean of all content management functionality.
+CMS can be re-implemented later when the saving issues are resolved.
