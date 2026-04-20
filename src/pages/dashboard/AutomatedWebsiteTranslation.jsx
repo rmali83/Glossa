@@ -19,6 +19,7 @@ const AutomatedWebsiteTranslation = () => {
     auto_publish: true,
     exclude_selectors: ['.no-translate', 'code', 'pre', 'script', 'style']
   });
+  const [existingSites, setExistingSites] = useState([]);
 
   const steps = [
     { id: 1, title: 'Configure Website', completed: false },
@@ -27,6 +28,24 @@ const AutomatedWebsiteTranslation = () => {
     { id: 4, title: 'Deploy & Monitor', completed: false },
     { id: 5, title: 'Live Translation!', completed: false }
   ];
+
+  useEffect(() => {
+    fetchExistingSites();
+  }, []);
+
+  const fetchExistingSites = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('automated_sites')
+        .select('id, domain, source_language, target_languages, created_at, config')
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      setExistingSites(data || []);
+    } catch (error) {
+      console.error('Error fetching existing sites:', error);
+    }
+  };
 
   const languages = [
     { code: 'en', name: 'English', flag: '🇺🇸' },
@@ -115,43 +134,115 @@ const AutomatedWebsiteTranslation = () => {
   const createAutomatedSite = async () => {
     setIsProcessing(true);
     try {
-      const { data: site, error } = await supabase
+      const cleanDomain = formData.domain.replace(/^https?:\/\//, '').replace(/\/$/, '');
+      
+      // First, check if the domain already exists
+      const { data: existingSite, error: checkError } = await supabase
         .from('automated_sites')
-        .insert({
-          domain: formData.domain.replace(/^https?:\/\//, '').replace(/\/$/, ''),
-          source_language: formData.source_language,
-          target_languages: formData.target_languages,
-          scan_interval: formData.scan_interval,
-          config: {
-            urlStructure: formData.url_structure,
-            deploymentMethod: formData.deployment_method,
-            autoPublish: formData.auto_publish,
-            excludeSelectors: formData.exclude_selectors,
-            contentTypes: {
-              mainContent: true,
-              navigation: true,
-              forms: true,
-              metadata: true,
-              images: true,
-              buttons: true
-            }
-          },
-          created_by: user.id
-        })
-        .select()
+        .select('*')
+        .eq('domain', cleanDomain)
         .single();
 
-      if (error) throw error;
+      let site;
+      
+      if (existingSite) {
+        // Domain exists, ask user if they want to update it
+        const shouldUpdate = confirm(
+          `The domain "${cleanDomain}" is already configured for automated translation.\n\n` +
+          `Would you like to update the existing configuration?`
+        );
+        
+        if (!shouldUpdate) {
+          setIsProcessing(false);
+          return;
+        }
+        
+        // Update existing site
+        const { data: updatedSite, error: updateError } = await supabase
+          .from('automated_sites')
+          .update({
+            source_language: formData.source_language,
+            target_languages: formData.target_languages,
+            scan_interval: formData.scan_interval,
+            config: {
+              urlStructure: formData.url_structure,
+              deploymentMethod: formData.deployment_method,
+              autoPublish: formData.auto_publish,
+              excludeSelectors: formData.exclude_selectors,
+              contentTypes: {
+                mainContent: true,
+                navigation: true,
+                forms: true,
+                metadata: true,
+                images: true,
+                buttons: true
+              }
+            },
+            updated_at: new Date().toISOString()
+          })
+          .eq('id', existingSite.id)
+          .select()
+          .single();
+
+        if (updateError) throw updateError;
+        site = updatedSite;
+        
+        alert(`✅ Successfully updated automated translation configuration for "${cleanDomain}"`);
+        
+      } else {
+        // Domain doesn't exist, create new site
+        const { data: newSite, error: insertError } = await supabase
+          .from('automated_sites')
+          .insert({
+            domain: cleanDomain,
+            source_language: formData.source_language,
+            target_languages: formData.target_languages,
+            scan_interval: formData.scan_interval,
+            config: {
+              urlStructure: formData.url_structure,
+              deploymentMethod: formData.deployment_method,
+              autoPublish: formData.auto_publish,
+              excludeSelectors: formData.exclude_selectors,
+              contentTypes: {
+                mainContent: true,
+                navigation: true,
+                forms: true,
+                metadata: true,
+                images: true,
+                buttons: true
+              }
+            },
+            created_by: user.id
+          })
+          .select()
+          .single();
+
+        if (insertError) throw insertError;
+        site = newSite;
+        
+        alert(`✅ Successfully created automated translation setup for "${cleanDomain}"`);
+      }
       
       setAutomatedSiteId(site.id);
       setCurrentStep(4);
+      
+      // Refresh existing sites list
+      await fetchExistingSites();
       
       // Start initial content scan
       await initiateContentScan(site.id);
       
     } catch (error) {
-      console.error('Error creating automated site:', error);
-      alert('Error setting up automated translation: ' + error.message);
+      console.error('Error setting up automated site:', error);
+      
+      // Provide more helpful error messages
+      if (error.message.includes('duplicate key')) {
+        alert('❌ This domain is already configured. Please use a different domain or contact support to update the existing configuration.');
+      } else if (error.message.includes('permission')) {
+        alert('❌ Permission denied. Please make sure you have the necessary permissions to create automated translation sites.');
+      } else {
+        alert('❌ Error setting up automated translation: ' + error.message);
+      }
     } finally {
       setIsProcessing(false);
     }
@@ -712,6 +803,31 @@ window.GlossaConfig = {
               <div className="mt-8 p-4 bg-green-50 border border-green-200 rounded-lg">
                 <p className="text-sm text-green-800 font-medium">
                   🚀 Your website is now multilingual! Add the integration code to see it in action.
+                </p>
+              </div>
+            )}
+
+            {/* Existing Sites */}
+            {existingSites.length > 0 && (
+              <div className="mt-8 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                <h3 className="text-sm font-medium text-blue-900 mb-3">
+                  📋 Existing Automated Sites ({existingSites.length})
+                </h3>
+                <div className="space-y-2 max-h-40 overflow-y-auto">
+                  {existingSites.map((site) => (
+                    <div key={site.id} className="text-xs bg-white p-2 rounded border">
+                      <div className="font-medium text-gray-900">{site.domain}</div>
+                      <div className="text-gray-600">
+                        {site.source_language} → {site.target_languages?.join(', ')}
+                      </div>
+                      <div className="text-gray-500">
+                        {new Date(site.created_at).toLocaleDateString()}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                <p className="text-xs text-blue-700 mt-2">
+                  💡 If you see a duplicate error, one of these domains is already configured.
                 </p>
               </div>
             )}

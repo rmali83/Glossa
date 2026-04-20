@@ -5,13 +5,15 @@ import { useAuth } from '../../context/AuthContext';
 import SimpleUploadModal from '../../components/SimpleUploadModal';
 import simpleUploadManager from '../../services/simpleUploadManager';
 import LANGUAGES from '../../data/languages';
-import './DashboardTheme.css';
 
 const CreateJob = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const template = searchParams.get('template');
+  
+  // Add loading state
+  const [isLoading, setIsLoading] = useState(true);
   
   // Template configurations
   const templateConfigs = {
@@ -84,6 +86,7 @@ const CreateJob = () => {
   // Fetch translators and reviewers
   useEffect(() => {
     const fetchUsers = async () => {
+      setIsLoading(true);
       try {
         const { data: profiles } = await supabase
           .from('profiles')
@@ -98,6 +101,8 @@ const CreateJob = () => {
         }
       } catch (error) {
         console.error('Error fetching users:', error);
+      } finally {
+        setIsLoading(false);
       }
     };
     fetchUsers();
@@ -258,7 +263,17 @@ const CreateJob = () => {
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950 p-6">
-      <div className="max-w-4xl mx-auto">
+      {isLoading ? (
+        <div className="max-w-4xl mx-auto">
+          <div className="flex items-center justify-center min-h-[400px]">
+            <div className="text-center">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+              <p className="text-slate-600 dark:text-slate-400">Loading create job form...</p>
+            </div>
+          </div>
+        </div>
+      ) : (
+        <div className="max-w-4xl mx-auto">
         <div className="flex items-center justify-between mb-6">
           <div>
             <h1 className="text-3xl font-bold text-slate-900 dark:text-slate-100">
@@ -484,16 +499,7 @@ const CreateJob = () => {
                     onClick={() => setShowUploadModal(true)}
                     className="px-6 py-2 bg-green-600 hover:bg-green-700 text-white rounded-xl font-semibold transition-all"
                   >
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />
-                    </svg>
-                    + Upload Files
-                  </button>
-                  <button
-                    onClick={() => setShowUploadModal(true)}
-                    className="px-6 py-2 bg-green-600 hover:bg-green-700 text-white rounded-xl font-semibold transition-all"
-                  >
-                    + Upload Files
+                    📁 Upload Files
                   </button>
                 </div>
               </div>
@@ -545,7 +551,6 @@ const CreateJob = () => {
             </div>
           )}
           {/* Website Translation Section - INLINE */}
-          {/* Website Translation Section - REMOVED */}
           
           {/* Upload Modal */}
           {showUploadModal && projectId && (
@@ -556,27 +561,8 @@ const CreateJob = () => {
               onUploadComplete={handleUploadComplete}
             />
           )}
-
-          {/* URL Extractor */}
-          {showUrlExtractor && projectId && (
-            <UrlExtractor
-              projectId={projectId}
-              onClose={() => setShowUrlExtractor(false)}
-              onComplete={handleUploadComplete}
-            />
-          )}
         </div>
-
-        {/* Upload Modal */}
-        {showUploadModal && projectId && (
-          <SimpleUploadModal
-            projectId={projectId}
-            projectName={formData.name}
-            onClose={() => setShowUploadModal(false)}
-            onUploadComplete={handleUploadComplete}
-          />
-        )}
-      </div>
+      )}
     </div>
   );
 };

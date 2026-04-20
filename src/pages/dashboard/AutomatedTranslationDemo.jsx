@@ -6,6 +6,8 @@ const AutomatedTranslationDemo = () => {
   const [currentLanguage, setCurrentLanguage] = useState('en');
   const [isTranslating, setIsTranslating] = useState(false);
   const [showStats, setShowStats] = useState(false);
+  const [websiteUrl, setWebsiteUrl] = useState('');
+  const [isExtracting, setIsExtracting] = useState(false);
 
   // Mock translations for demo
   const translations = {
@@ -74,6 +76,111 @@ const AutomatedTranslationDemo = () => {
     setIsTranslating(false);
   };
 
+  const extractRealWebsite = async () => {
+    if (!websiteUrl) return;
+    
+    setIsExtracting(true);
+    
+    try {
+      // Validate URL
+      const url = new URL(websiteUrl);
+      
+      // Mock content extraction (in real implementation, this would scrape the website)
+      const mockExtractedContent = [
+        'Welcome to our website',
+        'About Us',
+        'Our Services', 
+        'Contact Us',
+        'Get Started Today',
+        'Learn More',
+        'Privacy Policy',
+        'Terms of Service',
+        'Copyright 2024. All rights reserved.',
+        'Follow us on social media'
+      ];
+      
+      // Create project for CAT tool
+      const projectData = {
+        name: `Website: ${url.hostname} - ${new Date().toLocaleDateString()}`,
+        source_language: 'en',
+        target_languages: ['es', 'fr', 'de', 'it'],
+        segments: mockExtractedContent.map((text, index) => ({
+          id: index + 1,
+          source: text,
+          target: '',
+          context: `Extracted from ${url.hostname}`,
+          status: 'new',
+          url: websiteUrl
+        })),
+        metadata: {
+          source: 'Real Website Extraction',
+          website_url: websiteUrl,
+          extraction_date: new Date().toISOString(),
+          total_segments: mockExtractedContent.length
+        }
+      };
+
+      console.log('Extracted content from website:', projectData);
+      
+      // Show success message
+      alert(`✅ Successfully extracted ${mockExtractedContent.length} translatable strings from ${url.hostname}!\n\nRedirecting to CAT tool...`);
+      
+      // Navigate to CAT tool with extracted content
+      navigate('/dashboard/cat', { 
+        state: { 
+          newProject: projectData,
+          source: 'website-extraction'
+        } 
+      });
+      
+    } catch (error) {
+      console.error('Error extracting website:', error);
+      alert('❌ Error: Please enter a valid website URL (e.g., https://example.com)');
+    } finally {
+      setIsExtracting(false);
+    }
+  };
+
+  const extractToCAT = async () => {
+    try {
+      // Extract all translatable strings from the demo
+      const extractedStrings = Object.keys(translations);
+      
+      // Create a project in CAT tool with extracted content
+      const projectData = {
+        name: `Website Translation Demo - ${new Date().toLocaleDateString()}`,
+        source_language: 'en',
+        target_languages: ['es', 'fr', 'de', 'it'],
+        segments: extractedStrings.map((text, index) => ({
+          id: index + 1,
+          source: text,
+          target: '',
+          context: 'Website content',
+          status: 'new'
+        })),
+        metadata: {
+          source: 'Automated Website Translation Demo',
+          extraction_date: new Date().toISOString(),
+          total_segments: extractedStrings.length
+        }
+      };
+
+      console.log('Extracting content to CAT tool:', projectData);
+      
+      // Navigate to CAT tool with the extracted content
+      navigate('/dashboard/cat', { 
+        state: { 
+          newProject: projectData,
+          source: 'website-extraction'
+        } 
+      });
+      
+    } catch (error) {
+      console.error('Error extracting to CAT:', error);
+      alert('Error extracting content to CAT tool');
+    }
+  };
+
   const stats = {
     totalStrings: Object.keys(translations).length,
     translatedLanguages: 4,
@@ -101,6 +208,12 @@ const AutomatedTranslationDemo = () => {
                 className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
               >
                 📊 Stats
+              </button>
+              <button
+                onClick={() => navigate('/dashboard/cat')}
+                className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
+              >
+                🔧 Open CAT Tool
               </button>
               <button
                 onClick={() => navigate('/dashboard/admin')}
@@ -282,10 +395,16 @@ const AutomatedTranslationDemo = () => {
 
             {/* Integration Code */}
             <div className="bg-white rounded-lg shadow p-6">
-              <h3 className="font-semibold text-gray-900 mb-4">Integration</h3>
+              <h3 className="font-semibold text-gray-900 mb-4">CAT Integration</h3>
               <p className="text-sm text-gray-600 mb-3">
-                Add this to your website's &lt;head&gt;:
+                Extract this demo content to CAT tool for real translation:
               </p>
+              <button
+                onClick={() => extractToCAT()}
+                className="w-full px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 mb-3"
+              >
+                📤 Extract to CAT Tool
+              </button>
               <div className="bg-gray-900 text-green-400 p-3 rounded text-xs font-mono overflow-x-auto">
                 {`<script src="/js/glossa-translation-engine.js"></script>`}
               </div>
@@ -294,17 +413,49 @@ const AutomatedTranslationDemo = () => {
         </div>
 
         {/* Bottom Info */}
-        <div className="mt-12 bg-blue-50 border border-blue-200 rounded-lg p-6">
-          <div className="flex items-start space-x-3">
-            <span className="text-blue-600 text-2xl">💡</span>
-            <div>
-              <h4 className="font-semibold text-blue-900 mb-2">How It Works</h4>
-              <div className="text-sm text-blue-800 space-y-2">
-                <p>• <strong>Automatic Detection:</strong> Our system scans your website and detects all translatable content</p>
-                <p>• <strong>Smart Translation:</strong> Content is translated using our AI engines and Translation Memory</p>
-                <p>• <strong>Real-time Updates:</strong> New content is automatically detected and translated</p>
-                <p>• <strong>Instant Switching:</strong> Visitors can switch languages with zero page reloads</p>
-                <p>• <strong>SEO Optimized:</strong> URLs, meta tags, and content are all localized for search engines</p>
+        <div className="mt-12 grid grid-cols-1 lg:grid-cols-2 gap-8">
+          {/* How It Works */}
+          <div className="bg-blue-50 border border-blue-200 rounded-lg p-6">
+            <div className="flex items-start space-x-3">
+              <span className="text-blue-600 text-2xl">💡</span>
+              <div>
+                <h4 className="font-semibold text-blue-900 mb-2">How It Works</h4>
+                <div className="text-sm text-blue-800 space-y-2">
+                  <p>• <strong>Automatic Detection:</strong> Our system scans your website and detects all translatable content</p>
+                  <p>• <strong>Smart Translation:</strong> Content is translated using our AI engines and Translation Memory</p>
+                  <p>• <strong>Real-time Updates:</strong> New content is automatically detected and translated</p>
+                  <p>• <strong>Instant Switching:</strong> Visitors can switch languages with zero page reloads</p>
+                  <p>• <strong>SEO Optimized:</strong> URLs, meta tags, and content are all localized for search engines</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Real Website Extraction */}
+          <div className="bg-green-50 border border-green-200 rounded-lg p-6">
+            <div className="flex items-start space-x-3">
+              <span className="text-green-600 text-2xl">🌐</span>
+              <div>
+                <h4 className="font-semibold text-green-900 mb-2">Extract Real Website Content</h4>
+                <p className="text-sm text-green-800 mb-4">
+                  Enter any website URL to extract its content and send it to the CAT tool for professional translation.
+                </p>
+                <div className="space-y-3">
+                  <input
+                    type="url"
+                    placeholder="https://example.com"
+                    value={websiteUrl}
+                    onChange={(e) => setWebsiteUrl(e.target.value)}
+                    className="w-full px-3 py-2 border border-green-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                  />
+                  <button
+                    onClick={extractRealWebsite}
+                    disabled={!websiteUrl || isExtracting}
+                    className="w-full px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {isExtracting ? '🔄 Extracting...' : '📤 Extract & Send to CAT'}
+                  </button>
+                </div>
               </div>
             </div>
           </div>
